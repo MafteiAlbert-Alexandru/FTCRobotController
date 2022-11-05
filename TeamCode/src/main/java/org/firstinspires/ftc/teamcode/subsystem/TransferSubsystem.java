@@ -1,16 +1,27 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
-@Config
-public class TransferSubsystem {
+import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
 
-    private final Servo arm;
-    private final Servo joint1;
-    private final Servo joint2;
-    private final Servo leg;
+@Config
+public class TransferSubsystem extends SmartSubsystem {
+
+    private Servo arm;
+    public static double upperArmPos = 0.2;
+    public static double lowerArmPos = 0.69;
+    private Servo leg;
+    public static double closedLegPos = 0.5;
+    public static double centerLegPos = 0.25;
+    public static double openedLegPos =0;
+//    private final Servo joint1;
+//    private final Servo joint2;
+
     public static double downLiftPos = 0.67;
     public static double upLiftPos = 0.2;
     public static double closeJoint1Pos = 0.48;
@@ -22,15 +33,8 @@ public class TransferSubsystem {
     public boolean togAct = false;
     public static int timeout = 300;
     public boolean mainAct = false;
-    LinearOpMode opMode;
 
-    public TransferSubsystem(Servo arm, Servo joint1, Servo joint2, Servo leg, LinearOpMode opMode){
-        this.arm = arm;
-        this.joint1 = joint1;
-        this.joint2 = joint2;
-        this.leg = leg;
-        this.opMode = opMode;
-    }
+
 
     public void runArm(boolean bool){
         if(mainAct) return;
@@ -38,16 +42,16 @@ public class TransferSubsystem {
         else arm.setPosition(downLiftPos);
     }
 
-    public void runJoint(boolean bool){
-        if(bool) {
-            joint1.setPosition(openJoint1Pos);
-            joint2.setPosition(openJoint2Pos);
-        }
-        else {
-            joint1.setPosition(closeJoint1Pos);
-            joint2.setPosition(closeJoint2Pos);
-        }
-    }
+//    public void runJoint(boolean bool){
+//        if(bool) {
+//            joint1.setPosition(openJoint1Pos);
+//            joint2.setPosition(openJoint2Pos);
+//        }
+//        else {
+//            joint1.setPosition(closeJoint1Pos);
+//            joint2.setPosition(closeJoint2Pos);
+//        }
+//    }
 
     public void runLegAuto(boolean bool){
         if(bool && togAct) {
@@ -71,5 +75,39 @@ public class TransferSubsystem {
     public void runLeg(boolean bool){
         if(bool) leg.setPosition(openLegPos);
         else leg.setPosition(closeLegPos);
+    }
+    private boolean firstDown = false;
+    public void run(ToggleButton armButton, ButtonReader legButton)
+    {
+        armButton.update();
+
+
+        if(armButton.getToggle())
+        {
+            leg.setPosition(openedLegPos);
+            if(!firstDown)
+                opMode.sleep(300);
+            arm.setPosition(upperArmPos);
+            firstDown=true;
+        }else {
+            arm.setPosition(lowerArmPos);
+            if(firstDown) {
+                opMode.sleep(300);
+                firstDown=false;
+            }
+            if(legButton.isDown())
+            {
+                leg.setPosition(closedLegPos);
+            }else leg.setPosition(openedLegPos);
+        }
+    }
+
+    @Override
+    public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
+        super.initSubsystem(opMode, hardwareMap);
+
+        arm=hardwareMap.get(Servo.class, "arm");
+        leg=hardwareMap.get(Servo.class, "leg");
+
     }
 }

@@ -9,12 +9,10 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjusterPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjuster;
 
 @TeleOp
-public class MainTeleOp extends LinearOpMode {
+public class VisionTeleOp extends LinearOpMode {
 
     int cameraMonitorViewId;
     OpenCvCamera webcam;

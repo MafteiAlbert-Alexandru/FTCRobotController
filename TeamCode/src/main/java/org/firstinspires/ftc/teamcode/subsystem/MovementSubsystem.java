@@ -1,28 +1,48 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import com.acmerobotics.roadrunner.drive.MecanumDrive;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.HardwareMap;
 
-public class MovementSubsystem {
+public class MovementSubsystem extends SmartSubsystem{
 
-    private final DcMotorEx frontLeft;
-    private final DcMotorEx frontRight;
-    private final DcMotorEx backLeft;
-    private final DcMotorEx backRight;
-    private final GamepadEx gamepad;
+    private DcMotorEx frontLeft;
+    private DcMotorEx frontRight;
+    private DcMotorEx backLeft;
+    private DcMotorEx backRight;
 
-    public MovementSubsystem(GamepadEx gamepad, DcMotorEx frontLeft, DcMotorEx backLeft, DcMotorEx backRight, DcMotorEx frontRight){
-        this.frontLeft = frontLeft;
-        this.backLeft = backLeft;
-        this.backRight = backRight;
-        this.frontRight = frontRight;
-        this.gamepad = gamepad;
+    @Override
+    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
+        super.initSubsystem(linearOpMode, hardwareMap);
+
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+        frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        frontLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        backLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        frontRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        backRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        backLeft.setDirection(DcMotorEx.Direction.REVERSE);
+        backRight.setDirection(DcMotorEx.Direction.FORWARD);
+        frontRight.setDirection(DcMotorEx.Direction.FORWARD);
+
     }
-
-    public void movementMecanum(){
+    public void run(GamepadEx gamepad){
 
         double Forward = gamepad.getLeftY();
         double Strafe = gamepad.getLeftX();
@@ -34,7 +54,7 @@ public class MovementSubsystem {
         }
         if(!gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)){
             Turn /= 2;
-        }//
+        }
 
         double r = Math.hypot(Strafe, Forward);
 
@@ -44,7 +64,10 @@ public class MovementSubsystem {
         final double v2 = (r * Math.sin(robotAngle)) - Turn;
         final double v3 = (r * Math.sin(robotAngle)) + Turn;
         final double v4 = (r * Math.cos(robotAngle)) - Turn;
-
+        opMode.telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
+        opMode.telemetry.addData("frontRight", frontRight.getCurrentPosition());
+        opMode.telemetry.addData("backLeft", backLeft.getCurrentPosition());
+        opMode.telemetry.addData("backRight", backRight.getCurrentPosition());
         frontLeft.setPower(v1);
         frontRight.setPower(v2);
         backLeft.setPower(v3);

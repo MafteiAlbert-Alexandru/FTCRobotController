@@ -38,7 +38,7 @@ public class PedroTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+/*
         hardware = new Hardware_Map(hardwareMap);
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -64,9 +64,9 @@ public class PedroTeleOp extends LinearOpMode {
 
             InputManager();
             TelemetryManager(hardware.Left_Slider);
-        }
+        }*/
     }
-
+/*
     public void InputManager(){
 
         intakeSubsystem.runIntake(intakeToggle.getToggle());
@@ -93,5 +93,5 @@ public class PedroTeleOp extends LinearOpMode {
         armToggle.update();
         jointToggle.update();
         legToggle.update();
-    }
+    }*/
 }
