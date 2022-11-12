@@ -7,6 +7,7 @@ import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -58,7 +59,7 @@ public class MainTeleOP extends LinearOpMode {
 
             }
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
-            ToggleButton intakeButton = new ToggleButton(driverGamepad, GamepadKeys.Button.A);
+            ToggleButtonReader intakeButton = new ToggleButtonReader(driverGamepad, GamepadKeys.Button.A);
             ToggleButton armButton = new ToggleButton(driverGamepad, GamepadKeys.Button.B);
             ButtonReader legReader = new ButtonReader(driverGamepad, GamepadKeys.Button.Y);
             telemetry.update();

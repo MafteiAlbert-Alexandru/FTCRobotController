@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -18,10 +19,10 @@ public class IntakeSubsystem extends SmartSubsystem {
     public Motor leftIntake, rightIntake;
 
     public static double power = 0.65;
-    public void run(ToggleButton button)
+    public void run(ToggleButtonReader button)
     {
-        button.update();
-        if(button.getToggle())
+        button.readValue();
+        if(button.getState())
         {
             leftIntake.set(power);
             rightIntake.set(power);

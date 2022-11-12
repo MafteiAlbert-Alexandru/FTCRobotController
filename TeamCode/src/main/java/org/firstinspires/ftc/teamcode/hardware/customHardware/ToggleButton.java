@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware.customHardware;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 public class ToggleButton {
@@ -13,6 +14,7 @@ public class ToggleButton {
     public ToggleButton(GamepadEx gamepadEx, GamepadKeys.Button button){
         this.gamepadEx = gamepadEx;
         this.button = button;
+
     }
 
     public void update(){
