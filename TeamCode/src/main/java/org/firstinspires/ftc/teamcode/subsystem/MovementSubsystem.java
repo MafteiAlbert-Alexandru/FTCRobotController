@@ -20,6 +20,8 @@ import com.acmerobotics.roadrunner.trajectory.Trajectory;
 import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
 import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
+import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
@@ -147,8 +149,10 @@ public class MovementSubsystem extends SmartSubsystem{
     public static double VX_WEIGHT = 1;
     public static double VY_WEIGHT = 1;
     public static double OMEGA_WEIGHT = 1;
-    private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = MovementMecanumDrive.getVelocityConstraint(MAX_VEL, MAX_ANG_VEL, TRACK_WIDTH);
-    private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = MovementMecanumDrive.getAccelerationConstraint(MAX_ACCEL);
+    private static final TrajectoryVelocityConstraint VEL_CONSTRAINT = new MinVelocityConstraint(Arrays.asList(
+            new AngularVelocityConstraint(MAX_ANG_VEL),
+            new MecanumVelocityConstraint(MAX_VEL, TRACK_WIDTH)));
+    private static final TrajectoryAccelerationConstraint ACCEL_CONSTRAINT = new ProfileAccelerationConstraint(MAX_ACCEL);
     public class MovementMecanumDrive extends MecanumDrive {
         private TrajectoryFollower follower;
         private BNO055IMU imu;
@@ -170,7 +174,6 @@ public class MovementSubsystem extends SmartSubsystem{
                 module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
             }
 
-            // TODO: adjust the names of the following hardware devices to match your configuration
             imu = hardwareMap.get(BNO055IMU.class, "imu");
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
             parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
@@ -216,7 +219,6 @@ public class MovementSubsystem extends SmartSubsystem{
                 setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, MOTOR_VELO_PID);
             }
 
-            // TODO: reverse any motors using DcMotorEx.setDirection()
 
             frontLeft.setDirection(DcMotorSimple.Direction.REVERSE);
             backLeft.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -381,23 +383,12 @@ public class MovementSubsystem extends SmartSubsystem{
         public Double getExternalHeadingVelocity() {
             return (double) imu.getAngularVelocity().zRotationRate;
         }
-
-        public static TrajectoryVelocityConstraint getVelocityConstraint(double maxVel, double maxAngularVel, double trackWidth) {
-            return new MinVelocityConstraint(Arrays.asList(
-                    new AngularVelocityConstraint(maxAngularVel),
-                    new MecanumVelocityConstraint(maxVel, trackWidth)
-            ));
-        }
-
-        public static TrajectoryAccelerationConstraint getAccelerationConstraint(double maxAccel) {
-            return new ProfileAccelerationConstraint(maxAccel);
-        }
     };
     private DcMotorEx frontLeft;
     private DcMotorEx frontRight;
     private DcMotorEx backLeft;
     private DcMotorEx backRight;
-
+    public MovementMecanumDrive drive;
     @Override
     public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
         super.initSubsystem(linearOpMode, hardwareMap);
@@ -420,7 +411,7 @@ public class MovementSubsystem extends SmartSubsystem{
         backLeft.setDirection(DcMotorEx.Direction.REVERSE);
         backRight.setDirection(DcMotorEx.Direction.FORWARD);
         frontRight.setDirection(DcMotorEx.Direction.FORWARD);
-        MecanumDrive mecanum = new SampleMecanumDrive(frontLeft, frontRight,
+        drive = new MovementMecanumDrive(frontLeft, frontRight,
                 backLeft, backRight);
     }
     public void run(GamepadEx gamepad){
@@ -449,9 +440,8 @@ public class MovementSubsystem extends SmartSubsystem{
         opMode.telemetry.addData("frontRight", frontRight.getCurrentPosition());
         opMode.telemetry.addData("backLeft", backLeft.getCurrentPosition());
         opMode.telemetry.addData("backRight", backRight.getCurrentPosition());
-        frontLeft.setPower(v1);
-        frontRight.setPower(v2);
-        backLeft.setPower(v3);
-        backRight.setPower(v4);
+
+        drive.setMotorPowers(v1,v2,v3,v4);
+        drive.update();
     }
 }
