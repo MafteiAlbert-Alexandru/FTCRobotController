@@ -170,10 +170,6 @@ public class MovementSubsystem extends SmartSubsystem{
 
             batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
-            for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-                module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-            }
-
             imu = hardwareMap.get(BNO055IMU.class, "imu");
             BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
             parameters.angleUnit = BNO055IMU.AngleUnit.RADIANS;
@@ -369,9 +365,9 @@ public class MovementSubsystem extends SmartSubsystem{
         @Override
         public void setMotorPowers(double v, double v1, double v2, double v3) {
             frontLeft.setPower(v);
-            backLeft.setPower(v1);
-            backRight.setPower(v2);
-            frontRight.setPower(v3);
+            frontRight.setPower(v1);
+            backLeft.setPower(v2);
+            backRight.setPower(v3);
         }
 
         @Override
@@ -389,42 +385,18 @@ public class MovementSubsystem extends SmartSubsystem{
     private DcMotorEx backLeft;
     private DcMotorEx backRight;
     public MovementMecanumDrive drive;
+
     @Override
-    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
-        super.initSubsystem(linearOpMode, hardwareMap);
+    public void run(SubsystemData data) {
+        double Forward = data.driverGamepad.getLeftY();
+        double Strafe = data.driverGamepad.getLeftX();
+        double Turn = data.driverGamepad.getRightX();
 
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
-        frontLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backLeft.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        backRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-        frontRight.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
-
-        frontLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        backLeft.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        frontRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-        backRight.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
-
-        frontLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        backLeft.setDirection(DcMotorEx.Direction.REVERSE);
-        backRight.setDirection(DcMotorEx.Direction.FORWARD);
-        frontRight.setDirection(DcMotorEx.Direction.FORWARD);
-        drive = new MovementMecanumDrive(frontLeft, frontRight,
-                backLeft, backRight);
-    }
-    public void run(GamepadEx gamepad){
-
-        double Forward = gamepad.getLeftY();
-        double Strafe = gamepad.getLeftX();
-        double Turn = gamepad.getRightX();
-
-        if(!gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)){
+        if(!data.driverGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)){
             Forward /= 2;
             Strafe  /= 2;
         }
-        if(!gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)){
+        if(!data.driverGamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)){
             Turn /= 2;
         }
 
@@ -443,5 +415,18 @@ public class MovementSubsystem extends SmartSubsystem{
 
         drive.setMotorPowers(v1,v2,v3,v4);
         drive.update();
+    }
+
+    @Override
+    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
+        super.initSubsystem(linearOpMode, hardwareMap);
+
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+
+        drive = new MovementMecanumDrive(frontLeft, frontRight,
+                backLeft, backRight);
     }
 }

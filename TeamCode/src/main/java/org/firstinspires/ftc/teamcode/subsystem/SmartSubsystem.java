@@ -10,20 +10,15 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public abstract class SmartSubsystem {
 
-    GamepadEx gamepad;
 
     public LinearOpMode opMode;
     public HardwareMap hardwareMap;
-    public boolean initialized=false;
+
+    public abstract void run(SubsystemData data) throws InterruptedException;
+
     public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
         opMode=linearOpMode;
         this.hardwareMap=hardwareMap;
-        this.initialized=true;
-    }
-
-    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap, GamepadEx gamepad) {
-        opMode=linearOpMode;
-        this.hardwareMap=hardwareMap;
-        this.initialized=true;
     }
 }
+

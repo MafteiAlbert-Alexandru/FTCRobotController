@@ -14,33 +14,38 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
+import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.MisumiSliderSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
 
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
-    GamepadEx operatorGamepad, driverGamepad;
-
-    private SliderSubsystem sliderSubsystem = new SliderSubsystem(operatorGamepad);
     private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     private TransferSubsystem transferSubsystem = new TransferSubsystem();
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
-    private MisumiSliderSubsystem sliderSubsystem = new MisumiSliderSubsystem();
+    private SliderSubsystem sliderSubsystem = new SliderSubsystem();
+    private ClampSubsystem clampSubsystem = new ClampSubsystem();
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
-            GamepadEx driverGamepad = new GamepadEx(gamepad1);
-            GamepadEx operatorGamepad = new GamepadEx(gamepad2);
 
+            List<SmartSubsystem> smartSubsystems = new ArrayList<SmartSubsystem>();
             // Use Java reflection to access all fields of this TeleOP which are SmartSubsystems
             // and run initSubsystem on them
             for(Field field: this.getClass().getDeclaredFields())
@@ -51,36 +56,42 @@ public class MainTeleOP extends LinearOpMode {
                     SmartSubsystem subsystem =  ((SmartSubsystem) Objects.requireNonNull(field.get(this)));
                     try {
                        subsystem.initSubsystem((LinearOpMode) this, hardwareMap);
+                       smartSubsystems.add(subsystem);
                     } catch (Exception e) {
-                        subsystem.initialized=false;
                         telemetry.addLine(String.format("Failed initializing %s", field.getName()));
                         telemetry.addLine(e.toString());
                     }
                 }
 
             }
+
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
-            ToggleButtonReader intakeButton = new ToggleButtonReader(driverGamepad, GamepadKeys.Button.A);
-            ToggleButtonReader clampButton = new ToggleButtonReader(driverGamepad, GamepadKeys.Button.LEFT_BUMPER);
-            ToggleButton armButton = new ToggleButton(driverGamepad, GamepadKeys.Button.B);
-            ButtonReader legReader = new ButtonReader(driverGamepad, GamepadKeys.Button.Y);
+            for(LynxModule expansionHub: expansionHubs)
+            {
+                expansionHub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
+            }
+
             telemetry.update();
+            //ExecutorService executor = Executors.newFixedThreadPool(smartSubsystems.size());
             waitForStart();
+
+            SubsystemData data = new SubsystemData();
+            data.driverGamepad= new GamepadEx(gamepad1);
+            data.operatorGamepad = new GamepadEx(gamepad2);
+
+            for(SmartSubsystem subsystem : smartSubsystems)
+            {
+                subsystem.run(data);
+            }
             while(opModeIsActive()&&!isStopRequested())
             {
-                driverGamepad.readButtons();
-                operatorGamepad.readButtons();
-
-                if(intakeSubsystem.initialized) intakeSubsystem.run(intakeButton);
-                if(transferSubsystem.initialized) transferSubsystem.run(armButton, legReader);
-                if(sliderSubsystem.initialized) sliderSubsystem.run();
-//                if(movementSubsystem.initialized) movementSubsystem.run(driverGamepad);
-                for(LynxModule hub: expansionHubs)
+                data.driverGamepad.readButtons();
+                data.operatorGamepad.readButtons();
+                for(SmartSubsystem subsystem : smartSubsystems)
                 {
-
-                    telemetry.addData(hub.getDeviceName()+" voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
-                    telemetry.addData(hub.getDeviceName()+" current", hub.getCurrent(CurrentUnit.AMPS));
+                    subsystem.run(data);
                 }
+                // Adauga orice citire paralela aici
                 telemetry.update();
             }
         }catch(Exception e)

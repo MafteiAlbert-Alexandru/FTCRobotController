@@ -35,7 +35,6 @@ public class SmartOpMode extends LinearOpMode {
                     SmartSubsystem subsystem =  ((SmartSubsystem) Objects.requireNonNull(field.get(this)));
                     try { subsystem.initSubsystem((LinearOpMode) this, hardwareMap); }
                     catch (Exception e) {
-                        subsystem.initialized=false;
                         telemetry.addLine(String.format("Failed initializing %s", field.getName()));
                         telemetry.addLine(e.toString());
                     }
