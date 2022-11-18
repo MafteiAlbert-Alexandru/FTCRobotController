@@ -15,8 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
-//import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.MisumiSliderSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
 
@@ -32,7 +32,8 @@ public class MainTeleOP extends LinearOpMode {
     private SliderSubsystem sliderSubsystem = new SliderSubsystem(operatorGamepad);
     private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     private TransferSubsystem transferSubsystem = new TransferSubsystem();
-//    private MovementSubsystem movementSubsystem = new MovementSubsystem();
+    private MovementSubsystem movementSubsystem = new MovementSubsystem();
+    private MisumiSliderSubsystem sliderSubsystem = new MisumiSliderSubsystem();
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -60,6 +61,7 @@ public class MainTeleOP extends LinearOpMode {
             }
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
             ToggleButtonReader intakeButton = new ToggleButtonReader(driverGamepad, GamepadKeys.Button.A);
+            ToggleButtonReader clampButton = new ToggleButtonReader(driverGamepad, GamepadKeys.Button.LEFT_BUMPER);
             ToggleButton armButton = new ToggleButton(driverGamepad, GamepadKeys.Button.B);
             ButtonReader legReader = new ButtonReader(driverGamepad, GamepadKeys.Button.Y);
             telemetry.update();
@@ -75,6 +77,7 @@ public class MainTeleOP extends LinearOpMode {
 //                if(movementSubsystem.initialized) movementSubsystem.run(driverGamepad);
                 for(LynxModule hub: expansionHubs)
                 {
+
                     telemetry.addData(hub.getDeviceName()+" voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
                     telemetry.addData(hub.getDeviceName()+" current", hub.getCurrent(CurrentUnit.AMPS));
                 }
