@@ -3,16 +3,13 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.command.Subsystem;
 import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
@@ -24,13 +21,15 @@ import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
 
 import java.lang.reflect.Field;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
+    GamepadEx operatorGamepad, driverGamepad;
+
+    private SliderSubsystem sliderSubsystem = new SliderSubsystem(operatorGamepad);
     private IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     private TransferSubsystem transferSubsystem = new TransferSubsystem();
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
@@ -72,28 +71,15 @@ public class MainTeleOP extends LinearOpMode {
                 driverGamepad.readButtons();
                 operatorGamepad.readButtons();
 
-                if(intakeSubsystem.initialized)
-                {
-                    intakeSubsystem.run(intakeButton);
-                }
-                if(transferSubsystem.initialized)
-                {
-                    transferSubsystem.run(armButton, legReader);
-                }
-                if(movementSubsystem.initialized) {
-                   // movementSubsystem.run(driverGamepad);
-                }
-                if(sliderSubsystem.initialized)
-                {
-                    sliderSubsystem.run(clampButton);
-                }
+                if(intakeSubsystem.initialized) intakeSubsystem.run(intakeButton);
+                if(transferSubsystem.initialized) transferSubsystem.run(armButton, legReader);
+                if(sliderSubsystem.initialized) sliderSubsystem.run();
+//                if(movementSubsystem.initialized) movementSubsystem.run(driverGamepad);
                 for(LynxModule hub: expansionHubs)
                 {
 
                     telemetry.addData(hub.getDeviceName()+" voltage", hub.getInputVoltage(VoltageUnit.VOLTS));
                     telemetry.addData(hub.getDeviceName()+" current", hub.getCurrent(CurrentUnit.AMPS));
-
-
                 }
                 telemetry.update();
             }
@@ -102,7 +88,5 @@ public class MainTeleOP extends LinearOpMode {
             telemetry.addLine(e.toString());
             telemetry.update();
         }
-
-
     }
 }

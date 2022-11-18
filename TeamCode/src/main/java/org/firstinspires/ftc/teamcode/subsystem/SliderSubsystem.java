@@ -1,223 +1,104 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
+import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.apache.commons.math3.geometry.euclidean.twod.Line;
+import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
+import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
+
 
 @Config
-public class SliderSubsystem {
+public class SliderSubsystem extends SmartSubsystem {
 
-    SmartMotorEx Left_Slider, Right_Slider;
+    public SmartMotorEx slider;
+    public static boolean autoBrake = false;
+    public static double target = 0;
+    public static double DPP = 1;
+    public static double tolerance = 1000;
+    public static double coefficient = 0.2;
+    public static double pow = 0.1;
+    public static double inputTickCoef = 3;
+    public static int groundPos = 0;
+    public static int lowPos = 0;
+    public static int midPos = 0;
+    public static int highPos = 600;
 
-    public static double PosCoefficient = 0.05;
-    public static double PosTolerance = 8;
-    public static double sliderPower = 0.1;
-    public static int HighPos = 3500;
-    public static int MidPos = 2250;
-    public static int LowPos = 1000;
-    public static int GroundPos = 10;
-    public LinearOpMode opMode;
+    public static double power = 0.65;
 
-    public static double power = 0.05; //Thw Power of the slides
-    public static double DPP = 1; //Distance per Pulse
+    public GamepadEx gamepadEx;
+    public void run()
+    {
+        if(!opMode.opModeIsActive()) return;
+        //Siguranta in cazul in care cineva batut in cap foloseste Subsystemul asta gresit
+        SliderInput();
+        SetupSlider(); //slider go brr
+    }
 
-    Thread SliderSystem;
+    @Override
+    public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap, GamepadEx gamepad) {
+        this.gamepadEx = gamepad;
+        super.initSubsystem(opMode, hardwareMap);
+        slider=new SmartMotorEx(hardwareMap, "slider", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
+    }
 
-    GamepadEx gamepad;
-
-    public SliderSubsystem(GamepadEx gamepad, SmartMotorEx Left_Slider, SmartMotorEx Right_Slider, LinearOpMode opMode){
+    public SliderSubsystem(GamepadEx gamepad){
         this.gamepad = gamepad;
-        this.Left_Slider = Left_Slider;
-        this.Right_Slider = Right_Slider;
-        this.opMode = opMode;
+        SetupSlider(); //bag setup ul in constructor ca sa mi l cheme in init (asa nu mai stau eu sa ciordesc in clasa opModeIsActive)
     }
 
-    public void SetupSliders()  {
-
-        SliderSystem = new Thread(this::SliderManager);
-
-        SliderSystem.start();
-
-        //if(opMode.isStopRequested()) StopSliders();
-    }
-
-    public void StopSliders(){
-        SliderSystem.interrupt();
+    void SetupSlider(){
+        slider = new SmartMotorEx(hardwareMap, "slider");
+        slider.resetEncoder();
+        slider.setRunMode(SmartMotor.RunMode.PositionControl);
+        slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);
+        slider.setInverted(true);
     }
 
 
-    void SliderManager(){
-
-        Left_Slider.setRunMode(SmartMotorEx.RunMode.PositionControl);
-        Left_Slider.setPositionCoefficient(PosCoefficient);
-        Left_Slider.setZeroPowerBehavior(SmartMotorEx.ZeroPowerBehavior.BRAKE);
-        Left_Slider.setPositionTolerance(PosTolerance);
-        Left_Slider.resetEncoder();
-
-        Right_Slider.setRunMode(SmartMotorEx.RunMode.RawPower);
-        Right_Slider.setZeroPowerBehavior(SmartMotorEx.ZeroPowerBehavior.BRAKE);
-        Right_Slider.resetEncoder();
-
-        while(opMode.opModeIsActive()){
-            if(gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-                setTargetPosition(HighPos);
-                if(Left_Slider.getCurrentPosition()<HighPos)
-                    setPower(1);
-                else stopMotor();
-            }
-            else if(gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)){
-                setTargetPosition(GroundPos);
-                if(Left_Slider.getCurrentPosition()>GroundPos)
-                    setPower(1);
-                else stopMotor();
-            }
-            else stopMotor();
-
-            if(gamepad.isDown(GamepadKeys.Button.DPAD_DOWN))
-                LowPosSlider(LowPos);
-
-            else if(gamepad.isDown(GamepadKeys.Button.DPAD_LEFT))
-                MidPosSlider(MidPos);
-
-            else if (gamepad.isDown(GamepadKeys.Button.DPAD_UP))
-                HighPosSlider(HighPos);
-
-            else if (gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT))
-                GroundPosSlider(GroundPos);
+    void SliderInput(){
+        if(gamepadEx.wasJustPressed(GamepadKeys.Button.DPAD_UP)) target = highPos;
+        else if(gamepadEx.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) target = midPos;
+        else if(gamepadEx.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) target = lowPos;
+        else if(gamepadEx.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) target = groundPos;
+        else{
+            if(gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0) target +=gamepadEx.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)*inputTickCoef; //Cand apas pe LB liftul urca
+            if(gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0) target -=gamepadEx.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)*inputTickCoef; //Cand apas pe LB liftul urca
         }
 
-        StopSliders();
+        TargetClamp();
     }
 
-    void HighPosSlider (int pos){
-        SetPosSlider(pos);
+    void SliderPID(){
+        //Aici am vrut brake ul intern al motorului
+        if(autoBrake) slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.BRAKE);
+        else slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);
 
-        String direction;
-
-        if (Left_Slider.getCurrentPosition() > pos) direction = "down";
-        else if (Left_Slider.getCurrentPosition() < pos) direction = "up";
-        else direction = "equal";
-
-        if (direction.equals("up")) {
-            while (Left_Slider.getCurrentPosition() <= pos && opMode.opModeIsActive()) {
-                if (Left_Slider.getCurrentPosition() <= pos) setPower(power);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-            }
-        } else if (direction.equals("down")) {
-            while (Left_Slider.getCurrentPosition() >= pos && opMode.opModeIsActive()) {
-                if (Left_Slider.getCurrentPosition() >= pos) setPower(power);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-            }
-        } else stopMotor();
+        //La fiecare tick dau "refresh" la variabile ca daca vreau sa mai ajustez PID ul
+        slider.setDistancePerPulse(DPP);
+        slider.setPositionTolerance(tolerance);
+        slider.setPositionCoefficient(coefficient);
+        slider.set(pow);
+        slider.setTargetPosition((int)target); //l am convertit in int pt ca (vezi linia 74 si 75) ajungeam sa am zecimale
+        //si targetul poate sa fie doar int
     }
 
-    void MidPosSlider (int pos){
-        SetPosSlider(pos);
-
-        String direction;
-
-        if (Left_Slider.getCurrentPosition() > pos) direction = "down";
-        else if (Left_Slider.getCurrentPosition() < pos) direction = "up";
-        else direction = "equal";
-
-        if (direction.equals("up")) {
-            while (opMode.opModeIsActive() && Left_Slider.getCurrentPosition() <= pos) {
-                if (Left_Slider.getCurrentPosition() <= pos) setPower(sliderPower);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-            }
-        } else if (direction.equals("down")) {
-            while (opMode.opModeIsActive() && Left_Slider.getCurrentPosition() >= pos) {
-                if (Left_Slider.getCurrentPosition() >= pos) setPower(sliderPower);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-            }
-        } else stopMotor();
-    }
-
-    void LowPosSlider (int pos){
-        SetPosSlider(pos);
-
-        String direction;
-
-        if (Left_Slider.getCurrentPosition() > pos) direction = "down";
-        else if (Left_Slider.getCurrentPosition() < pos) direction = "up";
-        else direction = "equal";
-
-        if (direction.equals("up")) {
-            while (opMode.opModeIsActive() && Left_Slider.getCurrentPosition() <= pos) {
-                if (Left_Slider.getCurrentPosition() <= pos) setPower(sliderPower);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-
-            }
-        } else if (direction.equals("down")) {
-            while (opMode.opModeIsActive() && Left_Slider.getCurrentPosition() >= pos) {
-                if (Left_Slider.getCurrentPosition() >= pos) setPower(sliderPower);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.DPAD_RIGHT) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-
-            }
-        } else stopMotor();
-    }
-
-    void GroundPosSlider(int pos){
-        SetPosSlider(pos);
-
-        String direction;
-
-        if (Left_Slider.getCurrentPosition() > pos) direction = "down";
-        else if (Left_Slider.getCurrentPosition() < pos) direction = "up";
-        else direction = "equal";
-
-        if (direction.equals("up")) {
-            while (opMode.opModeIsActive()) {
-                if (Left_Slider.getCurrentPosition() >= pos) setPower(power);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-
-            }
-        } else if (direction.equals("down")) {
-            while (opMode.opModeIsActive() && Left_Slider.getCurrentPosition() >= pos) {
-                if (Left_Slider.getCurrentPosition() >= pos) setPower(power);
-                else stopMotor();
-
-                if (gamepad.gamepad.touchpad || gamepad.gamepad.start || gamepad.isDown(GamepadKeys.Button.DPAD_DOWN) || gamepad.isDown(GamepadKeys.Button.DPAD_LEFT) || gamepad.isDown(GamepadKeys.Button.DPAD_UP) || gamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || gamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)) break;
-            }
-        } else stopMotor();
-    }
-
-    void SetPosSlider(int pos) {
-        Left_Slider.setTargetPosition(pos);
-    }
-
-    void setPower(double pow){
-        Left_Slider.set(pow);
-        Right_Slider.setPower(Left_Slider.motorEx.getPower());
-    }
-
-    void stopMotor(){
-        Left_Slider.stopMotor();
-        Right_Slider.stopMotor();
-    }
-
-    void setTargetPosition(int pos){
-        Left_Slider.setTargetPosition(pos);
+    //Nu am gasit o funtie de clamp nu ma judeca:))
+    void TargetClamp(){
+        if(target > highPos) target = highPos;
+        else if(target < groundPos) target = groundPos;
     }
 }
