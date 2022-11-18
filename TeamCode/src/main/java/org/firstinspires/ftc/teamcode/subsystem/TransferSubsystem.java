@@ -19,8 +19,6 @@ public class TransferSubsystem extends SmartSubsystem {
     public static double closedLegPos = 0.5;
     public static double centerLegPos = 0.25;
     public static double openedLegPos =0;
-//    private final Servo joint1;
-//    private final Servo joint2;
 
     public static double downLiftPos = 0.67;
     public static double upLiftPos = 0.2;
@@ -62,8 +60,7 @@ public class TransferSubsystem extends SmartSubsystem {
             leg.setPosition(closeLegPos);
             opMode.sleep(timeout);
             arm.setPosition(upLiftPos);
-            opMode.sleep(timeout + 200
-            );
+            opMode.sleep(timeout + 200);
             arm.setPosition(downLiftPos);
         }
         else if (!bool){

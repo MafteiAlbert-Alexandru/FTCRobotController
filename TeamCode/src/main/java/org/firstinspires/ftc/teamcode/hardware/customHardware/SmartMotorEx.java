@@ -22,7 +22,6 @@ public class SmartMotorEx extends SmartMotor {
         this(hMap, id, GoBILDA.NONE, MotorDirection.FORWARD);
         ACHIEVABLE_MAX_TICKS_PER_SECOND = motorEx.getMotorType().getAchieveableMaxTicksPerSecond();
     }
-
     /**
      * Constructs the instance motor for the wrapper
      *
@@ -36,6 +35,16 @@ public class SmartMotorEx extends SmartMotor {
     }
 
     public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull GoBILDA gobildaType) {
+        super(hMap, id, gobildaType, MotorDirection.FORWARD);
+        motorEx = (DcMotorEx) super.motor;
+    }
+
+    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull NeveRest gobildaType, MotorDirection type) {
+        super(hMap, id, gobildaType, type);
+        motorEx = (DcMotorEx) super.motor;
+    }
+
+    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull NeveRest gobildaType) {
         super(hMap, id, gobildaType, MotorDirection.FORWARD);
         motorEx = (DcMotorEx) super.motor;
     }
