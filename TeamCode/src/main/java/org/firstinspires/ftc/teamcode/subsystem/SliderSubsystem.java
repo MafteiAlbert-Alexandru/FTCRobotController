@@ -39,20 +39,28 @@ public class SliderSubsystem extends SmartSubsystem {
 
     public static double power = 0.65;
 
+    public static boolean telemetryOn = false;
+
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) target = highPos;
+             if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) target = highPos;
         else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) target = midPos;
         else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) target = groundPos;
         else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) target = lowPos;
-        if(target>slider.getCurrentPosition())
-            slider.setPositionCoefficient(upwardCoefficient);
+
+        if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
         else slider.setPositionCoefficient(downwardCoefficient);
         slider.setPositionTolerance(tolerance);
 
         slider.set(pow);
         slider.setTargetPosition((int)target);
+
+        if(telemetryOn){
+            opMode.telemetry.addData("pos", slider.getCurrentPosition());
+            opMode.telemetry.addData("target", target);
+            opMode.telemetry.addData("pow", slider.get());
+        }
     }
 
     @Override

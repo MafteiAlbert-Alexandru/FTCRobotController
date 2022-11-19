@@ -62,7 +62,6 @@ public class MainTeleOP extends LinearOpMode {
                         telemetry.addLine(e.toString());
                     }
                 }
-
             }
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
