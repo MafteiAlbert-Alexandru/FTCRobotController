@@ -20,11 +20,11 @@ public class IntakeSubsystem extends SmartSubsystem {
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        if(data.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0)
+        if(data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER))
         {
             leftIntake.set(power);
             rightIntake.set(power);
-        }else if(data.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0){
+        }else if(data.operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)){
             leftIntake.set(-power);
             rightIntake.set(-power);
         }else {

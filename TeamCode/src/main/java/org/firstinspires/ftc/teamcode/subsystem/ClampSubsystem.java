@@ -16,20 +16,17 @@ public class ClampSubsystem extends SmartSubsystem{
     private ToggleButton clampButton;
     private Servo armPullServo;
     public static double position=0;
-    public static double clampOffset=0.28;
-    public void run(ToggleButtonReader clampButton) {
-        clampButton.readValue();
-        baseServo.setPosition(position);
+    public static double clampOffset=-0.02;
+    public static double initialPosition=0.4;
 
-        if (clampButton.getState())
-        {
-            armPullServo.setPosition(baseServo.getPosition()+clampOffset);
-        }else armPullServo.setPosition(baseServo.getPosition());
-    }
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-
+        clampButton.update(data.operatorGamepad);
+        if (clampButton.getToggle())
+        {
+            armPullServo.setPosition(baseServo.getPosition()-clampOffset);
+        }else armPullServo.setPosition(baseServo.getPosition()+0.28-clampOffset);
     }
 
     @Override
@@ -38,6 +35,7 @@ public class ClampSubsystem extends SmartSubsystem{
         baseServo=hardwareMap.get(Servo.class, "swingBase");
         armPullServo=hardwareMap.get(Servo.class, "swingPullArm");
         armPullServo.setDirection(Servo.Direction.REVERSE);
+        baseServo.setPosition(initialPosition);
         clampButton=new ToggleButton(GamepadKeys.Button.X);
     }
 }

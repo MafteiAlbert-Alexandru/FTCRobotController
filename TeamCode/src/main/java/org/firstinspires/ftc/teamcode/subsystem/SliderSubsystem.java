@@ -28,16 +28,14 @@ public class SliderSubsystem extends SmartSubsystem {
     public static double target = 0;
     public static double tolerance = 1000;
     public static double upwardCoefficient = 0.04;
-    public static double downwardCoefficient =0.001;
+    public static double downwardCoefficient =0.04;
     public static double pow = 0.1;
     public static int groundPos =200;
     public static int lowPos =400;
     public static int midPos = 570;
-    public static int highPos = 1550
-            ;
+    public static int highPos = 1550;
 
 
-    public static double power = 0.65;
 
     public static boolean telemetryOn = false;
 
