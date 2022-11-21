@@ -13,12 +13,13 @@ public abstract class SmartSubsystem {
 
     public LinearOpMode opMode;
     public HardwareMap hardwareMap;
-
+    public boolean initialized;
     public abstract void run(SubsystemData data) throws InterruptedException;
 
     public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
         opMode=linearOpMode;
         this.hardwareMap=hardwareMap;
+        this.initialized=true;
     }
 }
 
