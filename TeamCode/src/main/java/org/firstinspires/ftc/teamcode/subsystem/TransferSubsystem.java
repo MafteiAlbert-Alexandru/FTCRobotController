@@ -18,6 +18,7 @@ public class TransferSubsystem extends SmartSubsystem {
     private ToggleButton armButton;
     private Servo leg;
     public static double upperArmPos = 0.2;
+    public static double liftedArmPos =0.69;
     public static double lowerArmPos = 0.69;
 
     public static double closedLegPos = 0.5;
@@ -25,6 +26,14 @@ public class TransferSubsystem extends SmartSubsystem {
 
 
     private boolean firstDown = false;
+    public void lift()
+    {
+        arm.setPosition(liftedArmPos);
+    }
+    public void lower()
+    {
+
+    }
 
 
     @Override

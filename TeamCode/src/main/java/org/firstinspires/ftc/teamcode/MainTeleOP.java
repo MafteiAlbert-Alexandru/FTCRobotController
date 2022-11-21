@@ -75,7 +75,7 @@ public class MainTeleOP extends LinearOpMode {
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
             ExecutorService executor = Executors.newFixedThreadPool(4);
-            ToggleButton clampToggle = new ToggleButton(GamepadKeys.Button.X);
+            ToggleButton transferToggle = new ToggleButton(GamepadKeys.Button.X);
             while(opModeIsActive()&&!isStopRequested())
             {
                 data.driverGamepad.readButtons();
