@@ -7,8 +7,9 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
-import org.firstinspires.ftc.teamcode.drive.SampleMecanumDriveCancelable;
-import org.firstinspires.ftc.teamcode.util.PoseStorage;;
+import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
+
+
 @TeleOp(group = "advanced")
 public class FieldCentricTeleOp extends LinearOpMode {
 
@@ -28,7 +29,7 @@ public class FieldCentricTeleOp extends LinearOpMode {
 
         drive.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        drive.setPoseEstimate(PoseStorage.currentPose);
+        //drive.setPoseEstimate(PoseStorage.currentPose);
 
         waitForStart();
 
@@ -63,7 +64,7 @@ public class FieldCentricTeleOp extends LinearOpMode {
                 case AUTOMATIC_CONTROL:
                     // If x is pressed, we break out of the automatic following
                     if (gamepad1.touchpad) {
-                        drive.breakFollowing();
+                        //drive.breakFollowing();
                         currentMode = Mode.DRIVER_CONTROL;
                     }
 

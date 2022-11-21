@@ -58,6 +58,7 @@ public class MainTeleOP extends LinearOpMode {
                        subsystem.initSubsystem((LinearOpMode) this, hardwareMap);
                        smartSubsystems.add(subsystem);
                     } catch (Exception e) {
+                        subsystem.initialized=false;
                         telemetry.addLine(String.format("Failed initializing %s", field.getName()));
                         telemetry.addLine(e.toString());
                     }
@@ -65,32 +66,109 @@ public class MainTeleOP extends LinearOpMode {
             }
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
-            for(LynxModule expansionHub: expansionHubs)
-            {
-                expansionHub.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
-            }
+
 
             telemetry.update();
-            //ExecutorService executor = Executors.newFixedThreadPool(smartSubsystems.size());
             waitForStart();
 
             SubsystemData data = new SubsystemData();
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
-
-            for(SmartSubsystem subsystem : smartSubsystems)
-            {
-                subsystem.run(data);
-            }
+            ExecutorService executor = Executors.newFixedThreadPool(4);
+            ToggleButton clampToggle = new ToggleButton(GamepadKeys.Button.X);
             while(opModeIsActive()&&!isStopRequested())
             {
                 data.driverGamepad.readButtons();
                 data.operatorGamepad.readButtons();
-                for(SmartSubsystem subsystem : smartSubsystems)
+
+                if(movementSubsystem.initialized)
                 {
-                    subsystem.run(data);
+                    movementSubsystem.run(data);
                 }
-                // Adauga orice citire paralela aici
+               if(intakeSubsystem.initialized)
+                {
+                    if(data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER))
+                    {
+                        intakeSubsystem.intake();
+                    }
+                    else if(data.operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER))
+                    {
+                        intakeSubsystem.expulse();
+                    }else intakeSubsystem.stop();
+                }
+
+
+
+                if(sliderSubsystem.initialized && clampSubsystem.initialized)
+                {
+                    if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.Y))
+                    {
+                        sliderSubsystem.goToClear();
+                        executor.execute(()->{
+                            while(!sliderSubsystem.isClear());
+                            clampSubsystem.goToBackward();
+                            clampSubsystem.release();
+                            try {
+                                Thread.sleep(800);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            sliderSubsystem.goToTake();
+                        });
+
+                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
+                        if(!sliderSubsystem.isClear())
+                            sliderSubsystem.goToClear();
+
+                        executor.execute(()->{
+                            while(!sliderSubsystem.isClear());
+                            sliderSubsystem.goToPosition(SliderSubsystem.highPos);
+                            clampSubsystem.goToForward();
+
+                            });
+
+
+                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
+                        if (!sliderSubsystem.isClear())
+                            sliderSubsystem.goToClear();
+
+                        executor.execute(() -> {
+                            while (!sliderSubsystem.isClear()) ;
+                            sliderSubsystem.goToPosition(SliderSubsystem.midPos);
+                            clampSubsystem.goToForward();
+
+                        });
+                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
+                        if(!sliderSubsystem.isClear())
+                            sliderSubsystem.goToClear();
+
+                        executor.execute(()->{
+                            while(!sliderSubsystem.isClear());
+                            sliderSubsystem.goToPosition(SliderSubsystem.lowPos);
+                            clampSubsystem.goToForward();
+
+                        });
+                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
+                    {
+                        if(!sliderSubsystem.isClear())
+                            sliderSubsystem.goToClear();
+
+                        executor.execute(()->{
+                            while(!sliderSubsystem.isClear());
+                            sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
+                            clampSubsystem.goToForward();
+
+                        });
+                    }
+                    sliderSubsystem.run(data);
+                    clampSubsystem.run(data);
+                    sliderSubsystem.move((float) (data.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)-data.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
+                }
+
+                if(transferSubsystem.initialized)
+                    transferSubsystem.run(data);
+
+                // Adauga orice citire paralela aici*/
                 telemetry.update();
             }
         }catch(Exception e)

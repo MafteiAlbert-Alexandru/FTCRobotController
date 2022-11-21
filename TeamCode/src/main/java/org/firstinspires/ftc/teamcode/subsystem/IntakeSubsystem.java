@@ -18,6 +18,22 @@ public class IntakeSubsystem extends SmartSubsystem {
 
     public static double power = 0.65;
 
+    public void intake()
+    {
+        leftIntake.set(power);
+        rightIntake.set(power);
+    }
+    public void expulse()
+    {
+        leftIntake.set(-power);
+        rightIntake.set(-power);
+    }
+    public void stop()
+    {
+        leftIntake.set(0);
+        rightIntake.set(0);
+    }
+
     @Override
     public void run(SubsystemData data) throws InterruptedException {
         if(data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER))
