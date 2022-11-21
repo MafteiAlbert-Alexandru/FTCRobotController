@@ -18,15 +18,15 @@ public class ClampSubsystem extends SmartSubsystem{
     public static double position=0;
     public static double clampOffset=-0.02;
     public static double initialPosition=0.4;
+    public static double minSwapPos = 100;
 
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
         clampButton.update(data.operatorGamepad);
         if (clampButton.getToggle())
-        {
             armPullServo.setPosition(baseServo.getPosition()-clampOffset);
-        }else armPullServo.setPosition(baseServo.getPosition()+0.28-clampOffset);
+        else armPullServo.setPosition(baseServo.getPosition()+0.28-clampOffset);
     }
 
     @Override

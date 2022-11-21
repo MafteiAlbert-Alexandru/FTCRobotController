@@ -86,10 +86,7 @@ public class MainTeleOP extends LinearOpMode {
             {
                 data.driverGamepad.readButtons();
                 data.operatorGamepad.readButtons();
-                for(SmartSubsystem subsystem : smartSubsystems)
-                {
-                    subsystem.run(data);
-                }
+                for(SmartSubsystem subsystem : smartSubsystems) subsystem.run(data);
                 // Adauga orice citire paralela aici
                 telemetry.update();
             }
