@@ -12,6 +12,7 @@ import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequenceBui
 
 import javax.imageio.ImageTranscoder;
 
+
 public class MidAuto {
 
     public static void main(String args[]){
