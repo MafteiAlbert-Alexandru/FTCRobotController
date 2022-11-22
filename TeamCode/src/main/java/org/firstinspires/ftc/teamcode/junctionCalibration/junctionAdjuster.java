@@ -1,5 +1,9 @@
 package org.firstinspires.ftc.teamcode.junctionCalibration;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -11,19 +15,19 @@ public class junctionAdjuster {
         public int resolution_x;
         public int resolution_y;
         public double FOV_x;
-        public double FOV_y;
     }
 
     public class JunctionData{
         public double diameter;
     }
 
-    public class MecanumResources{
-        //Aici vin motoarele de la roti
+    public class Vec2{
+        public double x;
+        public double y;
     }
 
 
-    private class Resources{
+    /*private class Resources{
         public double integral;
 
         public double ang_0;
@@ -32,38 +36,82 @@ public class junctionAdjuster {
         public double distToJunction;
         public double camField;
         public double junctionField;
-    }
+    }*/
 
 
     private CameraData Cam;
     private JunctionData junction;
-    private MecanumResources mecanum;
-    private Resources frame;
+    //private Resources frame = new Resources();
 
-    private junctionAdjusterPipeline.Results results_0;
-    private junctionAdjusterPipeline.Results results_1;
+    /*private junctionAdjusterPipeline.Results results_0 = new junctionAdjusterPipeline.Results();
+    private junctionAdjusterPipeline.Results results_1 = new junctionAdjusterPipeline.Results();
 
     public double kp;
     public double ki;
-    public double kd;
+    public double kd;*/
 
     private junctionAdjusterPipeline pipeline;
 
-    public junctionAdjuster(OpenCvCamera camera_, CameraData cam_, JunctionData junction_, MecanumResources mecanum_){
-        this.camera = camera_;
+    Telemetry telemetry;
 
-        this.Cam = cam_;
-        this.junction = junction_;
-        this.mecanum = mecanum_;
+    public junctionAdjuster(OpenCvCamera camera_, float FOV_x, int resolution_x, int resolution_y, double diameter, Telemetry telemetry_){
+        camera = camera_;
 
-        kp = 1;     //
-        ki = 1;     // Trebuiesc ajustate
-        kd = 1;     //
+        Cam = new CameraData();
+        junction = new JunctionData();
+
+        Cam.FOV_x = FOV_x;
+        Cam.resolution_x = resolution_x;
+        Cam.resolution_y = resolution_y;
+
+        junction.diameter = diameter;
+
+        pipeline = new junctionAdjusterPipeline();
+        camera.setPipeline(pipeline);
+
+        telemetry = telemetry_;
+
+        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                camera.startStreaming(  Cam.resolution_x, Cam.resolution_y, OpenCvCameraRotation.UPRIGHT);
+            }
+            @Override
+            public void onError(int errorCode)
+            {
+
+                // This will be called if the camera could not be opened
+
+            }
+        });
+
+        FtcDashboard.getInstance().startCameraStream(camera, 0);
 
     }
 
-    public int update(double maxSpeed){
-        junctionAdjusterPipeline.Results results = junctionAdjusterPipeline.getLatestResults();
+    public Vec2 relativeJunctionPosition(){ // cm
+        Vec2 position = new Vec2();
+
+        double angle;
+        double distToJunction;
+
+        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+
+        angle = Math.toRadians(Math.abs((double)(results.junction_x1 + results.junction_x2) / (double)(Cam.resolution_x * 2) - 1) * Cam.FOV_x); // unghiul dintre vectorul de orientare a robotului si vectorul robot-junction
+        distToJunction = junction.diameter / Math.tan(angle);
+
+        position.x = Math.copySign(Math.tan(angle) * distToJunction, (double)(results.junction_x1 + results.junction_x2) / (double)(Cam.resolution_x * 2) - 1);
+        position.y = distToJunction;
+
+        return position;
+    }
+
+    /*public int update(double maxSpeed){
+        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+
+        telemetry.addData("wasAccesed ", results.wasAccesed);
 
         if (results.wasAccesed == false) { // prima accesare a datelor de pe camera dupa o calculare asincron a junctionului
             results.wasAccesed = true;
@@ -79,7 +127,11 @@ public class junctionAdjuster {
             frame.junctionField = Math.tan(frame.ang_1) * frame.distToJunction; //
 
             frame.integral += frame.ang_1 * (results_1.time - results_0.time);
+
+            telemetry.addData("distance ", frame.distToJunction);
         }
+
+        telemetry.update();
 
         double Error_1 = frame.ang_1;
         double Error_0 = frame.ang_0;
@@ -107,11 +159,5 @@ public class junctionAdjuster {
             return 0;
         }
         return 1;
-    }
-
-
-    private void turn(double direction, double power){//       directie: -1 = stanga, 1 = dreapta
-
-    }
-
+    }*/
 }
