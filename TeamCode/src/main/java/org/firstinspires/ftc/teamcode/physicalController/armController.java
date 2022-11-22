@@ -1,6 +1,6 @@
 package org.firstinspires.ftc.teamcode.physicalController;
 
-import com.arcrobotics.ftclib.hardware.motors.Motor;
+/*import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import java.util.Date;
 import java.util.Calendar;
@@ -10,9 +10,9 @@ public class armController {
     private Motor motor;
     public boolean active = false;
 
-    /*  A... - angular
-     *   C... - change
-     */
+    //  A... - angular
+    //   C... - change
+    //
 
 
     private class Physics{
@@ -147,4 +147,4 @@ public class armController {
             return encoderPosition / motor.getCPR()*2*Math.PI;
         }
     }
-}
+}*/
