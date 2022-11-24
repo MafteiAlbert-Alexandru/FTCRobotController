@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.apriltag.ApriltagDetectionJNI;
 
 @Config
 @Autonomous

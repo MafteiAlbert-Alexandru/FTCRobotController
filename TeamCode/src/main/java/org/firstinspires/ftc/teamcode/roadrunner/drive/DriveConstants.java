@@ -34,7 +34,7 @@ public class DriveConstants {
      * from DriveVelocityPIDTuner.
      */
     public static final boolean RUN_USING_ENCODER = true;
-    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(8, 0.1, 2,13);
+    public static PIDFCoefficients MOTOR_VELO_PID = new PIDFCoefficients(8, 0.1, 2,13.02453575365515);
             //getMotorVelocityF(MAX_RPM / 60 * TICKS_PER_REV)); // 13.110837
 
     /*

@@ -40,6 +40,7 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
+    private boolean stupidState = false;
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -101,15 +102,24 @@ public class MainTeleOP extends LinearOpMode {
 
                 if(sliderSubsystem.initialized && clampSubsystem.initialized)
                 {
+
                     if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.Y))
                     {
+                        if(!stupidState)
+                        {
+
+                        }else if(stupidState)
+                        {
+
+                        }
                         sliderSubsystem.goToClear();
                         executor.execute(()->{
                             while(!sliderSubsystem.isClear());
-                            clampSubsystem.goToBackward();
                             clampSubsystem.release();
+                            clampSubsystem.goToBackward();
+
                             try {
-                                Thread.sleep(800);
+                                Thread.sleep(900);
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             }
