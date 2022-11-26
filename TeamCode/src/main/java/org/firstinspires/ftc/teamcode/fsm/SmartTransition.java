@@ -5,6 +5,12 @@ import java.util.Objects;
 public abstract class SmartTransition {
     public SmartState from;
     public SmartState to;
+    public SmartTransition(SmartState from, SmartState to)
+    {
+        this.from=from;
+        this.to=to;
+
+    }
     void init()
     {
 

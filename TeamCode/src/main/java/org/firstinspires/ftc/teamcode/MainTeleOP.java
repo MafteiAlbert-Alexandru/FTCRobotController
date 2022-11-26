@@ -13,6 +13,11 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
+import org.firstinspires.ftc.teamcode.fsm.ButtonTransition;
+import org.firstinspires.ftc.teamcode.fsm.NullState;
+import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
+import org.firstinspires.ftc.teamcode.fsm.SmartState;
+import org.firstinspires.ftc.teamcode.fsm.SmartTransition;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
@@ -41,6 +46,9 @@ public class MainTeleOP extends LinearOpMode {
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
     private boolean stupidState = false;
+
+
+
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
@@ -75,6 +83,30 @@ public class MainTeleOP extends LinearOpMode {
             SubsystemData data = new SubsystemData();
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
+
+            SmartFSM fsm = new SmartFSM();
+            SmartState upperSliderState = new NullState(fsm) {};
+            SmartState mediumSliderState = new NullState(fsm) {};
+            SmartState lowerSliderState = new NullState(fsm) {};
+            SmartState groundSliderState = new NullState(fsm) {};
+            SmartState waitingSliderState = new NullState(fsm) {};
+            SmartState[] safeStates = {upperSliderState, mediumSliderState, lowerSliderState, groundSliderState, waitingSliderState};
+
+            SmartState loadedSliderState = new NullState(fsm) {};
+            for(SmartState state: safeStates)
+            {
+                fsm.addTransition(new ButtonTransition(state, upperSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+                    @Override
+                    public void run()
+                    {
+                        sliderSubsystem.goToPosition(SliderSubsystem.highPos);
+                        clampSubsystem.goToForward();
+                    }
+                });
+            }
+
+
+            };
             ExecutorService executor = Executors.newFixedThreadPool(4);
             ToggleButton transferToggle = new ToggleButton(GamepadKeys.Button.X);
             while(opModeIsActive()&&!isStopRequested())

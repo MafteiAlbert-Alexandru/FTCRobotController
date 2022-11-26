@@ -53,31 +53,7 @@ public class SmartFSMBuilder {
         //TODO: Implement between transitions
         return this;
     }
-    public SmartFSMBuilder interconnected(SmartStateTransitionPair pairs[]) throws IllegalAccessException, InstantiationException, NoSuchMethodException, InvocationTargetException {
-        if(toNextState) toNextState=false;
-        int baseState = states.size()-1;
-        for(SmartStateTransitionPair pair:pairs)
-        {
-            states.add(pair.state);
-            states.get(baseState);
 
-            for(SmartStateTransitionPair state: pairs)
-            {
-                SmartTransition transition = pair.transition.getClass().getConstructor().newInstance();
-                transition.from=state.state;
-                transition.to=pair.state;
-                transitions.add(transition);
-            }
-        }
-        for(SmartStateTransitionPair pair:pairs)
-        {
-            SmartTransition transition = pair.transition.getClass().newInstance();
-            transition.from=states.get(baseState);
-            transition.to=pair.state;
-            transitions.add(transition);
-        }
-        return this;
-    }
 
     public void build()
     {

@@ -6,13 +6,12 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 public class ButtonTransition extends SmartTransition{
 
     private GamepadEx gamepad;
-    private GamepadKeys button;
-    public ButtonTransition(GamepadEx gamepad, GamepadKeys.Button button)
+    private GamepadKeys.Button button;
+    public ButtonTransition(SmartState from, SmartState to, GamepadEx gamepad, GamepadKeys.Button button)
     {
-        if(gamepad.wasJustPressed(button))
-        {
-
-        }
+        super(from, to);
+        this.gamepad=gamepad;
+        this.button=button;
     }
     @Override
     public void init() {
@@ -21,7 +20,7 @@ public class ButtonTransition extends SmartTransition{
 
     @Override
     public boolean check() {
-        return false;
+        return gamepad.wasJustPressed(button);
     }
 
     @Override
