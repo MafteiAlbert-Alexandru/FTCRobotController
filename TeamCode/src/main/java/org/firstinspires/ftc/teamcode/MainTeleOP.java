@@ -203,55 +203,41 @@ public class MainTeleOP extends LinearOpMode {
                 }
             });
 
-            fsm.addTransition(new ButtonTransition(groundSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
+            fsm.addTransitionsTo(waitingSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState,upperSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
-                public void run() {
+                public void run(){
                     sliderSubsystem.goToClear();
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
                         clampSubsystem.goToBackward();
-
                     });
                 }
             });
-            fsm.addTransition(new ButtonTransition(lowerSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
-            {
+            fsm.addTransitionsTo(upperSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_UP) {
                 @Override
                 public void run() {
-                    sliderSubsystem.goToClear();
-                    executor.execute(()->{
-                        while(!sliderSubsystem.isClear());
-                        clampSubsystem.goToBackward();
-
-                    });
+                    sliderSubsystem.goToPosition(SliderSubsystem.highPos);
                 }
             });
-            fsm.addTransition(new ButtonTransition(mediumSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
-            {
+            fsm.addTransitionsTo(mediumSliderState, new SmartState[]{upperSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
                 @Override
                 public void run() {
-                    sliderSubsystem.goToClear();
-                    executor.execute(()->{
-                        while(!sliderSubsystem.isClear());
-                        clampSubsystem.goToBackward();
-
-                    });
+                    sliderSubsystem.goToPosition(SliderSubsystem.midPos);
                 }
             });
-            fsm.addTransition(new ButtonTransition(upperSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
-            {
+            fsm.addTransitionsTo(lowerSliderState, new SmartState[]{upperSliderState,groundSliderState,mediumSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
                 @Override
                 public void run() {
-                    sliderSubsystem.goToClear();
-                    executor.execute(()->{
-                        while(!sliderSubsystem.isClear());
-                        clampSubsystem.goToBackward();
-
-                    });
+                    sliderSubsystem.goToPosition(SliderSubsystem.lowPos);
                 }
             });
-
+            fsm.addTransitionsTo(groundSliderState, new SmartState[]{upperSliderState,mediumSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+                @Override
+                public void run() {
+                    sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
+                }
+            });
             fsm.build();
             waitForStart();
             while(opModeIsActive()&&!isStopRequested()) {

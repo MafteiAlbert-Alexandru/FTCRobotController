@@ -22,7 +22,17 @@ public class SmartFSM implements Callable<Void> {
     {
         transitions.add(smartTransition);
     }
-
+    public void addTransitionsTo(SmartState to, SmartState[] from, SmartTransition transition)
+    {
+        states.add(to);
+        for (SmartState state: from)
+        {
+            states.add(state);
+            transition.to=to;
+            transition.from=state;
+            transitions.add(transition);
+        }
+    }
     /**
      * This needs to be called for multi-state finite machines before running the fsm
      */

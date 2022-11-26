@@ -11,6 +11,7 @@ public abstract class SmartTransition {
         this.to=to;
 
     }
+    public SmartTransition(){}
     void init()
     {
 

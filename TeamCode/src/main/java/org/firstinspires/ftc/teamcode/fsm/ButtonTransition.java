@@ -13,6 +13,12 @@ public class ButtonTransition extends SmartTransition{
         this.gamepad=gamepad;
         this.button=button;
     }
+    public ButtonTransition(GamepadEx gamepad, GamepadKeys.Button button)
+    {
+        super();
+        this.gamepad=gamepad;
+        this.button=button;
+    }
     @Override
     public void init() {
 
