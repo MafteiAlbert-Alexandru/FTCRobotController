@@ -14,7 +14,7 @@ import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjuster;
 
 @TeleOp
-public class MainTeleOp extends LinearOpMode {
+public class VisionTeleOP extends LinearOpMode {
 
     OpenCvCamera webcam;
     junctionAdjuster j_adjuster;

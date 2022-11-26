@@ -24,13 +24,6 @@ public abstract class SmartTransition {
 
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SmartTransition that = (SmartTransition) o;
-        return Objects.equals(from, that.from) && Objects.equals(to, that.to);
-    }
 
     @Override
     public int hashCode() {

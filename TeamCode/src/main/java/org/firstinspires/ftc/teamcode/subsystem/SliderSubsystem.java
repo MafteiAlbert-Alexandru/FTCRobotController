@@ -82,10 +82,6 @@ public class SliderSubsystem extends SmartSubsystem {
     }
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)) target = highPos;
-        else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) target = midPos;
-        else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN)) target = groundPos;
-        else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) target = lowPos;
 
         if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
         else slider.setPositionCoefficient(downwardCoefficient);
