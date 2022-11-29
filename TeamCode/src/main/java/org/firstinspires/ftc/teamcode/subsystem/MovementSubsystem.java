@@ -51,7 +51,29 @@ public class MovementSubsystem extends SmartSubsystem{
     private DcMotorEx backLeft;
     private DcMotorEx backRight;
     public SampleMecanumDriveCancelable drive;
+    public void move(double forward, double strafe, double turn)
+    {
+        forward=forward>1?1:(forward<0)?0:forward;
+        strafe=strafe>1?1:(strafe<0)?0:strafe;
+        turn=turn>1?1:(turn<0)?0:turn;
+        double r = Math.hypot(strafe, forward);
 
+        double robotAngle = Math.atan2(forward, strafe) - Math.PI / 4;
+
+        final double v1 = (r * Math.cos(robotAngle)) + turn;
+        final double v2 = (r * Math.sin(robotAngle)) - turn;
+        final double v3 = (r * Math.sin(robotAngle)) + turn;
+        final double v4 = (r * Math.cos(robotAngle)) - turn;
+        opMode.telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
+        opMode.telemetry.addData("frontRight", frontRight.getCurrentPosition());
+        opMode.telemetry.addData("backLeft", backLeft.getCurrentPosition());
+        opMode.telemetry.addData("backRight", backRight.getCurrentPosition());
+
+        frontLeft.setPower(v1);
+        frontRight.setPower(v2);
+        backLeft.setPower(v3);
+        backRight.setPower(v4);
+    }
     @Override
     public void run(SubsystemData data) {
         double Forward = data.driverGamepad.getLeftY();
@@ -66,23 +88,8 @@ public class MovementSubsystem extends SmartSubsystem{
             Turn /= 2;
         }
 
-        double r = Math.hypot(Strafe, Forward);
+        move(Forward, Strafe,Turn);
 
-        double robotAngle = Math.atan2(Forward, Strafe) - Math.PI / 4;
-
-        final double v1 = (r * Math.cos(robotAngle)) + Turn;
-        final double v2 = (r * Math.sin(robotAngle)) - Turn;
-        final double v3 = (r * Math.sin(robotAngle)) + Turn;
-        final double v4 = (r * Math.cos(robotAngle)) - Turn;
-        opMode.telemetry.addData("frontLeft", frontLeft.getCurrentPosition());
-        opMode.telemetry.addData("frontRight", frontRight.getCurrentPosition());
-        opMode.telemetry.addData("backLeft", backLeft.getCurrentPosition());
-        opMode.telemetry.addData("backRight", backRight.getCurrentPosition());
-
-        frontLeft.setPower(v1);
-        frontRight.setPower(v2);
-        backLeft.setPower(v3);
-        backRight.setPower(v4);
     }
 
     @Override
