@@ -117,7 +117,7 @@ public class MainTeleOP extends LinearOpMode {
                         clampSubsystem.release();
                         sliderSubsystem.goToTake();
                         try {
-                            Thread.sleep(900);
+                            Thread.sleep(400);
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
@@ -172,14 +172,11 @@ public class MainTeleOP extends LinearOpMode {
                     sliderSubsystem.goToClear();
 
                     executor.execute(()->{
+                        sliderSubsystem.goToPosition(SliderSubsystem.midPos);
                         while(!sliderSubsystem.isClear());
                         clampSubsystem.goToForward();
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
-                        sliderSubsystem.goToPosition(SliderSubsystem.midPos);
+
+
                     });
                 }
             });
@@ -192,13 +189,10 @@ public class MainTeleOP extends LinearOpMode {
 
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
-                        clampSubsystem.goToForward();
-                        try {
-                            Thread.sleep(500);
-                        } catch (InterruptedException ex) {
-                            ex.printStackTrace();
-                        }
                         sliderSubsystem.goToPosition(SliderSubsystem.highPos);
+                        clampSubsystem.goToForward();
+
+
                     });
                 }
             });
@@ -207,10 +201,11 @@ public class MainTeleOP extends LinearOpMode {
             {
                 @Override
                 public void run(){
+                    clampSubsystem.goToBackward();
                     sliderSubsystem.goToClear();
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
-                        clampSubsystem.goToBackward();
+
                     });
                 }
             });

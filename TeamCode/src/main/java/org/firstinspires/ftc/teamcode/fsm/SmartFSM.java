@@ -28,9 +28,17 @@ public class SmartFSM implements Callable<Void> {
         for (SmartState state: from)
         {
             states.add(state);
-            transition.to=to;
-            transition.from=state;
-            transitions.add(transition);
+            transitions.add(new SmartTransition(state, to) {
+                @Override
+                public boolean check()
+                {
+                    return transition.check();
+                }
+                @Override
+                void run() {
+                    transition.run();
+                }
+            });
         }
     }
     /**
