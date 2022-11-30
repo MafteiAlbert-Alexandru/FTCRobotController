@@ -26,12 +26,9 @@ public class VisionTeleOP extends LinearOpMode {
 
     OpenCvCamera webcam;
     junctionAdjuster j_adjuster;
-    public static PIDFCoefficients xCoefficients = new PIDFCoefficients(0,0,0,0.0005);
-    public static PIDFCoefficients widthCoefficients = new PIDFCoefficients(0,0,0,0.0005);
 
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
-    public static double kX=0.0005;
-    public static double kY=0.0005;
+
     @Override
     public void runOpMode(){
 
@@ -40,8 +37,6 @@ public class VisionTeleOP extends LinearOpMode {
 
             movementSubsystem.initSubsystem(this, hardwareMap);
             webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"));
-            PIDFController xController = new PIDFController(xCoefficients.p, xCoefficients.i,xCoefficients.f,xCoefficients.f);
-            PIDFController widthController = new PIDFController(widthCoefficients.p, widthCoefficients.i, widthCoefficients.f);
 
             float FOV_x = 78;
             int resolution_x = 800;
@@ -53,23 +48,11 @@ public class VisionTeleOP extends LinearOpMode {
             waitForStart();
 
             while(opModeIsActive()&&!isStopRequested()){
-                xController.
-                junctionAdjuster.Vec2 junctionPosition_c = j_adjuster.getResults();
+                junctionAdjuster.Vec2 junctionPosition_c = j_adjuster.relativeJunctionPosition();
 
                 telemetry.addData("x", junctionPosition_c.x);
-                telemetry.addData("width", junctionPosition_c.y- junctionPosition_c.x);
-                junctionAdjuster.Vec2 target=new junctionAdjuster.Vec2();
-                target.x=kX*(300-junctionPosition_c.x);
-                target.y=kY*(160-(junctionPosition_c.y- junctionPosition_c.x));
-
-                telemetry.addData("target x", 300);
-                telemetry.addData("target width", 160);
-                telemetry.addData("vec x", target.x);
-                telemetry.addData("vec y", target.y);
+                telemetry.addData("y", junctionPosition_c.y);
                 telemetry.update();
-                if()
-                movementSubsystem.move(target.y, target.x, 0);
-
             }
             j_adjuster.stop();
         }catch (Exception e)
