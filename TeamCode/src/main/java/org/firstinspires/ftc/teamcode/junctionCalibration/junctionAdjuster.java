@@ -25,6 +25,31 @@ public class junctionAdjuster {
     public static class Vec2{
         public double x;
         public double y;
+
+        Vec2(){
+            this.x=0;
+            this.y=0;
+        };
+        Vec2(double x,double y){
+            this.x = x;
+            this.y = y;
+        }
+    }
+    public static class Vec3{
+        public double x;
+        public double y;
+        public double z;
+
+        Vec3(){
+            this.x=0;
+            this.y=0;
+            this.z=0;
+        };
+        Vec3(double x,double y,double z){
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
 
 
@@ -33,8 +58,11 @@ public class junctionAdjuster {
 
     private junctionAdjusterPipeline pipeline;
 
-    public boolean active_x;
-    public boolean active_y;
+    private Vec2 relativePosition;
+    private Vec2 setPoint = new Vec2(-2,8.5);
+    //-2,8.5
+    private double cameraAngle = 45;
+    public boolean active;
 
     Telemetry telemetry;
 
@@ -48,8 +76,7 @@ public class junctionAdjuster {
         Cam.resolution_x = resolution_x;
         Cam.resolution_y = resolution_y;
 
-        active_x = true;
-        active_y = true;
+        active = false;
 
         junction.diameter = diameter;
 
@@ -92,15 +119,35 @@ public class junctionAdjuster {
 
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
 
-        tan1 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * results.junction_x1;
-        tan2 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * results.junction_x2;
+        tan1 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
+        tan2 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
 
         distance = junction.diameter / (tan2 - tan1);
 
-        position.x = ((tan1 + tan2) / 2) * distance;
+        position.x = ((tan1+tan2)/2) * distance;
         position.y = distance;
 
         return position;
+    }
+
+    public Vec3 relativeJunctionTransform(){
+        Vec3 transform = new Vec3();
+
+        double distance;
+        double tan1,tan2;
+
+        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+
+        tan1 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
+        tan2 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+
+        distance = junction.diameter / (tan2 - tan1);
+
+        transform.x = ((tan1+tan2)/2) * distance; //strafe
+        transform.y = distance; //distance
+        transform.z = Math.atan((tan1+tan2)/2); //angle
+
+        return transform;
     }
 
     public Vec2 getResults(){
@@ -115,33 +162,23 @@ public class junctionAdjuster {
     }
 
     public void autoVisionPositioning(MovementSubsystem movementSubsystem, double speed){
-        Vec2 relativePosition = relativeJunctionPosition();
+        relativePosition = relativeJunctionPosition();
 
-        double forward = 0;
-        double strafe = 0;
+        Vec2 direction = new Vec2(relativePosition.x - setPoint.x, relativePosition.y - setPoint.y);
+        //telemetry.addData("x1", direction.x);
+        //telemetry.addData("y1", direction.y);
 
-        if(Math.abs(relativePosition.x) > 5){
-            active_x = true;
+        direction.x = direction.x * Math.cos(Math.toRadians(cameraAngle)) - direction.y * Math.sin(Math.toRadians(cameraAngle));
+        direction.y = direction.x * Math.sin(Math.toRadians(cameraAngle)) + direction.y * Math.cos(Math.toRadians(cameraAngle));
+        //telemetry.addData("x2", direction.x);
+        //telemetry.addData("y2", direction.y);
+        double xy = direction.x / direction.y;
 
-            strafe = Math.ceil(relativePosition.x/(speed * 100)) / (1/speed);
+        if(xy>1)direction = new Vec2(speed,(1/xy)*speed);
+        else direction = new Vec2(xy * speed, speed);
+        //telemetry.addData("x3", direction.x);
+        //telemetry.addData("y3", direction.y);
 
-        }else if(active_x == true){
-            active_x = false;
-
-            strafe = 0;
-        }
-
-        if(Math.abs(relativePosition.y) > 5){
-            active_y = true;
-
-            forward = Math.ceil(relativePosition.y/(speed * 100)) / (1/speed);
-
-        }else if(active_y == true){
-            active_y = false;
-
-            forward = 0;
-        }
-
-        movementSubsystem.move(forward, strafe, 0);
+        movementSubsystem.move(direction.y * 0.3, direction.x, 0);
     }
 }
