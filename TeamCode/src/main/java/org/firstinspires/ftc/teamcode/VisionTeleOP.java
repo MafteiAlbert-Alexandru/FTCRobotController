@@ -29,7 +29,10 @@ public class VisionTeleOP extends LinearOpMode {
 
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
 
-    public static double speed = 0.4;
+    public static double speed = 0;
+    public static junctionAdjuster.Vec2 setPoint = new junctionAdjuster.Vec2(-10.2,4.4);//-2,8.5
+    public static double cameraAngle = 45;
+    public static double treshold = 200;
 
     @Override
     public void runOpMode(){
@@ -50,7 +53,7 @@ public class VisionTeleOP extends LinearOpMode {
             waitForStart();
 
             while(opModeIsActive()&&!isStopRequested()){
-                j_adjuster.autoVisionPositioning(movementSubsystem, speed);
+                j_adjuster.autoVisionPositioning(movementSubsystem, speed, setPoint, cameraAngle, treshold);
                 telemetry.update();
             }
             j_adjuster.stop();

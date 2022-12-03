@@ -24,6 +24,7 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     public class Results{
         public int junction_x1;
         public int junction_x2;
+        public double area;
     };
 
     private Results latestResults=new Results();
@@ -83,6 +84,7 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
 
         latestResults.junction_x1 = (int)(mid_x - area/2);
         latestResults.junction_x2 = (int)(mid_x + area/2);
+        latestResults.area = area * Math.max(junctionRect.size.width, junctionRect.size.height);
 
         Imgproc.line(input, points[0], points[1], new Scalar(255, 255, 0));
         Imgproc.line(input, points[1], points[2], new Scalar(255, 255, 0));

@@ -30,9 +30,26 @@ public class junctionAdjuster {
             this.x=0;
             this.y=0;
         };
-        Vec2(double x,double y){
+        public Vec2(double x, double y){
             this.x = x;
             this.y = y;
+        }
+        Vec2 normalize(){
+            double length = Math.sqrt(x*x + y*y);
+            x/=length;
+            y/=length;
+            return this;
+        }
+        Vec2 normalizareRapida(){
+            double xy = this.x/this.y;
+            if(xy>1){
+                this.x = 1;
+                this.y = 1/xy;
+                return this;
+            }
+            this.x = xy;
+            this.y = 1;
+            return this;
         }
     }
     public static class Vec3{
@@ -59,9 +76,10 @@ public class junctionAdjuster {
     private junctionAdjusterPipeline pipeline;
 
     private Vec2 relativePosition;
-    private Vec2 setPoint = new Vec2(-2,8.5);
-    //-2,8.5
-    private double cameraAngle = 45;
+    private Vec3 relativeTransform;
+    private double relativeAngle;
+    private double cameraTangent;
+
     public boolean active;
 
     Telemetry telemetry;
@@ -77,6 +95,7 @@ public class junctionAdjuster {
         Cam.resolution_y = resolution_y;
 
         active = false;
+        cameraTangent = Math.tan(Math.toRadians(Cam.FOV_x/2));
 
         junction.diameter = diameter;
 
@@ -90,7 +109,7 @@ public class junctionAdjuster {
             @Override
             public void onOpened()
             {
-                camera.startStreaming(  Cam.resolution_x, Cam.resolution_y, OpenCvCameraRotation.UPRIGHT);
+                //camera.startStreaming(  Cam.resolution_x, Cam.resolution_y, OpenCvCameraRotation.UPRIGHT);
             }
             @Override
             public void onError(int errorCode)
@@ -101,13 +120,13 @@ public class junctionAdjuster {
             }
         });
 
-        FtcDashboard.getInstance().startCameraStream(camera, 0);
+        //FtcDashboard.getInstance().startCameraStream(camera, 0);
 
     }
     public void stop()
     {
-        FtcDashboard.getInstance().stopCameraStream();
-        camera.stopStreaming();
+        //FtcDashboard.getInstance().stopCameraStream();
+        //camera.stopStreaming();
         camera.closeCameraDevice();
     }
 
@@ -119,8 +138,8 @@ public class junctionAdjuster {
 
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
 
-        tan1 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
-        tan2 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
+        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
 
         distance = junction.diameter / (tan2 - tan1);
 
@@ -128,6 +147,15 @@ public class junctionAdjuster {
         position.y = distance;
 
         return position;
+    }
+
+    public double relativeJunctionAngle(){
+        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+        double tan1,tan2;
+
+        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
+        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        return Math.atan((tan1+tan2)/2);
     }
 
     public Vec3 relativeJunctionTransform(){
@@ -138,8 +166,8 @@ public class junctionAdjuster {
 
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
 
-        tan1 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
-        tan2 = (Math.tan(Math.toRadians(Cam.FOV_x/2)) / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
+        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
 
         distance = junction.diameter / (tan2 - tan1);
 
@@ -161,24 +189,38 @@ public class junctionAdjuster {
         return position;
     }
 
-    public void autoVisionPositioning(MovementSubsystem movementSubsystem, double speed){
-        relativePosition = relativeJunctionPosition();
+    public void autoVisionPositioning(MovementSubsystem movementSubsystem, double speed, Vec2 setPoint, double cameraAngle, double treshold){
+        relativeTransform = relativeJunctionTransform();
 
-        Vec2 direction = new Vec2(relativePosition.x - setPoint.x, relativePosition.y - setPoint.y);
-        //telemetry.addData("x1", direction.x);
-        //telemetry.addData("y1", direction.y);
+        Vec2 direction = new Vec2(Math.sin(relativeTransform.z - cameraAngle), Math.cos(relativeTransform.z - cameraAngle));
 
-        direction.x = direction.x * Math.cos(Math.toRadians(cameraAngle)) - direction.y * Math.sin(Math.toRadians(cameraAngle));
-        direction.y = direction.x * Math.sin(Math.toRadians(cameraAngle)) + direction.y * Math.cos(Math.toRadians(cameraAngle));
-        //telemetry.addData("x2", direction.x);
-        //telemetry.addData("y2", direction.y);
-        double xy = direction.x / direction.y;
+        double length = Math.sqrt(relativeTransform.x*relativeTransform.x + relativeTransform.y*relativeTransform.y);
+        direction.x *= length;
+        direction.y *= length;
 
-        if(xy>1)direction = new Vec2(speed,(1/xy)*speed);
-        else direction = new Vec2(xy * speed, speed);
-        //telemetry.addData("x3", direction.x);
-        //telemetry.addData("y3", direction.y);
+        direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
 
-        movementSubsystem.move(direction.y * 0.3, direction.x, 0);
+        /*if(direction.y < 5)direction.y = 0;
+
+        if(Math.abs(Math.sqrt(direction.x* direction.x + direction.y* direction.y)) < 1){
+            movementSubsystem.move(0, 0, 0);
+            return false;
+        }*/
+
+        length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
+
+        double kp;
+        if(length > 10)kp = 1;
+        else kp = length/10;
+
+        direction.x/=length;
+        direction.y/=length;
+
+        telemetry.addData("x", direction.x);
+        telemetry.addData("y", direction.y);
+        telemetry.addData("length", length);
+
+
+        movementSubsystem.move(direction.y * 0.4 * speed * kp, direction.x * speed * kp, 0);
     }
 }
