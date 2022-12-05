@@ -254,82 +254,8 @@ public class MainTeleOP extends LinearOpMode {
                     } else intakeSubsystem.stop();
                 }
 
-
-//                if(sliderSubsystem.initialized && clampSubsystem.initialized)
-////                {
-//
-//                    if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.Y))
-//                    {
-//                        if(!stupidState)
-//                        {
-//
-//                        }else if(stupidState)
-//                        {
-//
-//                        }
-//                        sliderSubsystem.goToClear();
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            clampSubsystem.release();
-//                            clampSubsystem.goToBackward();
-//
-//                            try {
-//                                Thread.sleep(900);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                            sliderSubsystem.goToTake();
-//                        });
-//
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.highPos);
-//                            clampSubsystem.goToForward();
-//
-//                            });
-//
-//
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-//                        if (!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(() -> {
-//                            while (!sliderSubsystem.isClear()) ;
-//                            sliderSubsystem.goToPosition(SliderSubsystem.midPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.lowPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
-//                    {
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }
                 sliderSubsystem.run(data);
                 clampSubsystem.run(data);
-//                    sliderSubsystem.move((float) (data.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)-data.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
-//                }
-
                 if (transferSubsystem.initialized)
                     transferSubsystem.run(data);
 

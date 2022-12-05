@@ -31,7 +31,7 @@ public class SliderSubsystem extends SmartSubsystem {
 
     public  int target = 0;
     public static double tolerance = 30;
-    public static double upwardCoefficient = 0.04;
+    public static double upwardCoefficient = 0.1;
     public static double downwardCoefficient =0.1;
     public static double pow = 0.1;
 
