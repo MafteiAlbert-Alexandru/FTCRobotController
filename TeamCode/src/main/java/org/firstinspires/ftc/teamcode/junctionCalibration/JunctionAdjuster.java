@@ -1,22 +1,18 @@
 package org.firstinspires.ftc.teamcode.junctionCalibration;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
+import org.firstinspires.ftc.teamcode.vision.CameraConfig;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraRotation;
 
-public class junctionAdjuster {
+public class JunctionAdjuster {
     private OpenCvCamera camera;
 
-    public class CameraData{
-        public int resolution_x;
-        public int resolution_y;
-        public double FOV_x;
-    }
 
     public class JunctionData{
         public double diameter;
@@ -26,7 +22,7 @@ public class junctionAdjuster {
         public double x;
         public double y;
 
-        Vec2(){
+        public Vec2(){
             this.x=0;
             this.y=0;
         };
@@ -69,8 +65,7 @@ public class junctionAdjuster {
         }
     }
 
-
-    private CameraData Cam;
+    
     private JunctionData junction;
 
     private junctionAdjusterPipeline pipeline;
@@ -79,55 +74,25 @@ public class junctionAdjuster {
     private Vec3 relativeTransform;
     private double relativeAngle;
     private double cameraTangent;
-
+    private CameraConfig config;
     public boolean active;
 
-    Telemetry telemetry;
+    private Telemetry telemetry;
 
-    public junctionAdjuster(OpenCvCamera camera_, float FOV_x, int resolution_x, int resolution_y, double diameter, Telemetry telemetry_){
-        camera = camera_;
-
-        Cam = new CameraData();
+    public JunctionAdjuster(WebcamUtil webcamUtil, double diameter, Telemetry telemetry_){
+        camera= webcamUtil.getWebcam();
+        config=webcamUtil.getConfig();
         junction = new JunctionData();
-
-        Cam.FOV_x = FOV_x;
-        Cam.resolution_x = resolution_x;
-        Cam.resolution_y = resolution_y;
-
+        
         active = false;
-        cameraTangent = Math.tan(Math.toRadians(Cam.FOV_x/2));
+        
+        cameraTangent = Math.tan(Math.toRadians(config.getFovX()/2));
 
         junction.diameter = diameter;
 
         pipeline = new junctionAdjusterPipeline();
         camera.setPipeline(pipeline);
-
         telemetry = telemetry_;
-
-        camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
-        {
-            @Override
-            public void onOpened()
-            {
-                //camera.startStreaming(  Cam.resolution_x, Cam.resolution_y, OpenCvCameraRotation.UPRIGHT);
-            }
-            @Override
-            public void onError(int errorCode)
-            {
-
-                // This will be called if the camera could not be opened
-
-            }
-        });
-
-        //FtcDashboard.getInstance().startCameraStream(camera, 0);
-
-    }
-    public void stop()
-    {
-        //FtcDashboard.getInstance().stopCameraStream();
-        //camera.stopStreaming();
-        camera.closeCameraDevice();
     }
 
     public Vec2 relativeJunctionPosition(){ // cm
@@ -138,8 +103,8 @@ public class junctionAdjuster {
 
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
 
-        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
-        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (config.getResolutionX() / 2.0));
+        tan2 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x2 - (config.getResolutionX() / 2.0));
 
         distance = junction.diameter / (tan2 - tan1);
 
@@ -153,8 +118,8 @@ public class junctionAdjuster {
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
         double tan1,tan2;
 
-        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
-        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (config.getResolutionX() / 2.0));
+        tan2 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x2 - (config.getResolutionX() / 2.0));
         return Math.atan((tan1+tan2)/2);
     }
 
@@ -166,8 +131,8 @@ public class junctionAdjuster {
 
         junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
 
-        tan1 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x1 - (Cam.resolution_x / 2));
-        tan2 = (cameraTangent / (Cam.resolution_x / 2)) * (results.junction_x2 - (Cam.resolution_x / 2));
+        tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (config.getResolutionX() / 2.0));
+        tan2 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x2 - (config.getResolutionX() / 2.0));
 
         distance = junction.diameter / (tan2 - tan1);
 
@@ -189,7 +154,7 @@ public class junctionAdjuster {
         return position;
     }
 
-    public void autoVisionPositioning(MovementSubsystem movementSubsystem, double speed, Vec2 setPoint, double cameraAngle, double treshold){
+    public Vector2d value(double speed, Vec2 setPoint, double cameraAngle){
         relativeTransform = relativeJunctionTransform();
 
         Vec2 direction = new Vec2(Math.sin(relativeTransform.z - cameraAngle), Math.cos(relativeTransform.z - cameraAngle));
@@ -199,14 +164,6 @@ public class junctionAdjuster {
         direction.y *= length;
 
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
-
-        /*if(direction.y < 5)direction.y = 0;
-
-        if(Math.abs(Math.sqrt(direction.x* direction.x + direction.y* direction.y)) < 1){
-            movementSubsystem.move(0, 0, 0);
-            return false;
-        }*/
-
         length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
 
         double kp;
@@ -220,7 +177,6 @@ public class junctionAdjuster {
         telemetry.addData("y", direction.y);
         telemetry.addData("length", length);
 
-
-        movementSubsystem.move(direction.y * 0.4 * speed * kp, direction.x * speed * kp, 0);
+        return new Vector2d(direction.x*speed*kp, direction.y*speed*kp*0.4);
     }
 }

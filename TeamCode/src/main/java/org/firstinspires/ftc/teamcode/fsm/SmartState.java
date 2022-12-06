@@ -3,8 +3,8 @@ package org.firstinspires.ftc.teamcode.fsm;
 import java.util.Objects;
 
 public abstract class SmartState {
-    void init() {};
-    void update() {};
+    public void init() {};
+    public void update() {};
     public SmartState() {}
     public SmartState(SmartFSM fsm) {fsm.addState(this);}
     @Override
@@ -16,4 +16,5 @@ public abstract class SmartState {
         }
 
     }
+
 }

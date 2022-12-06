@@ -2,42 +2,37 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.gamepad.ButtonReader;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
 import org.firstinspires.ftc.teamcode.fsm.ButtonTransition;
+import org.firstinspires.ftc.teamcode.fsm.MovementTransition;
 import org.firstinspires.ftc.teamcode.fsm.NullState;
 import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
 import org.firstinspires.ftc.teamcode.fsm.SmartState;
-import org.firstinspires.ftc.teamcode.fsm.SmartTransition;
-import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
-import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjuster;
+import org.firstinspires.ftc.teamcode.junctionCalibration.PixelJunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-
+@Config
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
@@ -47,8 +42,8 @@ public class MainTeleOP extends LinearOpMode {
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
     private boolean stupidState = false;
-
-
+    public static double angle =45;
+    public static double speed=0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -77,13 +72,39 @@ public class MainTeleOP extends LinearOpMode {
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
 
+            WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
 
+            PixelJunctionAdjuster junctionAdjuster = new PixelJunctionAdjuster(webcamUtil,2.54, telemetry);
+
+            webcamUtil.start(true);
             telemetry.update();
             waitForStart();
 
             SubsystemData data = new SubsystemData();
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
+
+            SmartFSM movementFSM = new SmartFSM();
+            SmartState movementState = new SmartState() {
+                public void update()
+                {
+                    telemetry.addData("aaa",1);
+                    movementSubsystem.run(data);
+                }
+            };
+            SmartState homingState = new SmartState() {
+                public void update()
+                {
+                    telemetry.addData("aaa",2);
+                    Vector2d direction = junctionAdjuster.value(speed, new PixelJunctionAdjuster.Vec2(-2.3,6.5), Math.toDegrees(webcamUtil.getAngle()));
+                    movementSubsystem.move(direction.getY(), direction.getX(),0);
+                }
+            };
+            movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
+            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad) {});
+            movementFSM.setInitialState(movementState);
+            movementFSM.addState(homingState);
+            movementFSM.build();
 
             SmartFSM fsm = new SmartFSM();
             SmartState upperSliderState = new NullState(fsm) {};
@@ -239,13 +260,12 @@ public class MainTeleOP extends LinearOpMode {
             while(opModeIsActive()&&!isStopRequested()) {
                 data.driverGamepad.readButtons();
                 data.operatorGamepad.readButtons();
-
+                webcamUtil.setAngle(Math.toRadians(angle));
                 fsm.update();
+                movementFSM.update();
 
 
-                if (movementSubsystem.initialized) {
-                    movementSubsystem.run(data);
-                }
+
                 if (intakeSubsystem.initialized) {
                     if (data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
                         intakeSubsystem.intake();
