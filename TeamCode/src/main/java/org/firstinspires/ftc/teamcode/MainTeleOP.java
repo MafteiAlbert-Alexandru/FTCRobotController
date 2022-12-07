@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.fsm.MovementTransition;
 import org.firstinspires.ftc.teamcode.fsm.NullState;
 import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
 import org.firstinspires.ftc.teamcode.fsm.SmartState;
+import org.firstinspires.ftc.teamcode.junctionCalibration.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.junctionCalibration.PixelJunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
@@ -41,8 +42,8 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
-    public static double angle =45;
-    public static double speed=0;
+    public static double visionAngle = 45;
+    public static double visionSpeed = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -73,7 +74,7 @@ public class MainTeleOP extends LinearOpMode {
 
             WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
 
-            PixelJunctionAdjuster junctionAdjuster = new PixelJunctionAdjuster(webcamUtil, telemetry);
+            JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, telemetry);
             webcamUtil.registerListener(junctionAdjuster);
             webcamUtil.start(true);
             telemetry.update();
@@ -93,17 +94,12 @@ public class MainTeleOP extends LinearOpMode {
             SmartState homingState = new SmartState() {
                 public void update()
                 {
-                    Vector2d direction = junctionAdjuster.getDirection().times(speed);
+                    Vector2d direction = junctionAdjuster.value(visionSpeed, new JunctionAdjuster.Vec2(-10.2,4.4));
                     movementSubsystem.move(direction.getY(), direction.getX(),0);
                 }
             };
             movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
-            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad) {
-                @Override
-                public void run() {
-                    junctionAdjuster.reset();
-                }
-            });
+            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad){});
             movementFSM.setInitialState(movementState);
             movementFSM.addState(homingState);
             movementFSM.build();
@@ -265,10 +261,10 @@ public class MainTeleOP extends LinearOpMode {
             });
             fsm.build();
             waitForStart();
+            webcamUtil.setAngle(Math.toRadians(visionAngle));
             while(opModeIsActive()&&!isStopRequested()) {
                 data.driverGamepad.readButtons();
                 data.operatorGamepad.readButtons();
-                webcamUtil.setAngle(Math.toRadians(angle));
                 fsm.update();
                 movementFSM.update();
 
