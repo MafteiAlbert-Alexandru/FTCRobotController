@@ -20,6 +20,9 @@ public class ClampSubsystem extends SmartSubsystem{
     public static double unclampedOffset=0.2;
     public static double initialPosition=0.4;
     private boolean clamping = false;
+    public boolean isClamping()
+    {return  clamping;
+    }
     public void clamp()
     {
         clamping=true;

@@ -41,7 +41,6 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
-    private boolean stupidState = false;
     public static double angle =45;
     public static double speed=0;
 
@@ -74,8 +73,8 @@ public class MainTeleOP extends LinearOpMode {
 
             WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
 
-            PixelJunctionAdjuster junctionAdjuster = new PixelJunctionAdjuster(webcamUtil,2.54, telemetry);
-
+            PixelJunctionAdjuster junctionAdjuster = new PixelJunctionAdjuster(webcamUtil, telemetry);
+            webcamUtil.registerListener(junctionAdjuster);
             webcamUtil.start(true);
             telemetry.update();
             waitForStart();
@@ -88,20 +87,23 @@ public class MainTeleOP extends LinearOpMode {
             SmartState movementState = new SmartState() {
                 public void update()
                 {
-                    telemetry.addData("aaa",1);
                     movementSubsystem.run(data);
                 }
             };
             SmartState homingState = new SmartState() {
                 public void update()
                 {
-                    telemetry.addData("aaa",2);
-                    Vector2d direction = junctionAdjuster.value(speed, new PixelJunctionAdjuster.Vec2(-2.3,6.5), Math.toDegrees(webcamUtil.getAngle()));
+                    Vector2d direction = junctionAdjuster.getDirection().times(speed);
                     movementSubsystem.move(direction.getY(), direction.getX(),0);
                 }
             };
             movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
-            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad) {});
+            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad) {
+                @Override
+                public void run() {
+                    junctionAdjuster.reset();
+                }
+            });
             movementFSM.setInitialState(movementState);
             movementFSM.addState(homingState);
             movementFSM.build();
@@ -120,6 +122,7 @@ public class MainTeleOP extends LinearOpMode {
             ExecutorService executor = Executors.newFixedThreadPool(4);
             fsm.addTransition(new ButtonTransition(initialSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
+
                 @Override
                 public void run(){
                     sliderSubsystem.goToClear();
@@ -195,6 +198,7 @@ public class MainTeleOP extends LinearOpMode {
 
                     executor.execute(()->{
                         sliderSubsystem.goToPosition(SliderSubsystem.midPos);
+
                         while(!sliderSubsystem.isClear());
                         clampSubsystem.goToForward();
 
@@ -221,6 +225,10 @@ public class MainTeleOP extends LinearOpMode {
 
             fsm.addTransitionsTo(waitingSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState,upperSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.Y)
             {
+                @Override
+                public boolean check() {
+                    return super.check() && !clampSubsystem.isClamping();
+                }
                 @Override
                 public void run(){
                     clampSubsystem.goToBackward();
@@ -282,6 +290,7 @@ public class MainTeleOP extends LinearOpMode {
                 // Adauga orice citire paralela aici*/
                 telemetry.update();
             }
+            webcamUtil.stop();
             } catch (IllegalAccessException illegalAccessException) {
             illegalAccessException.printStackTrace();
 
