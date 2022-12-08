@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.hardware.customHardware;
 
 import androidx.annotation.NonNull;
 
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -10,6 +11,7 @@ import org.apache.commons.math3.analysis.function.Pow;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 public class SmartMotorEx extends SmartMotor {
+
     public DcMotorEx motorEx;
 
     /**

@@ -3,26 +3,18 @@ package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.VoltageUnit;
-import org.firstinspires.ftc.teamcode.fsm.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.NullState;
-import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
-import org.firstinspires.ftc.teamcode.fsm.SmartState;
-import org.firstinspires.ftc.teamcode.fsm.SmartTransition;
-import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
-import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjuster;
+import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
+import org.firstinspires.ftc.teamcode.fsm.albert.NullState;
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartFSM;
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
@@ -33,10 +25,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
@@ -46,15 +36,11 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
-    private boolean stupidState = false;
-
-
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
-
             List<SmartSubsystem> smartSubsystems = new ArrayList<SmartSubsystem>();
             // Use Java reflection to access all fields of this TeleOP which are SmartSubsystems
             // and run initSubsystem on them
@@ -62,7 +48,6 @@ public class MainTeleOP extends LinearOpMode {
             {
                 if(field.getType().getSuperclass()!=null && field.getType().getSuperclass().equals(SmartSubsystem.class))
                 {
-
                     SmartSubsystem subsystem =  ((SmartSubsystem) Objects.requireNonNull(field.get(this)));
                     try {
                        subsystem.initSubsystem((LinearOpMode) this, hardwareMap);
@@ -77,7 +62,6 @@ public class MainTeleOP extends LinearOpMode {
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
 
-
             telemetry.update();
             waitForStart();
 
@@ -91,12 +75,16 @@ public class MainTeleOP extends LinearOpMode {
             SmartState lowerSliderState = new NullState(fsm) {};
             SmartState groundSliderState = new NullState(fsm) {};
             SmartState waitingSliderState = new NullState(fsm) {};
+            SmartState aimSliderState = new NullState(fsm) {};
+//            SmartState shootSliderState = new NullState(fsm) {};
             SmartState[] safeStates = {upperSliderState, mediumSliderState, lowerSliderState, groundSliderState, waitingSliderState};
 
             SmartState loadedSliderState = new NullState(fsm) {};
             SmartState initialSliderState = new NullState() {};
+
             fsm.setInitialState(initialSliderState);
             ExecutorService executor = Executors.newFixedThreadPool(4);
+
             fsm.addTransition(new ButtonTransition(initialSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
@@ -110,6 +98,19 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
+//            fsm.addTransition(new ButtonTransition(aimSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.B)
+//            {
+//                @Override
+//                public void run(){
+//                    executor.execute(()->{
+//                        sliderSubsystem.goToClear();
+//                        while(!sliderSubsystem.isClear());
+//                        clampSubsystem.release();
+//                        clampSubsystem.goToForward();
+//
+//                    });
+//                }
+//            });
             fsm.addTransition(new ButtonTransition(waitingSliderState, loadedSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
@@ -192,8 +193,6 @@ public class MainTeleOP extends LinearOpMode {
                         while(!sliderSubsystem.isClear());
                         sliderSubsystem.goToPosition(SliderSubsystem.highPos);
                         clampSubsystem.goToForward();
-
-
                     });
                 }
             });
@@ -206,7 +205,6 @@ public class MainTeleOP extends LinearOpMode {
                     sliderSubsystem.goToClear();
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
-
                     });
                 }
             });
@@ -242,7 +240,6 @@ public class MainTeleOP extends LinearOpMode {
 
                 fsm.update();
 
-
                 if (movementSubsystem.initialized) {
                     movementSubsystem.run(data);
                 }
@@ -253,7 +250,6 @@ public class MainTeleOP extends LinearOpMode {
                         intakeSubsystem.expulse();
                     } else intakeSubsystem.stop();
                 }
-
 
 //                if(sliderSubsystem.initialized && clampSubsystem.initialized)
 ////                {

@@ -53,9 +53,9 @@ public class MovementSubsystem extends SmartSubsystem{
     public SampleMecanumDriveCancelable drive;
     public void move(double forward, double strafe, double turn)
     {
-        forward=forward>1?1:(forward<0)?0:forward;
-        strafe=strafe>1?1:(strafe<0)?0:strafe;
-        turn=turn>1?1:(turn<0)?0:turn;
+//        forward=forward>1?1:(forward<0)?0:forward;
+//        strafe=strafe>1?1:(strafe<0)?0:strafe;
+//        turn=turn>1?1:(turn<0)?0:turn;
         double r = Math.hypot(strafe, forward);
 
         double robotAngle = Math.atan2(forward, strafe) - Math.PI / 4;

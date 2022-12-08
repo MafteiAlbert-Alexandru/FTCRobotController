@@ -21,13 +21,10 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
 
-
-
 @Config
-public class SliderSubsystem extends SmartSubsystem {
+ public class SliderSubsystem extends SmartSubsystem {
 
     public SmartMotorEx slider;
-
 
     public  int target = 0;
     public static double tolerance = 30;
@@ -38,12 +35,20 @@ public class SliderSubsystem extends SmartSubsystem {
     public static int groundPos =200;
     public static int lowPos =400;
     public static int midPos = 570;
-    public static int highPos = 1550;
+    public static int highPos = 1475;
 
     public static int safePos = 200;
-    public static int loadPos= 50;
+    public static int loadPos= 45;
     public static int clearPos = 300;
 
+    public static int aimPos = 380;
+    public static int cone5Pos = 230;
+    public static int cone4Pos = 125;
+    public static int cone3Pos = 65;
+    public static int cone2Pos = 25;
+    public static int cone1Pos = 0;
+
+    public static boolean telemetryOn = true;
 
     public boolean isClear()
     {
@@ -55,7 +60,6 @@ public class SliderSubsystem extends SmartSubsystem {
         slider.setTargetPosition(target);
     }
 
-    public static boolean telemetryOn = false;
     public void goToTake()
     {
         target=loadPos;
@@ -98,6 +102,16 @@ public class SliderSubsystem extends SmartSubsystem {
         }
     }
 
+    public void update() throws InterruptedException {
+
+        if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
+        else slider.setPositionCoefficient(downwardCoefficient);
+        slider.setPositionTolerance(tolerance);
+
+        slider.set(pow);
+        slider.setTargetPosition((int)target);
+    }
+
     @Override
     public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
         super.initSubsystem(opMode, hardwareMap);
@@ -107,5 +121,13 @@ public class SliderSubsystem extends SmartSubsystem {
         slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);
         slider.setInverted(true);
         target=0;
+    }
+
+    public void setTarget(int pos){
+        target = pos;
+    }
+
+    public int getPosition(){
+        return slider.getCurrentPosition();
     }
 }

@@ -16,14 +16,13 @@ public class ClampSubsystem extends SmartSubsystem{
     private ToggleButton clampButton;
     private Servo armPullServo;
     public static double position=0;
-    public static double clampOffset=0.28;
+    public static double clampOffset=0.2;
     public static double unclampedOffset=0.2;
     public static double initialPosition=0.4;
     private boolean clamping = false;
     public void clamp()
     {
         clamping=true;
-
     }
 
     public void release()
@@ -45,6 +44,11 @@ public class ClampSubsystem extends SmartSubsystem{
     @Override
     public void run(SubsystemData data) throws InterruptedException {
         if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.X)) clamping=!clamping;
+        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
+        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
+    }
+
+    public void update() throws InterruptedException {
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }

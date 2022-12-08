@@ -180,7 +180,6 @@ public class SmartMotor implements HardwareDevice {
             }
             return real;
         }
-
     }
 
     public enum RunMode {
@@ -205,7 +204,6 @@ public class SmartMotor implements HardwareDevice {
 
     public DcMotor motor;
     public Encoder encoder;
-
 
     protected RunMode runmode;
 
