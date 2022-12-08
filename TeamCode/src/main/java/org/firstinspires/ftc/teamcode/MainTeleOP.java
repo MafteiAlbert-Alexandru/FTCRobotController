@@ -2,17 +2,22 @@ package org.firstinspires.ftc.teamcode;
 
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.NullState;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartFSM;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
+import org.firstinspires.ftc.teamcode.fsm.ButtonTransition;
+import org.firstinspires.ftc.teamcode.fsm.MovementTransition;
+import org.firstinspires.ftc.teamcode.fsm.NullState;
+import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
+import org.firstinspires.ftc.teamcode.fsm.SmartState;
+import org.firstinspires.ftc.teamcode.junctionCalibration.JunctionAdjuster;
+import org.firstinspires.ftc.teamcode.junctionCalibration.PixelJunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
@@ -20,6 +25,7 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -27,7 +33,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
+@Config
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
@@ -36,11 +42,14 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
+    public static double visionAngle = 45;
+    public static double visionSpeed = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
+
             List<SmartSubsystem> smartSubsystems = new ArrayList<SmartSubsystem>();
             // Use Java reflection to access all fields of this TeleOP which are SmartSubsystems
             // and run initSubsystem on them
@@ -48,6 +57,7 @@ public class MainTeleOP extends LinearOpMode {
             {
                 if(field.getType().getSuperclass()!=null && field.getType().getSuperclass().equals(SmartSubsystem.class))
                 {
+
                     SmartSubsystem subsystem =  ((SmartSubsystem) Objects.requireNonNull(field.get(this)));
                     try {
                        subsystem.initSubsystem((LinearOpMode) this, hardwareMap);
@@ -62,6 +72,11 @@ public class MainTeleOP extends LinearOpMode {
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
 
+            WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
+
+            JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, telemetry);
+            webcamUtil.registerListener(junctionAdjuster);
+            webcamUtil.start(true);
             telemetry.update();
             waitForStart();
 
@@ -69,24 +84,41 @@ public class MainTeleOP extends LinearOpMode {
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
 
+            SmartFSM movementFSM = new SmartFSM();
+            SmartState movementState = new SmartState() {
+                public void update()
+                {
+                    movementSubsystem.run(data);
+                }
+            };
+            SmartState homingState = new SmartState() {
+                public void update()
+                {
+                    Vector2d direction = junctionAdjuster.value(visionSpeed, new JunctionAdjuster.Vec2(-10.2,4.4));
+                    movementSubsystem.move(direction.getY(), direction.getX(),0);
+                }
+            };
+            movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
+            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad){});
+            movementFSM.setInitialState(movementState);
+            movementFSM.addState(homingState);
+            movementFSM.build();
+
             SmartFSM fsm = new SmartFSM();
             SmartState upperSliderState = new NullState(fsm) {};
             SmartState mediumSliderState = new NullState(fsm) {};
             SmartState lowerSliderState = new NullState(fsm) {};
             SmartState groundSliderState = new NullState(fsm) {};
             SmartState waitingSliderState = new NullState(fsm) {};
-            SmartState aimSliderState = new NullState(fsm) {};
-//            SmartState shootSliderState = new NullState(fsm) {};
             SmartState[] safeStates = {upperSliderState, mediumSliderState, lowerSliderState, groundSliderState, waitingSliderState};
 
             SmartState loadedSliderState = new NullState(fsm) {};
             SmartState initialSliderState = new NullState() {};
-
             fsm.setInitialState(initialSliderState);
             ExecutorService executor = Executors.newFixedThreadPool(4);
-
             fsm.addTransition(new ButtonTransition(initialSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
+
                 @Override
                 public void run(){
                     sliderSubsystem.goToClear();
@@ -98,19 +130,6 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
-//            fsm.addTransition(new ButtonTransition(aimSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.B)
-//            {
-//                @Override
-//                public void run(){
-//                    executor.execute(()->{
-//                        sliderSubsystem.goToClear();
-//                        while(!sliderSubsystem.isClear());
-//                        clampSubsystem.release();
-//                        clampSubsystem.goToForward();
-//
-//                    });
-//                }
-//            });
             fsm.addTransition(new ButtonTransition(waitingSliderState, loadedSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
@@ -175,6 +194,7 @@ public class MainTeleOP extends LinearOpMode {
 
                     executor.execute(()->{
                         sliderSubsystem.goToPosition(SliderSubsystem.midPos);
+
                         while(!sliderSubsystem.isClear());
                         clampSubsystem.goToForward();
 
@@ -193,6 +213,8 @@ public class MainTeleOP extends LinearOpMode {
                         while(!sliderSubsystem.isClear());
                         sliderSubsystem.goToPosition(SliderSubsystem.highPos);
                         clampSubsystem.goToForward();
+
+
                     });
                 }
             });
@@ -200,11 +222,16 @@ public class MainTeleOP extends LinearOpMode {
             fsm.addTransitionsTo(waitingSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState,upperSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
+                public boolean check() {
+                    return super.check() && !clampSubsystem.isClamping();
+                }
+                @Override
                 public void run(){
                     clampSubsystem.goToBackward();
                     sliderSubsystem.goToClear();
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
+
                     });
                 }
             });
@@ -234,15 +261,15 @@ public class MainTeleOP extends LinearOpMode {
             });
             fsm.build();
             waitForStart();
+            webcamUtil.setAngle(Math.toRadians(visionAngle));
             while(opModeIsActive()&&!isStopRequested()) {
                 data.driverGamepad.readButtons();
                 data.operatorGamepad.readButtons();
-
                 fsm.update();
+                movementFSM.update();
 
-                if (movementSubsystem.initialized) {
-                    movementSubsystem.run(data);
-                }
+
+
                 if (intakeSubsystem.initialized) {
                     if (data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER)) {
                         intakeSubsystem.intake();
@@ -251,87 +278,15 @@ public class MainTeleOP extends LinearOpMode {
                     } else intakeSubsystem.stop();
                 }
 
-//                if(sliderSubsystem.initialized && clampSubsystem.initialized)
-////                {
-//
-//                    if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.Y))
-//                    {
-//                        if(!stupidState)
-//                        {
-//
-//                        }else if(stupidState)
-//                        {
-//
-//                        }
-//                        sliderSubsystem.goToClear();
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            clampSubsystem.release();
-//                            clampSubsystem.goToBackward();
-//
-//                            try {
-//                                Thread.sleep(900);
-//                            } catch (InterruptedException e) {
-//                                e.printStackTrace();
-//                            }
-//                            sliderSubsystem.goToTake();
-//                        });
-//
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_UP)){
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.highPos);
-//                            clampSubsystem.goToForward();
-//
-//                            });
-//
-//
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_RIGHT)) {
-//                        if (!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(() -> {
-//                            while (!sliderSubsystem.isClear()) ;
-//                            sliderSubsystem.goToPosition(SliderSubsystem.midPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_LEFT)) {
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.lowPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }else if(data.operatorGamepad.wasJustPressed(GamepadKeys.Button.DPAD_DOWN))
-//                    {
-//                        if(!sliderSubsystem.isClear())
-//                            sliderSubsystem.goToClear();
-//
-//                        executor.execute(()->{
-//                            while(!sliderSubsystem.isClear());
-//                            sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
-//                            clampSubsystem.goToForward();
-//
-//                        });
-//                    }
                 sliderSubsystem.run(data);
                 clampSubsystem.run(data);
-//                    sliderSubsystem.move((float) (data.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)-data.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)));
-//                }
-
                 if (transferSubsystem.initialized)
                     transferSubsystem.run(data);
 
                 // Adauga orice citire paralela aici*/
                 telemetry.update();
             }
+            webcamUtil.stop();
             } catch (IllegalAccessException illegalAccessException) {
             illegalAccessException.printStackTrace();
 

@@ -24,6 +24,7 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     public class Results{
         public int junction_x1;
         public int junction_x2;
+        public double area;
     };
 
     private Results latestResults=new Results();
@@ -32,10 +33,10 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     private Mat yellowMask = new Mat();
     private Mat output = new Mat();
     private Mat ContourInput = new Mat();
-    public static double lowerYellowH = 15;
-    public static double lowerYellowS = 40;
+    public static double lowerYellowH = 12;
+    public static double lowerYellowS = 90;
     public static double lowerYellowV = 40;
-    public static double upperYellowH = 31;
+    public static double upperYellowH = 35;
     public static double upperYellowS = 255;
     public static double upperYellowV = 255;
 
@@ -51,9 +52,9 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
         Core.inRange(hsvInput, new Scalar(lowerYellowH, lowerYellowS, lowerYellowV), new Scalar(upperYellowH, upperYellowS, upperYellowV), yellowMask);
         Core.copyTo(input, output, yellowMask);
 
-        Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, new Mat());
-        Imgproc.morphologyEx(output, output, Imgproc.MORPH_CLOSE, new Mat());
-        Imgproc.GaussianBlur(output, output, new Size(5.0, 15.0), 0.00);
+        //Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, new Mat());
+        //Imgproc.morphologyEx(output, output, Imgproc.MORPH_CLOSE, new Mat());
+        //Imgproc.GaussianBlur(output, output, new Size(5.0, 15.0), 0.00);
 
         Imgproc.cvtColor(output, ContourInput, Imgproc.COLOR_BGR2GRAY);
         List<MatOfPoint> contours = new ArrayList<>();
@@ -83,6 +84,7 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
 
         latestResults.junction_x1 = (int)(mid_x - area/2);
         latestResults.junction_x2 = (int)(mid_x + area/2);
+        latestResults.area = area * Math.max(junctionRect.size.width, junctionRect.size.height);
 
         Imgproc.line(input, points[0], points[1], new Scalar(255, 255, 0));
         Imgproc.line(input, points[1], points[2], new Scalar(255, 255, 0));

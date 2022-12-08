@@ -1,10 +1,8 @@
 package org.firstinspires.ftc.teamcode.vision;
 
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.internal.camera.CameraState;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -15,12 +13,12 @@ import java.util.ArrayList;
 public class AprilTagUtil {
 
     private HardwareMap hardwareMap;
-    private AprilCamera aprilCamera;
+    private CameraConfig aprilCamera;
     private OpenCvCamera camera;
     private AprilTagDetectionPipeline detectionPipeline;
     private Thread openingThread = null;
     private double tagSize;
-    public AprilTagUtil(HardwareMap hardwareMap, AprilCamera aprilCamera, double tagSize)
+    public AprilTagUtil(HardwareMap hardwareMap, CameraConfig aprilCamera, double tagSize)
     {
         this.hardwareMap=hardwareMap;
         this.aprilCamera=aprilCamera;
@@ -38,27 +36,6 @@ public class AprilTagUtil {
     }
     public void open()
     {
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"), cameraMonitorViewId);
-        detectionPipeline=new AprilTagDetectionPipeline(aprilCamera.getFx(), aprilCamera.getFy(), aprilCamera.getCx(), aprilCamera.getCy(), 0.1666);
-        camera.setPipeline(detectionPipeline);
-        openingThread = new Thread(()->{
-            try {
-                int result = -1;
-                while (result < 0) {
-                    isOpening = true;
-                    result = camera.openCameraDevice();
-                    Thread.sleep(10);
-                }
-                isOpen = true;
-                camera.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
-            }catch(InterruptedException ignored)
-            {
-                isOpening=false;
-                isOpen=false;
-            }
-        });
-        openingThread.start();
 
     }
     public int getId(int[] possibleIds)  {
