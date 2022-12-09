@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.autonomous;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -9,21 +8,23 @@ import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancela
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystemAuto;
+import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 
 @Autonomous
 public class OldAutoR extends LinearOpMode {
 
     Pose2d startPoseRight = new Pose2d(36, -62, Math.toRadians(90));
 
-    Pose2d rightStack = new Pose2d(58, -13.25, Math.toRadians(0));
+    Pose2d rightStack = new Pose2d(60, -11, Math.toRadians(0));
 
-    Pose2d rightStack2 = new Pose2d(57.5, -13.25, Math.toRadians(0));
+    Pose2d rightStack2 = new Pose2d(61, -11, Math.toRadians(0));
 
-    Pose2d rightStack3 = new Pose2d(58, -13.25, Math.toRadians(0));
+    Pose2d rightStack3 = new Pose2d(61, -11, Math.toRadians(0));
 
-    Pose2d rightJunction = new Pose2d(36, -14.5, Math.toRadians(0));
+    Pose2d rightJunction = new Pose2d(32, -12, Math.toRadians(0));
 
-    SliderSubsystem sliderSubsystem = new SliderSubsystem();
+    SliderSubsystemAuto sliderSubsystem = new SliderSubsystemAuto();
     ClampSubsystem clampSubsystem = new ClampSubsystem();
 
     @Override
@@ -42,7 +43,7 @@ public class OldAutoR extends LinearOpMode {
                     TargetPosition(SliderSubsystem.clearPos);
                     clampSubsystem.goToBackward();
                 })
-                .forward(51)
+                .forward(53)
                 .addDisplacementMarker(() ->{
                     TargetPosition(45);
                 })
@@ -55,12 +56,14 @@ public class OldAutoR extends LinearOpMode {
                     clampSubsystem.goToForward();
                     HighPossliderSubsystem();
                 })
-                .strafeLeft(11.5)
-                .waitSeconds(0.75)
+                .strafeLeft(13)
                 .addDisplacementMarker(() ->{
                     clampSubsystem.release();
                 })
-                .strafeRight(12)
+                .waitSeconds(0.5)
+                .strafeLeft(0.5)
+                .back(1)
+                .strafeRight(12.5)
 
                 //cycle 1
 
@@ -81,20 +84,19 @@ public class OldAutoR extends LinearOpMode {
 
                 .lineToLinearHeading(rightJunction)
                 .turn(Math.toRadians(90))
-                .strafeLeft(12)
-                .waitSeconds(0.75)
+                .strafeLeft(8)
                 .addDisplacementMarker(() ->{
                     clampSubsystem.release();
                 })
-                .strafeRight(12.3)
-
-                //cycle 2
+                .waitSeconds(0.2)
+                .strafeLeft(0.5)
+                .strafeRight(12.5)
 
                 .turn(Math.toRadians(-90))
                 .addDisplacementMarker(() -> {
                     AimPossliderSubsystem();
                 })
-                .lineToLinearHeading(rightStack)
+                .lineToLinearHeading(rightStack2)
 
                 .addDisplacementMarker(() -> {
                     TargetPosition(SliderSubsystem.cone4Pos);
@@ -106,12 +108,13 @@ public class OldAutoR extends LinearOpMode {
                 })
                 .lineToLinearHeading(rightJunction)
                 .turn(Math.toRadians(90))
-                .strafeLeft(12)
-                .waitSeconds(0.75)
+                .strafeLeft(7.5)
                 .addDisplacementMarker(() ->{
                     clampSubsystem.release();
                 })
-                .strafeRight(12)
+                .waitSeconds(0.2)
+                .strafeLeft(0.5)
+                .strafeRight(12.5)
 
                 //cycle 3
 
@@ -119,7 +122,7 @@ public class OldAutoR extends LinearOpMode {
                 .addDisplacementMarker(() -> {
                     AimPossliderSubsystem();
                 })
-                .lineToLinearHeading(rightStack2)
+                .lineToLinearHeading(rightStack3)
 
                 .addDisplacementMarker(() -> {
                     TargetPosition(SliderSubsystem.cone3Pos);
@@ -131,12 +134,17 @@ public class OldAutoR extends LinearOpMode {
                 })
                 .lineToLinearHeading(rightJunction)
                 .turn(Math.toRadians(90))
-                .strafeLeft(12)
-                .waitSeconds(0.75)
+                .strafeLeft(6)
                 .addDisplacementMarker(() ->{
                     clampSubsystem.release();
                 })
-                .strafeRight(12)
+                .waitSeconds(0.2)
+                .strafeLeft(0.5)
+                .strafeRight(12.5)
+                .addDisplacementMarker( () -> {
+                    clampSubsystem.goToBackward();
+                    sliderSubsystem.goToTake();
+                })
                 .build();
 
         waitForStart();
@@ -148,7 +156,7 @@ public class OldAutoR extends LinearOpMode {
 
         while (opModeIsActive()){
             drive.update();
-            sliderSubsystem.update();
+            sliderSubsystem.run(new SubsystemData());
             clampSubsystem.update();
         }
     }

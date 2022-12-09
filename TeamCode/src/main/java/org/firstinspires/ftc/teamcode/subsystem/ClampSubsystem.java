@@ -17,7 +17,7 @@ public class ClampSubsystem extends SmartSubsystem{
     public static double clampOffset=0.2;
     public static double unclampedOffset=0.2;
     public static double initialPosition=0.4;
-    public static double forwardPos = 0.6;
+    public static double forwardPos = 0.1;
     private boolean clamping = false;
     public boolean isClamping()
     {return  clamping;
@@ -33,13 +33,13 @@ public class ClampSubsystem extends SmartSubsystem{
     }
     public void goToForward()
     {
-        baseServo.setPosition(0);
+        baseServo.setPosition(forwardPos);
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
     public void goToBackward()
     {
-        baseServo.setPosition(forwardPos);
+        baseServo.setPosition(0.6);
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
