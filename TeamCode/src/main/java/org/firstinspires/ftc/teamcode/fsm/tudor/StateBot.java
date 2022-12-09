@@ -4,8 +4,7 @@ package org.firstinspires.ftc.teamcode.fsm.tudor;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 
-//Tudor e frustrat ca SM-ul lui Albert nu merge bine
-//Ascult Oscar pe fundal cand fac asta deci codul cred ca o iesit bine
+//Das STM cu recrutii
 public class StateBot{
 
     SliderSubsystem sliderSubsystem;
