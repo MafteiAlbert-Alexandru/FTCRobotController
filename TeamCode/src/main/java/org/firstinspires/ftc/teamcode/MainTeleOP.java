@@ -11,13 +11,12 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.firstinspires.ftc.teamcode.fsm.ButtonTransition;
 import org.firstinspires.ftc.teamcode.fsm.MovementTransition;
-import org.firstinspires.ftc.teamcode.fsm.NullState;
-import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
-import org.firstinspires.ftc.teamcode.fsm.SmartState;
+import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
+import org.firstinspires.ftc.teamcode.fsm.albert.NullState;
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartFSM;
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
 import org.firstinspires.ftc.teamcode.junctionCalibration.JunctionAdjuster;
-import org.firstinspires.ftc.teamcode.junctionCalibration.PixelJunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
@@ -110,7 +109,6 @@ public class MainTeleOP extends LinearOpMode {
             SmartState lowerSliderState = new NullState(fsm) {};
             SmartState groundSliderState = new NullState(fsm) {};
             SmartState waitingSliderState = new NullState(fsm) {};
-            SmartState[] safeStates = {upperSliderState, mediumSliderState, lowerSliderState, groundSliderState, waitingSliderState};
 
             SmartState loadedSliderState = new NullState(fsm) {};
             SmartState initialSliderState = new NullState() {};
@@ -227,10 +225,11 @@ public class MainTeleOP extends LinearOpMode {
                 }
                 @Override
                 public void run(){
-                    clampSubsystem.goToBackward();
+
                     sliderSubsystem.goToClear();
                     executor.execute(()->{
                         while(!sliderSubsystem.isClear());
+                        clampSubsystem.goToBackward();
 
                     });
                 }

@@ -1,4 +1,4 @@
-package experiments;
+package org.firstinspires.ftc.teamcode.experiments;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.controller.PIDController;

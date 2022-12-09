@@ -1,11 +1,8 @@
 package org.firstinspires.ftc.teamcode.junctionCalibration;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.arcrobotics.ftclib.controller.PIDController;
-import com.arcrobotics.ftclib.controller.PIDFController;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.vision.CameraConfig;
 import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 import org.firstinspires.ftc.teamcode.vision.WebcamUtilsListener;
@@ -74,7 +71,6 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         config = webcamUtil.getConfig();
         junction = new JunctionData();
         this.webcamUtil = webcamUtil;
-
         cameraTangent = Math.tan(Math.toRadians(config.getFovX()/2));
 
         junction.diameter = diameter;

@@ -1,4 +1,4 @@
-package experiments;
+package org.firstinspires.ftc.teamcode.experiments;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
@@ -7,7 +7,6 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
-import org.checkerframework.checker.units.qual.C;
 import org.firstinspires.ftc.teamcode.fsm.tudor.StateBot;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
@@ -44,7 +43,7 @@ public class StateTester extends LinearOpMode {
 
         while (opModeIsActive()){
 
-            sliderSubsystem.update();
+            //sliderSubsystem.update();
             clampSubsystem.update();
 
             leDriver.readButtons();

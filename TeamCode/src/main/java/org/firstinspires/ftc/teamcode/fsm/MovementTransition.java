@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.fsm;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
-public class MovementTransition extends  SmartTransition{
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
+import org.firstinspires.ftc.teamcode.fsm.albert.SmartTransition;
+
+public class MovementTransition extends SmartTransition {
     private GamepadEx gamepad;
     public MovementTransition(SmartState from, SmartState to, GamepadEx gamepad)
     {

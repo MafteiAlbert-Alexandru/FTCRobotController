@@ -3,6 +3,9 @@ package org.firstinspires.ftc.teamcode.fsm.albert;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 
+/**
+ * A transition triggered on a button press
+ */
 public class ButtonTransition extends SmartTransition{
 
     private GamepadEx gamepad;
