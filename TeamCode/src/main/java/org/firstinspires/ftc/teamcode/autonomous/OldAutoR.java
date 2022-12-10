@@ -40,7 +40,7 @@ public class OldAutoR extends LinearOpMode {
         TrajectorySequence traj1 = drive.trajectorySequenceBuilder(startPoseRight)
                 .addDisplacementMarker(() ->{
                     clampSubsystem.release();
-                    TargetPosition(SliderSubsystem.clearPos);
+                    TargetPosition(SliderSubsystem.ClearPos);
                     clampSubsystem.goToBackward();
                 })
                 .forward(53)

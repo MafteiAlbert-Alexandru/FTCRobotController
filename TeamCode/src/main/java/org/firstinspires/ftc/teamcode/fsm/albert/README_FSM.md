@@ -7,9 +7,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartFSM;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartTransition;
+import org.firstinspires.ftc.teamcode.fsm.albert.FSM;
+import org.firstinspires.ftc.teamcode.fsm.albert.State;
+import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
 
 import java.util.Random;
 
@@ -19,14 +19,14 @@ class CrashCourse extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         // Creates a FSM for usage inside of a TeleOP
-        SmartFSM fsm = new SmartFSM();
+        FSM fsm = new FSM();
 
 
         // Creates a new state
         // IMPORTANT: Note the fsm inside parenthesis and the {}(brackets)
         //      The brackets are a anonymous class implementation which guarantees the uniquness of a state
         //      and a custom implementation
-        SmartState state1 = new SmartState(fsm) {
+        State state1 = new State(fsm) {
             @Override
             public void update() {
                 telemetry.addData("State", 1);
@@ -34,7 +34,7 @@ class CrashCourse extends LinearOpMode {
             }
         });
 
-        Smartstate state2 = new SmartState(fsm) {
+        Smartstate state2 = new State(fsm) {
             @Override
             public void update() {
                 telemetry.addData("State", 2);
@@ -45,7 +45,7 @@ class CrashCourse extends LinearOpMode {
         GamepadEx testGamepad = new GamepadEx(gamepad1);
 
         // Adds a transition which executes on a button
-        fsm.addTransition(new ButtonTransition(state1, state2, testGamepad, GamepadKeys.Button.A) {
+        fsm.add(new ButtonTransition(state1, state2, testGamepad, GamepadKeys.Button.A) {
             @Override
             public void run() {
                 telemetry.addLine("Inside transition between 1 and 2");
@@ -53,7 +53,7 @@ class CrashCourse extends LinearOpMode {
         });
 
         // Adds a transition from state 2 to state 1 which executes randomly because fuck you that's why
-        fsm.addTransition(new SmartTransition(state2, state1) {
+        fsm.add(new Transition(state2, state1) {
             Random random = new Random();
 
             @Override

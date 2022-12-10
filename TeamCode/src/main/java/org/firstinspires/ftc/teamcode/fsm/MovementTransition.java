@@ -2,12 +2,12 @@ package org.firstinspires.ftc.teamcode.fsm;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartTransition;
+import org.firstinspires.ftc.teamcode.fsm.albert.State;
+import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
 
-public class MovementTransition extends SmartTransition {
+public class MovementTransition extends Transition {
     private GamepadEx gamepad;
-    public MovementTransition(SmartState from, SmartState to, GamepadEx gamepad)
+    public MovementTransition(State from, State to, GamepadEx gamepad)
     {
         super(from, to);
         this.gamepad=gamepad;

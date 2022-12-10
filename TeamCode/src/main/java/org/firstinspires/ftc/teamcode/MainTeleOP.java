@@ -13,9 +13,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.fsm.MovementTransition;
 import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.NullState;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartFSM;
-import org.firstinspires.ftc.teamcode.fsm.albert.SmartState;
+import org.firstinspires.ftc.teamcode.fsm.albert.FSM;
+import org.firstinspires.ftc.teamcode.fsm.albert.State;
 import org.firstinspires.ftc.teamcode.junctionCalibration.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
@@ -27,7 +26,6 @@ import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
 import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
@@ -49,7 +47,7 @@ public class MainTeleOP extends LinearOpMode {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
 
-            List<SmartSubsystem> smartSubsystems = new ArrayList<SmartSubsystem>();
+
             // Use Java reflection to access all fields of this TeleOP which are SmartSubsystems
             // and run initSubsystem on them
             for(Field field: this.getClass().getDeclaredFields())
@@ -60,7 +58,6 @@ public class MainTeleOP extends LinearOpMode {
                     SmartSubsystem subsystem =  ((SmartSubsystem) Objects.requireNonNull(field.get(this)));
                     try {
                        subsystem.initSubsystem((LinearOpMode) this, hardwareMap);
-                       smartSubsystems.add(subsystem);
                     } catch (Exception e) {
                         subsystem.initialized=false;
                         telemetry.addLine(String.format("Failed initializing %s", field.getName()));
@@ -83,38 +80,38 @@ public class MainTeleOP extends LinearOpMode {
             data.driverGamepad= new GamepadEx(gamepad1);
             data.operatorGamepad = new GamepadEx(gamepad2);
 
-            SmartFSM movementFSM = new SmartFSM();
-            SmartState movementState = new SmartState() {
+            FSM movementFSM = new FSM();
+            State movementState = new State() {
                 public void update()
                 {
                     movementSubsystem.run(data);
                 }
             };
-            SmartState homingState = new SmartState() {
+            State homingState = new State() {
                 public void update()
                 {
                     Vector2d direction = junctionAdjuster.value(visionSpeed, new JunctionAdjuster.Vec2(-10.2,4.4));
                     movementSubsystem.move(direction.getY(), direction.getX(),0);
                 }
             };
-            movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
-            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad){});
+            movementFSM.add(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
+            movementFSM.add(new MovementTransition(homingState, movementState, data.driverGamepad){});
             movementFSM.setInitialState(movementState);
-            movementFSM.addState(homingState);
+            movementFSM.add(homingState);
             movementFSM.build();
 
-            SmartFSM fsm = new SmartFSM();
-            SmartState upperSliderState = new NullState(fsm) {};
-            SmartState mediumSliderState = new NullState(fsm) {};
-            SmartState lowerSliderState = new NullState(fsm) {};
-            SmartState groundSliderState = new NullState(fsm) {};
-            SmartState waitingSliderState = new NullState(fsm) {};
+            FSM fsm = new FSM();
+            State upperSliderState = new State(fsm) {};
+            State mediumSliderState = new State(fsm) {};
+            State lowerSliderState = new State(fsm) {};
+            State groundSliderState = new State(fsm) {};
+            State waitingSliderState = new State(fsm) {};
 
-            SmartState loadedSliderState = new NullState(fsm) {};
-            SmartState initialSliderState = new NullState() {};
+            State loadedSliderState = new State(fsm) {};
+            State initialSliderState = new State() {};
             fsm.setInitialState(initialSliderState);
             ExecutorService executor = Executors.newFixedThreadPool(4);
-            fsm.addTransition(new ButtonTransition(initialSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
+            fsm.add(new ButtonTransition(initialSliderState, waitingSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
 
                 @Override
@@ -128,7 +125,7 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
-            fsm.addTransition(new ButtonTransition(waitingSliderState, loadedSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
+            fsm.add(new ButtonTransition(waitingSliderState, loadedSliderState, data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
                 public void run(){
@@ -145,7 +142,7 @@ public class MainTeleOP extends LinearOpMode {
                 }
             });
 
-            fsm.addTransition(new ButtonTransition(loadedSliderState, groundSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_DOWN)
+            fsm.add(new ButtonTransition(loadedSliderState, groundSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_DOWN)
             {
                 @Override
                 public void run()
@@ -160,11 +157,11 @@ public class MainTeleOP extends LinearOpMode {
                         } catch (InterruptedException ex) {
                             ex.printStackTrace();
                         }
-                        sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
+                        sliderSubsystem.goToPosition(SliderSubsystem.GroundPos);
                     });
                 }
             });
-            fsm.addTransition(new ButtonTransition(loadedSliderState, lowerSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_LEFT)
+            fsm.add(new ButtonTransition(loadedSliderState, lowerSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_LEFT)
             {
                 @Override
                 public void run()
@@ -183,7 +180,7 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
-            fsm.addTransition(new ButtonTransition(loadedSliderState, mediumSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_RIGHT)
+            fsm.add(new ButtonTransition(loadedSliderState, mediumSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_RIGHT)
             {
                 @Override
                 public void run()
@@ -200,7 +197,7 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
-            fsm.addTransition(new ButtonTransition(loadedSliderState, upperSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_UP)
+            fsm.add(new ButtonTransition(loadedSliderState, upperSliderState, data.operatorGamepad, GamepadKeys.Button.DPAD_UP)
             {
                 @Override
                 public void run()
@@ -217,7 +214,7 @@ public class MainTeleOP extends LinearOpMode {
                 }
             });
 
-            fsm.addTransitionsTo(waitingSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState,upperSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.Y)
+            fsm.addTransitionsTo(waitingSliderState, new State[]{mediumSliderState,groundSliderState,lowerSliderState,upperSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.Y)
             {
                 @Override
                 public boolean check() {
@@ -234,28 +231,28 @@ public class MainTeleOP extends LinearOpMode {
                     });
                 }
             });
-            fsm.addTransitionsTo(upperSliderState, new SmartState[]{mediumSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+            fsm.addTransitionsTo(upperSliderState, new State[]{mediumSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_UP) {
                 @Override
                 public void run() {
                     sliderSubsystem.goToPosition(SliderSubsystem.highPos);
                 }
             });
-            fsm.addTransitionsTo(mediumSliderState, new SmartState[]{upperSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+            fsm.addTransitionsTo(mediumSliderState, new State[]{upperSliderState,groundSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
                 @Override
                 public void run() {
                     sliderSubsystem.goToPosition(SliderSubsystem.midPos);
                 }
             });
-            fsm.addTransitionsTo(lowerSliderState, new SmartState[]{upperSliderState,groundSliderState,mediumSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+            fsm.addTransitionsTo(lowerSliderState, new State[]{upperSliderState,groundSliderState,mediumSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
                 @Override
                 public void run() {
                     sliderSubsystem.goToPosition(SliderSubsystem.lowPos);
                 }
             });
-            fsm.addTransitionsTo(groundSliderState, new SmartState[]{upperSliderState,mediumSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+            fsm.addTransitionsTo(groundSliderState, new State[]{upperSliderState,mediumSliderState,lowerSliderState}, new ButtonTransition(data.operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
                 @Override
                 public void run() {
-                    sliderSubsystem.goToPosition(SliderSubsystem.groundPos);
+                    sliderSubsystem.goToPosition(SliderSubsystem.GroundPos);
                 }
             });
             fsm.build();

@@ -6,11 +6,11 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 /**
  * A transition triggered on a button press
  */
-public class ButtonTransition extends SmartTransition{
+public class ButtonTransition extends Transition {
 
-    private GamepadEx gamepad;
-    private GamepadKeys.Button button;
-    public ButtonTransition(SmartState from, SmartState to, GamepadEx gamepad, GamepadKeys.Button button)
+    private final GamepadEx gamepad;
+    private final GamepadKeys.Button button;
+    public ButtonTransition(State from, State to, GamepadEx gamepad, GamepadKeys.Button button)
     {
         super(from, to);
         this.gamepad=gamepad;

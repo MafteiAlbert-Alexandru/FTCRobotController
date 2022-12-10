@@ -21,14 +21,14 @@ import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
     public static double downwardCoefficient =0.1;
     public static double pow = 0.1;
 
-    public static int groundPos =150;
+    public static int GroundPos =150;
     public static int lowPos =750;
     public static int midPos = 1150;
     public static int highPos = 1475;
 
     public static int safePos = 600;
     public static int loadPos= 45;
-    public static int clearPos = 300;
+    public static int ClearPos = 300;
 
     public static int aimPos = 380;
     public static int cone5Pos = 230;
@@ -49,7 +49,7 @@ import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
     }
     public void goToClear()
     {
-        target=clearPos;
+        target=ClearPos;
     }
 
     public void goToTake()
@@ -60,20 +60,13 @@ import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
     {
         target=position;
     }
-    public Long lastTime=null;
-    public static float clamp(float val, float min, float max) {
-        return Math.max(min, Math.min(max, val));
-    }
-    public static float step = 10;
-    public void move(float offset)
+
+    public void goTo(int position)
     {
-        Long time = System.currentTimeMillis();
-        if(lastTime==null) lastTime=time;
-
-
-        target= (int) clamp(target+step*offset*(time-lastTime)/1000.0f, 0, highPos);
-        slider.setTargetPosition(target);
+        target=position;
+        while(Math.abs(slider.getCurrentPosition()-target)>=tolerance);
     }
+
     @Override
     public void run(SubsystemData data) throws InterruptedException {
 

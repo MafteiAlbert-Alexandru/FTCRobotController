@@ -121,7 +121,7 @@ public class StateBot{
 //    }
 
     void groundCase() {
-        sliderSubsystem.setTarget(SliderSubsystem.groundPos);
+        sliderSubsystem.setTarget(SliderSubsystem.GroundPos);
     }
     void lowCase(){
         sliderSubsystem.setTarget(SliderSubsystem.lowPos);

@@ -5,22 +5,23 @@ import java.util.Objects;
 /**
  * Represents a transition between two states
  */
-public abstract class SmartTransition {
-    public SmartState from;
-    public SmartState to;
+public abstract class Transition implements Runnable{
+    public State from;
+    public State to;
+    public FSM fsm;
 
     /**
      * Creates a SmartTransition between two SmartStates
      * @param from From state
      * @param to To state
      */
-    public SmartTransition(SmartState from, SmartState to)
+    public Transition(State from, State to)
     {
         this.from=from;
         this.to=to;
 
     }
-    public SmartTransition(){}
+    public Transition(){}
 
 
     /**
@@ -42,15 +43,15 @@ public abstract class SmartTransition {
         return false;
     }
 
+
     /**
-     * Code to be executed on the transition
-     * Implement this to add custom behavior
+     * Function called by the fsm(in parallel) on execution of this transition
+     * Override for custom implentation
      */
     public void run()
     {
 
     }
-
 
     /**
      * Comparison is done based on the nodes
