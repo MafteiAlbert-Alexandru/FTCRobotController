@@ -19,6 +19,16 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         public double diameter;
     }
 
+    public static class visionResults{
+        public Vector2d movementData;
+        public boolean found;
+
+        visionResults(Vector2d MovementData, boolean Found){
+            this.movementData = MovementData;
+            this.found = Found;
+        }
+    }
+
     public static class Vec2{
         public double x;
         public double y;
@@ -61,21 +71,30 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     private junctionAdjusterPipeline pipeline;
 
     private Vec3 relativeTransform;
+    private Vec2 relativePosition;
+
     private double cameraTangent;
     private double cameraAngle;
+    private double initialCameraAngle;
+    private Vec2 cameraVec;
+
+
+    private junctionAdjusterPipeline.Results results;
+
 
     private CameraConfig config;
     private WebcamUtil webcamUtil;
 
     private Telemetry telemetry;
 
-    public JunctionAdjuster(WebcamUtil webcamUtil, double diameter, Telemetry telemetry_){
+    public JunctionAdjuster(WebcamUtil webcamUtil, double diameter, Telemetry telemetry_, double initialCamAngle){
         camera = webcamUtil.getWebcam();
         config = webcamUtil.getConfig();
         junction = new JunctionData();
         this.webcamUtil = webcamUtil;
 
         cameraTangent = Math.tan(Math.toRadians(config.getFovX()/2));
+        this.initialCameraAngle = initialCamAngle;
 
         junction.diameter = diameter;
 
@@ -86,7 +105,8 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
     @Override
     public void onNewAngle(double angle) {
-        cameraAngle = Math.toDegrees(angle);
+        this.cameraAngle = angle;
+        cameraVec = new Vec2(Math.sin(angle),Math.cos(angle));
     }
 
     public Vec2 relativeJunctionPosition(){ // cm
@@ -95,21 +115,21 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         double distance;
         double tan1,tan2;
 
-        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+        this.results = pipeline.getLatestResults();
 
-        tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (config.getResolutionX() / 2.0));
-        tan2 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x2 - (config.getResolutionX() / 2.0));
+        tan1 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x1 - (double)(config.getResolutionX() / 2.0));
+        tan2 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x2 - (double)(config.getResolutionX() / 2.0));
 
         distance = junction.diameter / (tan2 - tan1);
 
-        position.x = ((tan1+tan2)/2) * distance;
-        position.y = distance;
+        position.x = ((tan1+tan2)/2) * distance; //strafe
+        position.y = distance; //distance
 
         return position;
     }
 
     public double relativeJunctionAngle(){
-        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+        this.results = pipeline.getLatestResults();
         double tan1,tan2;
 
         tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (config.getResolutionX() / 2.0));
@@ -123,7 +143,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         double distance;
         double tan1,tan2;
 
-        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+        this.results = pipeline.getLatestResults();
 
         tan1 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x1 - (double)(config.getResolutionX() / 2.0));
         tan2 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x2 - (double)(config.getResolutionX() / 2.0));
@@ -140,7 +160,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     public Vec2 getResults(){
         Vec2 position = new Vec2();
 
-        junctionAdjusterPipeline.Results results = pipeline.getLatestResults();
+        this.results = pipeline.getLatestResults();
 
         position.x = results.junction_x1;
         position.y = results.junction_x2;
@@ -148,18 +168,22 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         return position;
     }
 
-    public Vector2d value(double speed, Vec2 setPoint){
-        relativeTransform = relativeJunctionTransform();
+    //this returns the strafe and forward values the robot moves by in homing state
+    public visionResults value(double speed, Vec2 setPoint){
+        relativePosition = relativeJunctionPosition();
 
-        Vec2 direction = new Vec2(Math.sin(Math.toRadians(relativeTransform.z - cameraAngle)), Math.cos(Math.toRadians(relativeTransform.z - cameraAngle)));
+        if(results.found == false){
+            return new visionResults(new Vector2d(0,0),false);
+        }
 
-        double length = Math.sqrt(relativeTransform.x*relativeTransform.x + relativeTransform.y*relativeTransform.y);
-        direction.x *= length;
-        direction.y *= length;
 
+        Vec2 direction = new Vec2(
+                relativePosition.x * cameraVec.y - relativePosition.y * cameraVec.x,
+                relativePosition.y * cameraVec.y + relativePosition.x * cameraVec.x
+        );
 
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
-        length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
+        double length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
 
         double kp;
         if(length > 10)kp = 1;
@@ -168,10 +192,12 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         direction.x/=length;
         direction.y/=length;
 
-        if(relativeTransform.z - cameraAngle < 0 && relativeTransform.z - cameraAngle > -45){
-            webcamUtil.setAngle(Math.toRadians(cameraAngle - (relativeTransform.z/20)));
+        double newCamAngle = cameraAngle - (Math.atan(relativePosition.x/relativePosition.y)/15);
+
+        if(-Math.toDegrees(newCamAngle) < 0 && -Math.toDegrees(newCamAngle) > -45){
+            webcamUtil.setAngle(newCamAngle);
         }
 
-        return new Vector2d(direction.x*speed*kp, direction.y*speed*kp*0.4);
+        return new visionResults(new Vector2d(direction.x*speed*kp, direction.y*speed*kp*0.4), true);
     }
 }

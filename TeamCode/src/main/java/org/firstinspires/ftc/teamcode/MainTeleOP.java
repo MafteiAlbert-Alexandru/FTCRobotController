@@ -42,8 +42,9 @@ public class MainTeleOP extends LinearOpMode {
     private MovementSubsystem movementSubsystem = new MovementSubsystem();
     private SliderSubsystem sliderSubsystem = new SliderSubsystem();
     private ClampSubsystem clampSubsystem = new ClampSubsystem();
-    public static double visionAngle = 45;
+    public static double visionAngle = 20;
     public static double visionSpeed = 0;
+
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,7 +75,7 @@ public class MainTeleOP extends LinearOpMode {
 
             WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
 
-            JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, telemetry);
+            JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, telemetry, visionAngle);
             webcamUtil.registerListener(junctionAdjuster);
             webcamUtil.start(true);
             telemetry.update();
@@ -88,18 +89,25 @@ public class MainTeleOP extends LinearOpMode {
             SmartState movementState = new SmartState() {
                 public void update()
                 {
+
                     movementSubsystem.run(data);
                 }
             };
             SmartState homingState = new SmartState() {
                 public void update()
                 {
-                    Vector2d direction = junctionAdjuster.value(visionSpeed, new JunctionAdjuster.Vec2(-10.2,4.4));
-                    movementSubsystem.move(direction.getY(), direction.getX(),0);
+                    JunctionAdjuster.visionResults VisionResults = junctionAdjuster.value(visionSpeed, new JunctionAdjuster.Vec2(-10.2,4.4));
+                    if(VisionResults.found)movementSubsystem.move(VisionResults.movementData.getY(), VisionResults.movementData.getX(),0);
+                    //TODO: transition from homing state to movement state if setPoint was reached or no junctions were found
                 }
             };
             movementFSM.addTransition(new ButtonTransition(movementState,homingState,data.driverGamepad, GamepadKeys.Button.A) {});
-            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad){});
+            movementFSM.addTransition(new MovementTransition(homingState, movementState, data.driverGamepad){
+                @Override
+                public void run() {
+                    webcamUtil.setAngle(Math.toRadians(visionAngle));
+                }
+            });
             movementFSM.setInitialState(movementState);
             movementFSM.addState(homingState);
             movementFSM.build();
