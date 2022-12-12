@@ -73,7 +73,7 @@ public class MainTeleOP extends LinearOpMode {
 
             List<LynxModule> expansionHubs = hardwareMap.getAll(LynxModule.class);
 
-            WebcamUtil webcamUtil = new WebcamUtil(hardwareMap);
+            WebcamUtil webcamUtil = new WebcamUtil(hardwareMap, telemetry);
 
             JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, telemetry, visionAngle);
             webcamUtil.registerListener(junctionAdjuster);

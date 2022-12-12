@@ -1,10 +1,15 @@
 package org.firstinspires.ftc.teamcode.junctionCalibration;
 
+import android.provider.ContactsContract;
+import android.renderscript.Int4;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfInt;
+import org.opencv.core.MatOfInt4;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
@@ -29,18 +34,22 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     };
 
     private Results latestResults=new Results();
+
     private Scalar clearScalar = new Scalar(0, 0, 0);
     private Mat hsvInput = new Mat();
     private Mat yellowMask = new Mat();
     private Mat output = new Mat();
     private Mat ContourInput = new Mat();
+
     public static double lowerYellowH = 12;
     public static double lowerYellowS = 90;
     public static double lowerYellowV = 40;
     public static double upperYellowH = 35;
     public static double upperYellowS = 255;
     public static double upperYellowV = 255;
+
     public static int pixelTreshold = 250;
+
     public static double kWidthWeight = 1.5;
     public static double kRaportWeight = 23;
     public static double kMidDistanceWeight = 0;
@@ -74,9 +83,9 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
         Core.inRange(hsvInput, new Scalar(lowerYellowH, lowerYellowS, lowerYellowV), new Scalar(upperYellowH, upperYellowS, upperYellowV), yellowMask);
         Core.copyTo(input, output, yellowMask);
 
-        Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, new Mat());
-        Imgproc.morphologyEx(output, output, Imgproc.MORPH_CLOSE, new Mat());
-        Imgproc.GaussianBlur(output, output, new Size(5.0, 15.0), 0.00);
+        //Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, new Mat());
+        //Imgproc.morphologyEx(output, output, Imgproc.MORPH_CLOSE, new Mat());
+        //Imgproc.GaussianBlur(output, output, new Size(5.0, 15.0), 0.00);
 
         Imgproc.cvtColor(output, ContourInput, Imgproc.COLOR_BGR2GRAY);
         List<MatOfPoint> contours = new ArrayList<>();
@@ -88,7 +97,7 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
         latestResults.found = false;
 
         for (int i = 0; i < contours.size(); i++) {
-            if(Imgproc.contourArea(contours.get(i)) < pixelTreshold)continue;
+            if(Imgproc.contourArea(contours.get(i)) < pixelTreshold || Imgproc.isContourConvex(contours.get(i)))continue;
 
             MatOfPoint2f NewMtx = new MatOfPoint2f( contours.get(i).toArray() );
             Imgproc.drawContours(input, contours, i, new Scalar(0,0,255));
