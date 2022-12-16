@@ -1,47 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 
-
-import androidx.annotation.NonNull;
-
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
-import com.acmerobotics.roadrunner.drive.DriveSignal;
-import com.acmerobotics.roadrunner.drive.MecanumDrive;
-import com.acmerobotics.roadrunner.followers.HolonomicPIDVAFollower;
-import com.acmerobotics.roadrunner.followers.TrajectoryFollower;
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.trajectory.Trajectory;
-import com.acmerobotics.roadrunner.trajectory.TrajectoryBuilder;
-import com.acmerobotics.roadrunner.trajectory.constraints.AngularVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.MecanumVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.MinVelocityConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.ProfileAccelerationConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
-import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
-import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.qualcomm.hardware.bosch.BNO055IMU;
-import com.qualcomm.hardware.lynx.LynxModule;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.Gamepad;
-import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.hardware.configuration.typecontainers.MotorConfigurationType;
 
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
-import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
-import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
-import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequenceRunner;
-import org.firstinspires.ftc.teamcode.roadrunner.util.LynxModuleUtil;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Config
 
@@ -81,20 +46,20 @@ public class MovementSubsystem extends SmartSubsystem{
         double Turn = data.driverGamepad.getRightX();
 
         if(!data.driverGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)){
-            Forward /= 2;
-            Strafe  /= 2;
+            Forward /= 1.5;
+            Strafe  /= 1.5;
         }
         if(!data.driverGamepad.isDown(GamepadKeys.Button.RIGHT_BUMPER)){
-            Turn /= 2;
+            Turn /= 1.5;
         }
-
-        move(Forward, Strafe,Turn);
+        double euler = Math.exp(1);
+        move(Math.pow(Math.abs(Forward),euler)*Math.signum(Forward), Math.pow(Math.abs(Strafe), euler)*Math.signum(Strafe),Math.pow(Math.abs(Turn),euler)*Math.signum(Turn));
 
     }
 
     @Override
-    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
-        super.initSubsystem(linearOpMode, hardwareMap);
+    public void initSubsystem(OpMode opMode) {
+        super.initSubsystem(opMode);
 
         frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
         backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
@@ -103,5 +68,6 @@ public class MovementSubsystem extends SmartSubsystem{
 
         drive = new SampleMecanumDriveCancelable(hardwareMap, frontLeft, backLeft,
                 backRight, frontRight);
+
     }
 }

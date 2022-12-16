@@ -2,8 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
@@ -17,7 +16,8 @@ public class ClampSubsystem extends SmartSubsystem{
     public static double clampOffset=0.2;
     public static double unclampedOffset=0.2;
     public static double initialPosition=0.4;
-    public static double forwardPos = 0.1;
+    public static double ForwardPos = 0.1;
+    public static double BackwardPos = 0.62;
     private boolean clamping = false;
     public boolean isClamping()
     {return  clamping;
@@ -25,23 +25,38 @@ public class ClampSubsystem extends SmartSubsystem{
     public void clamp()
     {
         clamping=true;
+        setPosition(position);
     }
 
     public void release()
     {
         clamping=false;
+        setPosition(position);
     }
-    public void goToForward()
+    public void goTo(double position) throws InterruptedException {
+        double initialPosition = baseServo.getPosition();
+        double delta = Math.abs(position-initialPosition);
+        double time = delta * 300 / 240.0 *1000;
+        setPosition(position);
+        Thread.sleep((long) time);
+    }
+    public void setPosition(double position)
     {
-        baseServo.setPosition(forwardPos);
+        this.position=position;
+        baseServo.setPosition(position);
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
-    public void goToBackward()
-    {
+    public void goToForward() throws InterruptedException {
+        baseServo.setPosition(ForwardPos);
+
+
+    }
+    public void goToBackward() throws InterruptedException {
         baseServo.setPosition(0.6);
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
+        Thread.sleep(300);
     }
     @Override
     public void run(SubsystemData data) throws InterruptedException {
@@ -56,8 +71,8 @@ public class ClampSubsystem extends SmartSubsystem{
     }
 
     @Override
-    public void initSubsystem(LinearOpMode linearOpMode, HardwareMap hardwareMap) {
-        super.initSubsystem(linearOpMode, hardwareMap);
+    public void initSubsystem(OpMode opMode) {
+        super.initSubsystem(opMode);
         baseServo=hardwareMap.get(Servo.class, "swingBase");
         armPullServo=hardwareMap.get(Servo.class, "swingPullArm");
         armPullServo.setDirection(Servo.Direction.REVERSE);

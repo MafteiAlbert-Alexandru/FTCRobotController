@@ -5,7 +5,7 @@ import java.util.Objects;
 /**
  * Represents a transition between two states
  */
-public abstract class Transition implements Runnable{
+public abstract class Transition{
     public State from;
     public State to;
     public FSM fsm;
@@ -48,7 +48,7 @@ public abstract class Transition implements Runnable{
      * Function called by the fsm(in parallel) on execution of this transition
      * Override for custom implentation
      */
-    public void run()
+    public void run() throws InterruptedException
     {
 
     }

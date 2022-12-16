@@ -78,7 +78,7 @@ public class FSM {
                     return transition.check();
                 }
                 @Override
-                public void run() {
+                public void run() throws InterruptedException{
                     transition.run();
                 }
             });
@@ -109,7 +109,7 @@ public class FSM {
         buildCalled=true;
     }
 
-    public void update()
+    public void update(boolean transitionCheck)
     {
         assert buildCalled : "Build not called before update";
         if(currentState!=null)
@@ -118,7 +118,7 @@ public class FSM {
             if(executionDeque.isEmpty())
             {
 
-
+                if(transitionCheck)
                 for(Transition transition: transitionsLookup.getOrDefault(currentState, new ArrayList<>())) {
                     if (transition.check()) {
 
@@ -136,7 +136,9 @@ public class FSM {
                                 Transition transition = executionDeque.removeFirst();
                                 transition.run();
                                 currentState=transition.to;
-                            }finally {
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            } finally {
                                 executionLock.unlock();
                             }
                         });
@@ -150,7 +152,27 @@ public class FSM {
         }
 
     }
+    public void enqueStates(State[] states)
+    {
+        State state;
+        if (executionDeque.peekLast() != null) {
+            state = executionDeque.peekLast().to;
+        } else {
+            state = currentState;
+        }
 
+        for(int i=0;i<states.length;i++)
+        {
+            for (Transition transition:
+                 transitionsLookup.getOrDefault(state, new ArrayList<>())) {
+                if(transition.to==states[i])
+                {
+                    executionDeque.add(transition);
+                    state=transition.to;
+                }
+            }
+        }
+    }
     public void goTo(State target) {
         State state;
         if (executionDeque.peekLast() != null) {
@@ -159,7 +181,7 @@ public class FSM {
             state = currentState;
         }
         Stack<Transition> transitions = new Stack<>();
-        depthFirstSearch(state,target, new HashMap<State, Boolean>(), transitions);
+        depthFirstSearch(state,target, new HashMap<>(), transitions);
         executionDeque.addAll(transitions);
     }
     private void depthFirstSearch(State current, State target, HashMap<State, Boolean> visited, Stack<Transition> path)

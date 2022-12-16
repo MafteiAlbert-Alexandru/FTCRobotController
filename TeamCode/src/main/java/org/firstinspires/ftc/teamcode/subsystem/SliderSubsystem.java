@@ -2,33 +2,32 @@ package org.firstinspires.ftc.teamcode.subsystem;
 
 
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.control.PIDCoefficients;
-import com.acmerobotics.roadrunner.control.PIDFController;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
 
 @Config
- public class SliderSubsystem extends SmartSubsystem {
+public class SliderSubsystem extends SmartSubsystem {
 
     public SmartMotorEx slider;
 
-    public static int target = 0;
-    public static double tolerance = 30;
-    public static double upwardCoefficient = 0.1;
-    public static double downwardCoefficient =0.1;
-    public static double pow = 0.1;
+    public  int target = 0; //Smash target
+    public static double tolerance = 30; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
+    public static double upwardCoefficient = 0.08; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
+    public static double downwardCoefficient =0.035; //Dar cand cobor sunt mai chill
+    public static double pow = 0.1; //POWer pentru cine nu si-a dat seama
+    //Asta mi face glisiera sa faca pau pau (adica e kP-ul din PID)
 
-    public static int GroundPos =150;
-    public static int lowPos =750;
-    public static int midPos = 1150;
-    public static int highPos = 1475;
+    //Aici niste pozitii ca suntem noi cam smec
 
-    public static int safePos = 600;
-    public static int loadPos= 45;
-    public static int ClearPos = 300;
+    public static int GroundPos =-20; //Ajutam putin PID-ul
+    public static int LowPos =750;
+    public static int MediumPos = 1150;
+    public static int HighPos = 1550;
+
+    public static int SafePos = 450;
+    public static int LoadPos = 45;
 
     public static int aimPos = 380;
     public static int cone5Pos = 230;
@@ -37,77 +36,50 @@ import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
     public static int cone2Pos = 25;
     public static int cone1Pos = 0;
 
-    public static boolean telemetryOn = true;
-    public static PIDCoefficients sliderPID= new PIDCoefficients(0.02,0.0003,0.0008);
-    public static Double kV=0.0;
-    public static double sliderSpeed = 1500;
+    public static boolean telemetryOn = true; //Daca vreau telemetrie
 
-    private PIDFController sliderController;
-    public boolean isClear()
+    //Functie secsi ca sa se verifice daca glisiera este intr-o pozitie sigura
+    public boolean isSafe()
     {
-        return slider.getCurrentPosition() >= safePos;
-    }
-    public void goToClear()
-    {
-        target=ClearPos;
+        return slider.getCurrentPosition() >= SafePos;
     }
 
-    public void goToTake()
-    {
-        target=loadPos;
-    }
-    public void goToPosition(int position)
-    {
-        target=position;
-    }
-
-    public void goTo(int position)
-    {
-        target=position;
-        while(Math.abs(slider.getCurrentPosition()-target)>=tolerance);
-    }
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
 
-        sliderController.setTargetVelocity(sliderSpeed);
-        slider.set(sliderController.update(slider.getCurrentPosition(), slider.getCorrectedVelocity()));
+            if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
+            else slider.setPositionCoefficient(downwardCoefficient);
+            slider.setPositionTolerance(tolerance);
+            slider.setTargetPosition(target);
+            slider.set(pow);
 
-        if(telemetryOn){
-            opMode.telemetry.addData("pos", slider.getCurrentPosition());
-            opMode.telemetry.addData("target", target);
-            opMode.telemetry.addData("pow", slider.get());
-            opMode.telemetry.addData("vel", slider.getCorrectedVelocity());
-        }
-    }
 
-    public void update() throws InterruptedException {
-        if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
-        else slider.setPositionCoefficient(downwardCoefficient);
-        slider.setPositionTolerance(tolerance);
+            if(telemetryOn){
+                opMode.telemetry.addData("pos", slider.getCurrentPosition());
+                opMode.telemetry.addData("target", target);
+                opMode.telemetry.addData("pow", slider.get());
+            }
 
-        slider.set(pow);
-        slider.setTargetPosition((int)target);
     }
 
     @Override
-    public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
-        super.initSubsystem(opMode, hardwareMap);
-        sliderController= new PIDFController(sliderPID,kV);
+    public void initSubsystem(OpMode opMode) {
+        super.initSubsystem(opMode);
         slider=new SmartMotorEx(hardwareMap, "slider", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
-        sliderController.setOutputBounds(-1,1);
-
-
-
-            slider.resetEncoder();
-        slider.setRunMode(SmartMotor.RunMode.RawPower);
+        slider.resetEncoder();
+        slider.setRunMode(SmartMotor.RunMode.PositionControl);
         slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);
         slider.setInverted(true);
         target=0;
     }
-
-    public void setTarget(int pos){
-        target = pos;
+    public void goTo(int target) {
+        setTarget(target);
+        while(!slider.atTargetPosition());
+    }
+    public void setTarget(int target){
+        this.target = target;
+        slider.setTargetPosition(target);
     }
 
     public int getPosition(){

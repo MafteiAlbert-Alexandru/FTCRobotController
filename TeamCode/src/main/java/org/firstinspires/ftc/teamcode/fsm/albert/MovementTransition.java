@@ -1,9 +1,6 @@
-package org.firstinspires.ftc.teamcode.fsm;
+package org.firstinspires.ftc.teamcode.fsm.albert;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
-
-import org.firstinspires.ftc.teamcode.fsm.albert.State;
-import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
 
 public class MovementTransition extends Transition {
     private GamepadEx gamepad;
@@ -28,7 +25,7 @@ public class MovementTransition extends Transition {
     }
 
     @Override
-    public void run() {
+    public void run() throws InterruptedException {
 
     }
 }

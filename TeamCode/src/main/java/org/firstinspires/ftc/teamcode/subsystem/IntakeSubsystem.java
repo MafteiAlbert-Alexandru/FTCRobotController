@@ -2,12 +2,10 @@ package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
-import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
 
 
 @Config
@@ -51,8 +49,8 @@ public class IntakeSubsystem extends SmartSubsystem {
     }
 
     @Override
-    public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
-        super.initSubsystem(opMode, hardwareMap);
+    public void initSubsystem(OpMode opMode) {
+        super.initSubsystem(opMode);
         leftIntake=new SmartMotorEx(hardwareMap, "leftIntake", SmartMotorEx.GoBILDA.RPM_1620, SmartMotor.MotorDirection.REVERSE);
         rightIntake=new SmartMotorEx(hardwareMap, "rightIntake", SmartMotorEx.GoBILDA.RPM_1620, SmartMotor.MotorDirection.FORWARD);
         leftIntake.setInverted(true);

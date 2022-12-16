@@ -33,7 +33,7 @@ public class ButtonTransition extends Transition {
     }
 
     @Override
-    public void run() {
+    public void run() throws InterruptedException {
 
     }
 }

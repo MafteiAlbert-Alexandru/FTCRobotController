@@ -1,12 +1,8 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.gamepad.ButtonReader;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
-import com.arcrobotics.ftclib.gamepad.ToggleButtonReader;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
@@ -18,26 +14,22 @@ public class TransferSubsystem extends SmartSubsystem {
     private ToggleButton armButton;
     private Servo leg;
     public static double upperArmPos = 0.2;
-    public static double sliderSubsystemedArmPos =0.69;
-    public static double lowerArmPos = 0.69;
-
+    public static double lowerArmPos = 0.67;
+    public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.5;
     public static double openedLegPos =0;
 
 
     private boolean firstDown = false;
-    public void sliderSubsystem()
-    {
-        arm.setPosition(sliderSubsystemedArmPos);
-    }
-    public void lower()
-    {
-
-    }
 
 
+    private double realLowerArmPos=idleArmPos;
     @Override
     public void run(SubsystemData data) throws InterruptedException {
+        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER))
+        {
+            realLowerArmPos=lowerArmPos;
+        }else realLowerArmPos=idleArmPos;
         armButton.update(data.operatorGamepad);
         if(armButton.getToggle())
         {
@@ -47,7 +39,7 @@ public class TransferSubsystem extends SmartSubsystem {
             arm.setPosition(upperArmPos);
             firstDown=true;
         }else {
-            arm.setPosition(lowerArmPos);
+            arm.setPosition(realLowerArmPos);
             if(firstDown) {
                 Thread.sleep(300);
                 firstDown=false;
@@ -60,8 +52,8 @@ public class TransferSubsystem extends SmartSubsystem {
     }
 
     @Override
-    public void initSubsystem(LinearOpMode opMode, HardwareMap hardwareMap) {
-        super.initSubsystem(opMode, hardwareMap);
+    public void initSubsystem(OpMode opMode) {
+        super.initSubsystem(opMode);
 
         arm=hardwareMap.get(Servo.class, "arm");
         leg=hardwareMap.get(Servo.class, "leg");
