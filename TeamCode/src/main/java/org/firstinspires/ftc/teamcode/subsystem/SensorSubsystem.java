@@ -1,8 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
-import android.graphics.Color;
-
-import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
@@ -26,30 +23,36 @@ public class SensorSubsystem extends SmartSubsystem{
         coneColor=hardwareMap.get(ColorSensor.class, "coneColor");
 
     }
-
+    public boolean toFlip()
+    {
+        return frontDistance.getDistance(DistanceUnit.MM) <100 && backDistance.getDistance(DistanceUnit.MM) <100;
+    }
+    public String formatRGB(int red, int green, int blue)
+    {
+        return String.format("#%02X%02X%02X", red, green,blue);
+    }
     @Override
     public void run(SubsystemData data) throws InterruptedException {
         TelemetryPacket packet = new TelemetryPacket();
 
-        opMode.telemetry.addData("rightDistance", rightDistance.getDistance(DistanceUnit.MM));
-        opMode.telemetry.addData("frontDistance", frontDistance.getDistance(DistanceUnit.MM));
-        opMode.telemetry.addData("backDistance", backDistance.getDistance(DistanceUnit.MM));
-        opMode.telemetry.addData("coneDistance", coneDistance.getDistance(DistanceUnit.MM));
-        float hsv[] = new float[3];
-
-        Color.RGBToHSV(frontColor.red(), frontColor.green(), frontColor.blue(),hsv);
-        packet.fieldOverlay()
-                .setFill("hsl("+hsv[0]+", "+hsv[1]+", "+hsv[2]+")")
-                .fillRect(-20, -20, 20, 20);
-        FtcDashboard.getInstance().sendTelemetryPacket(packet);
-
-        Color.RGBToHSV(backColor.red(), backColor.green(), backColor.blue(),hsv);
-        packet.fieldOverlay()
-                .setFill("hsl("+hsv[0]+", "+hsv[1]+", "+hsv[2]+")")
-                .fillRect(0, -20, 20, 20);;
-        Color.RGBToHSV(coneColor.red(), coneColor.green(), coneColor.blue(),hsv);
-        packet.fieldOverlay()
-                .setFill("hsl("+hsv[0]+", "+hsv[1]+", "+hsv[2]+")")
-                .fillRect(20, -20, 20, 20);;
+//        opMode.telemetry.addData("rightDistance", rightDistance.getDistance(DistanceUnit.MM));
+//        opMode.telemetry.addData("frontDistance", frontDistance.getDistance(DistanceUnit.MM));
+//        opMode.telemetry.addData("backDistance", backDistance.getDistance(DistanceUnit.MM));
+//        opMode.telemetry.addData("coneDistance", coneDistance.getDistance(DistanceUnit.MM));
+//        float hsv[] = new float[3];
+//
+//
+//        packet.fieldOverlay()
+//                .setFill(formatRGB(frontColor.red(), frontColor.green(), frontColor.blue()))
+//                .fillRect(-20, -20, 20, 20);
+//
+//
+//        packet.fieldOverlay()
+//                .setFill(formatRGB(backColor.red(), backColor.green(), backColor.blue()))
+//                .fillRect(0, -20, 20, 20);;
+//        packet.fieldOverlay()
+//                .setFill(formatRGB(coneColor.red(), coneColor.green(), coneColor.blue()))
+//                .fillRect(20, -20, 20, 20);
+//        FtcDashboard.getInstance().sendTelemetryPacket(packet);
     }
 }

@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
 
 @Config
-public class ClampSubsystem extends SmartSubsystem{
+public class ClampSubsystem extends SmartSubsystem {
     private Servo baseServo;
     private ToggleButton clampButton;
     private Servo armPullServo;
     public static double position=0;
-    public static double clampOffset=0.2;
+    public static double clampOffset=0.17;
     public static double unclampedOffset=0.2;
     public static double initialPosition=0.4;
     public static double ForwardPos = 0.1;
@@ -36,16 +36,17 @@ public class ClampSubsystem extends SmartSubsystem{
     public void goTo(double position) throws InterruptedException {
         double initialPosition = baseServo.getPosition();
         double delta = Math.abs(position-initialPosition);
-        double time = delta * 300 / 240.0 *1000;
+        double time = delta * 300 / 220.0 *1000;
         setPosition(position);
         Thread.sleep((long) time);
     }
     public void setPosition(double position)
     {
         this.position=position;
+
+        if(clamping) armPullServo.setPosition(position+clampOffset-unclampedOffset);
+        else armPullServo.setPosition(position+clampOffset);
         baseServo.setPosition(position);
-        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
-        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
     public void goToForward() throws InterruptedException {
         baseServo.setPosition(ForwardPos);
@@ -56,7 +57,6 @@ public class ClampSubsystem extends SmartSubsystem{
         baseServo.setPosition(0.6);
         if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
         else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
-        Thread.sleep(300);
     }
     @Override
     public void run(SubsystemData data) throws InterruptedException {
