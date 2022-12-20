@@ -14,7 +14,7 @@ public class ClampSubsystem extends SmartSubsystem {
     private Servo armPullServo;
     public static double position=0;
     public static double clampOffset=0.17;
-    public static double unclampedOffset=0.2;
+    public static double unclampedOffset=0.22;
     public static double initialPosition=0.4;
     public static double ForwardPos = 0.1;
     public static double BackwardPos = 0.62;

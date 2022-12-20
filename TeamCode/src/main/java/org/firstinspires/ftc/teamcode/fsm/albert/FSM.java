@@ -84,6 +84,10 @@ public class FSM {
             });
         }
     }
+    public State getCurrentState()
+    {
+        return  currentState;
+    }
     /**
      * This needs to be called for multi-state finite machines before running the fsm
      */

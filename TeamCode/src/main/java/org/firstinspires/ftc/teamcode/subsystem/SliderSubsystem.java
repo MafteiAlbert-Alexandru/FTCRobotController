@@ -12,21 +12,22 @@ public class SliderSubsystem extends SmartSubsystem {
 
     public SmartMotorEx slider;
 
+    // TODO CALIBRATE POSITIONS FURTHER
     public  int target = 0; //Smash target
     public static double tolerance = 30; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
     public static double upwardCoefficient = 0.08; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
-    public static double downwardCoefficient =0.035; //Dar cand cobor sunt mai chill
+    public static double downwardCoefficient =0.05; //Dar cand cobor sunt mai chill
     public static double pow = 0.1; //POWer pentru cine nu si-a dat seama
     //Asta mi face glisiera sa faca pau pau (adica e kP-ul din PID)
 
     //Aici niste pozitii ca suntem noi cam smec
 
     public static int GroundPos =-20; //Ajutam putin PID-ul
-    public static int LowPos =750;
-    public static int MediumPos = 1150;
-    public static int HighPos = 1550;
+    public static int LowPos =600;
+    public static int MediumPos = 1025;
+    public static int HighPos = 1440;
 
-    public static int SafePos = 450;
+    public static int SafePos = 600;
     public static int LoadPos = 45;
 
     public static int aimPos = 380;
@@ -36,7 +37,7 @@ public class SliderSubsystem extends SmartSubsystem {
     public static int cone2Pos = 25;
     public static int cone1Pos = 0;
 
-    public static boolean telemetryOn = true; //Daca vreau telemetrie
+    public static boolean telemetryOn = false; //Daca vreau telemetrie
 
     //Functie secsi ca sa se verifice daca glisiera este intr-o pozitie sigura
     public boolean isSafe()

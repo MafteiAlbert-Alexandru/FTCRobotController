@@ -18,6 +18,9 @@ import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+
 public class Robot {
 
     //region Subsystem
@@ -28,7 +31,7 @@ public class Robot {
     public  SliderSubsystem sliderSubsystem = new SliderSubsystem();
     public ClampSubsystem clampSubsystem = new ClampSubsystem();
     public   SensorSubsystem sensorSubsystem = new SensorSubsystem();
-
+private Executor executor = Executors.newSingleThreadExecutor();
     //endregion
 
     //region State
@@ -104,17 +107,19 @@ public class Robot {
             @Override
             //Asta verifica daca isi ia trigger tranzitia
             public boolean check() {
-                // IF SENSOR TODO
-                return operatorGamepad.wasJustPressed(GamepadKeys.Button.Y);
+                return sensorSubsystem.coneIsLoaded();
             }
 
             @Override
             public void run() throws InterruptedException {
+                Thread.sleep(500);
                 //daca e sus mergi jos (vezi in codul sursa)
-                if(transferSubsystem.isUp()) transferSubsystem.goDown();
+                if(transferSubsystem.isUp()) transferSubsystem.override=false;
+
                 clampSubsystem.release(); //dau drumul la hook (siguranta)
                 sliderSubsystem.goTo(SliderSubsystem.LoadPos); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
+                transferSubsystem.override=true;
             }
         });
 
@@ -130,6 +135,7 @@ public class Robot {
         SliderAndClampingFSM.addTransitionsTo(upperState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_UP) {
             @Override
             public void run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.HighPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
             }
@@ -138,6 +144,7 @@ public class Robot {
 
             @Override
             public void run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.MediumPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
             }
@@ -229,6 +236,7 @@ public class Robot {
         subsystemData.driverGamepad=driverGamepad;
         subsystemData.operatorGamepad=operatorGamepad;
     }
+    private boolean running = false;
     private SubsystemData subsystemData = new SubsystemData();
     public void update() throws InterruptedException {
         if(!this.autonomous)
@@ -247,9 +255,20 @@ public class Robot {
             MovementFSM.update(true);
 
             sensorSubsystem.run(subsystemData);
-            if(sensorSubsystem.toFlip())
+            if(!running&&sensorSubsystem.toFlip())
             {
-                transferSubsystem.lift();
+                executor.execute(()->{
+                    running=true;
+                    try {
+                        Thread.sleep(850);
+                        if(sensorSubsystem.toFlip())
+                        transferSubsystem.lift();
+                        Thread.sleep(300);
+                        transferSubsystem.goDown();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
             }
             transferSubsystem.run(subsystemData);
             intakeSubsystem.run(subsystemData);

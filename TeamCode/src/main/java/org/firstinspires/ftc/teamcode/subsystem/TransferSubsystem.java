@@ -13,12 +13,12 @@ public class TransferSubsystem extends SmartSubsystem {
     public static double upperArmPos = 0.19;
     public static double lowerArmPos = 0.67;
     public static double idleArmPos = 0.62;
-    public static double closedLegPos = 0.5;
+    public static double closedLegPos = 0.27;
     public static double openedLegPos =0;
     private boolean lifting=false;
     public void lift() throws InterruptedException {
         lifting=true;
-        Thread.sleep(100);
+
     }
     public boolean isUp()
     {
@@ -26,36 +26,32 @@ public class TransferSubsystem extends SmartSubsystem {
     }
     public void goDown() throws InterruptedException {
         lifting=false;
-        Thread.sleep(100);
     }
     private boolean firstDown = false;
-
-
-    private double realLowerArmPos=idleArmPos;
+    public boolean override=true;
     @Override
     public void run(SubsystemData data) throws InterruptedException {
+        double realLowerArmPos = idleArmPos;
         if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER))
         {
-            realLowerArmPos=lowerArmPos;
-        }else realLowerArmPos=idleArmPos;
-        if(data.operatorGamepad.isDown(GamepadKeys.Button.A)||lifting)
+            realLowerArmPos =lowerArmPos;
+        }else {
+
+            realLowerArmPos =idleArmPos;
+        }
+        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER))
         {
-            leg.setPosition(openedLegPos);
-            if(!firstDown)
-                Thread.sleep(300);
+            leg.setPosition(closedLegPos);
+
+        }else             leg.setPosition(openedLegPos);
+
+        if(override&&(data.operatorGamepad.isDown(GamepadKeys.Button.A)||lifting))
+        {
             arm.setPosition(upperArmPos);
             firstDown=true;
         }
         else {
             arm.setPosition(realLowerArmPos);
-            if(firstDown) {
-                Thread.sleep(300);
-                firstDown=false;
-            }
-            if(data.operatorGamepad.getButton(GamepadKeys.Button.B))
-            {
-                leg.setPosition(closedLegPos);
-            }else leg.setPosition(openedLegPos);
         }
     }
 

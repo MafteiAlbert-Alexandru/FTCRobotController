@@ -14,7 +14,7 @@ public class IntakeSubsystem extends SmartSubsystem {
     public SmartMotorEx rightIntake;
 
 
-    public static double power = 0.8;
+    public static double power = 1;
 
     public void intake()
     {
