@@ -94,9 +94,23 @@ private Executor executor = Executors.newSingleThreadExecutor();
 
             @Override
             public void run() throws InterruptedException {
-                sliderSubsystem.goTo(SliderSubsystem.SafePos);
+                sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
+                clampSubsystem.release();
+                //hook-ul se duce in SafePos si pe spate (adica in robot)
+            }
+        });
+
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, waitingState, operatorGamepad, GamepadKeys.Button.Y) {
+            //adaug un state intre cel initial si cel de waiting
+            //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
+
+            @Override
+            public void run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release();
+                sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
             }
         });
@@ -107,12 +121,12 @@ private Executor executor = Executors.newSingleThreadExecutor();
             @Override
             //Asta verifica daca isi ia trigger tranzitia
             public boolean check() {
-                return sensorSubsystem.coneIsLoaded();
+                return sensorSubsystem.coneIsLoaded() || subsystemData.operatorGamepad.getButton(GamepadKeys.Button.Y);
             }
 
             @Override
             public void run() throws InterruptedException {
-                Thread.sleep(500);
+//                Thread.sleep(500);
                 //daca e sus mergi jos (vezi in codul sursa)
                 if(transferSubsystem.isUp()) transferSubsystem.override=false;
 
@@ -152,24 +166,19 @@ private Executor executor = Executors.newSingleThreadExecutor();
         SliderAndClampingFSM.addTransitionsTo(lowerState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
             @Override
             public void run() throws InterruptedException {
-                if (sliderSubsystem.isSafe()) clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                else {
-                    sliderSubsystem.goTo(SliderSubsystem.SafePos);
-                    clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                }
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
 
             }
         });
         SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
             @Override
             public void run() throws InterruptedException {
-                if (sliderSubsystem.isSafe()) clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                else {
-                    sliderSubsystem.goTo(SliderSubsystem.SafePos);
-                    clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                }
-
+                if(sliderSubsystem.isSafe()) clampSubsystem.goToBackward();
+                if(sliderSubsystem.getPosition()>=SliderSubsystem.GroundPos+10)
+                clampSubsystem.goToForward();
+                sliderSubsystem.goTo(SliderSubsystem.GroundPos);
             }
         });
         State[] outsideStates = new State[]{groundState, frontWaitingState, lowerState, mediumState, upperState};
@@ -200,9 +209,11 @@ private Executor executor = Executors.newSingleThreadExecutor();
                 if (sliderSubsystem.isSafe()) {
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                     sliderSubsystem.goTo(SliderSubsystem.SafePos);
+                    sliderSubsystem.goTo(SliderSubsystem.LowPos);
                 } else {
                     sliderSubsystem.goTo(SliderSubsystem.SafePos);
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                    sliderSubsystem.goTo(SliderSubsystem.LowPos);
                 }
             }
         });

@@ -22,10 +22,11 @@ public class SliderSubsystem extends SmartSubsystem {
 
     //Aici niste pozitii ca suntem noi cam smec
 
-    public static int GroundPos =-20; //Ajutam putin PID-ul
+    public static int GroundPos =150; //Ajutam putin PID-ul
     public static int LowPos =600;
     public static int MediumPos = 1025;
-    public static int HighPos = 1440;
+    public static int HighPos = 1470;
+    public static int PreLoadPos = 250;
 
     public static int SafePos = 600;
     public static int LoadPos = 45;
@@ -42,7 +43,7 @@ public class SliderSubsystem extends SmartSubsystem {
     //Functie secsi ca sa se verifice daca glisiera este intr-o pozitie sigura
     public boolean isSafe()
     {
-        return slider.getCurrentPosition() >= SafePos;
+        return slider.getCurrentPosition() >= LowPos;
     }
 
 

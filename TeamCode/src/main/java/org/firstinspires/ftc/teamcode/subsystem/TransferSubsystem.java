@@ -11,7 +11,7 @@ public class TransferSubsystem extends SmartSubsystem {
     private Servo arm;
     private Servo leg;
     public static double upperArmPos = 0.19;
-    public static double lowerArmPos = 0.67;
+    public static double lowerArmPos = 0.65;
     public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.27;
     public static double openedLegPos =0;
@@ -39,11 +39,10 @@ public class TransferSubsystem extends SmartSubsystem {
 
             realLowerArmPos =idleArmPos;
         }
-        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER))
-        {
+        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || data.operatorGamepad.isDown(GamepadKeys.Button.B)) {
             leg.setPosition(closedLegPos);
-
-        }else             leg.setPosition(openedLegPos);
+        }
+        else leg.setPosition(openedLegPos);
 
         if(override&&(data.operatorGamepad.isDown(GamepadKeys.Button.A)||lifting))
         {

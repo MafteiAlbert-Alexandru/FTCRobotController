@@ -137,9 +137,10 @@ public class FSM {
                             executionLock.lock();
                             try {
 
-                                Transition transition = executionDeque.removeFirst();
+                                Transition transition = executionDeque.peekFirst();
                                 transition.run();
                                 currentState=transition.to;
+                                executionDeque.removeFirst();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();
                             } finally {
