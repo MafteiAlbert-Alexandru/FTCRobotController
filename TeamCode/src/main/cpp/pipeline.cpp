@@ -1,0 +1,48 @@
+//
+// Created by nightchips on 12/22/22.
+//
+
+#include <jni.h>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <cassert>
+
+extern "C"
+{
+
+        JNIEXPORT JNICALL
+            jlong
+            Java_org_firstinspires_ftc_teamcode_junction_LUT_createPtrToLut(JNIEnv *env, jclass lutObject, jbyteArray lut)
+        {
+                jbyte *rawLut = new jbyte[256 * 256 * 256];
+                jboolean boolean = JNI_FALSE;
+                jbyte *lutElements = env->GetByteArrayElements(lut, &boolean);
+                memcpy(rawLut, lutElements, sizeof(jbyte) * 256 * 256 * 256);
+                env->ReleaseByteArrayElements(lut, lutElements, 0);
+        }
+        JNIEXPORT JNICALL void Java_org_firstinspires_ftc_teamcode_junction_LUT_lutOperation(JNIEnv *env, jclass lutObject, jlong inputPtr, jlong outputPtr)
+        {
+                static jbyte *lut = NULL;
+                cv::Mat *inputMat = (cv::Mat *)inputPtr;
+                cv::Mat *outputMat = (cv::Mat *)outputPtr;
+
+                assert(inputMat->isContinuous() == true);
+                assert(inputMat->type() == CV_8UC3);
+                assert(outputMat->isContinuous() == true);
+
+                if (__builtin_expect(lut == NULL, 0))
+                {
+                        lut = (jbyte *)env->GetStaticLongField(lutObject, env->GetFieldID(lutObject, "ptrToLut", "J"));
+                }
+                const auto numPixels = inputMat->cols * inputMat->rows;
+                for (auto i = 0; i < numPixels; i++)
+                {
+                        const auto offset = inputMat->data + i * 3;
+                        const auto r = *(offset);
+                        const auto g = *(offset + 1);
+                        const auto b = *(offset + 2);
+
+                        outputMat->data[i] = (lut[r * 256 * 256 + g * 256 + b]) ? 255 : 0;
+                }
+        }
+}

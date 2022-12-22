@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
-import org.firstinspires.ftc.teamcode.junctionCalibration.LUT;
-import org.firstinspires.ftc.teamcode.junctionCalibration.junctionAdjusterPipeline;
+import org.firstinspires.ftc.teamcode.junction.LUT;
+import org.firstinspires.ftc.teamcode.junction.JunctionAdjusterPipeline;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -40,7 +40,7 @@ public class PipelineTeleOp extends LinearOpMode {
 
                 }
             });
-            junctionAdjusterPipeline pipeline = new junctionAdjusterPipeline();
+            JunctionAdjusterPipeline pipeline = new JunctionAdjusterPipeline();
             webcam.setPipeline(pipeline);
 
 
