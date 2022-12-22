@@ -5,7 +5,7 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
-import org.firstinspires.ftc.teamcode.hardware.customHardware.ToggleButton;
+import org.firstinspires.ftc.teamcode.hardware.ToggleButton;
 
 @Config
 public class ClampSubsystem extends SmartSubsystem {

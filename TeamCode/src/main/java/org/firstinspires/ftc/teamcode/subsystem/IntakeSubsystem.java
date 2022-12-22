@@ -4,8 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
-import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
+import org.firstinspires.ftc.teamcode.hardware.SmartMotor;
+import org.firstinspires.ftc.teamcode.hardware.SmartMotorEx;
 
 
 @Config

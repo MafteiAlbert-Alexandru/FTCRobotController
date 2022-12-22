@@ -4,8 +4,8 @@ package org.firstinspires.ftc.teamcode.subsystem;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotor;
-import org.firstinspires.ftc.teamcode.hardware.customHardware.SmartMotorEx;
+import org.firstinspires.ftc.teamcode.hardware.SmartMotor;
+import org.firstinspires.ftc.teamcode.hardware.SmartMotorEx;
 
 @Config
 public class SliderSubsystem extends SmartSubsystem {
@@ -14,18 +14,18 @@ public class SliderSubsystem extends SmartSubsystem {
 
     // TODO CALIBRATE POSITIONS FURTHER
     public  int target = 0; //Smash target
-    public static double tolerance = 30; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
-    public static double upwardCoefficient = 0.08; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
-    public static double downwardCoefficient =0.05; //Dar cand cobor sunt mai chill
+    public static double tolerance = 10; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
+    public static double upwardCoefficient = 0.12; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
+    public static double downwardCoefficient =0.15; //Dar cand cobor sunt mai chill
     public static double pow = 0.1; //POWer pentru cine nu si-a dat seama
     //Asta mi face glisiera sa faca pau pau (adica e kP-ul din PID)
 
     //Aici niste pozitii ca suntem noi cam smec
 
     public static int GroundPos =150; //Ajutam putin PID-ul
-    public static int LowPos =600;
-    public static int MediumPos = 1025;
-    public static int HighPos = 1470;
+    public static int LowPos =660;
+    public static int MediumPos = 1050;
+    public static int HighPos = 1475;
     public static int PreLoadPos = 250;
 
     public static int SafePos = 600;

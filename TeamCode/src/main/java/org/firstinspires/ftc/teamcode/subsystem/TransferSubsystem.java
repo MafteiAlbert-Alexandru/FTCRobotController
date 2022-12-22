@@ -10,10 +10,11 @@ public class TransferSubsystem extends SmartSubsystem {
 
     private Servo arm;
     private Servo leg;
-    public static double upperArmPos = 0.19;
+    public static double upperArmPos = 0.18;
     public static double lowerArmPos = 0.65;
     public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.27;
+    public static double hittingLegPos =0.4;
     public static double openedLegPos =0;
     private boolean lifting=false;
     public void lift() throws InterruptedException {
@@ -27,7 +28,6 @@ public class TransferSubsystem extends SmartSubsystem {
     public void goDown() throws InterruptedException {
         lifting=false;
     }
-    private boolean firstDown = false;
     public boolean override=true;
     @Override
     public void run(SubsystemData data) throws InterruptedException {
@@ -39,7 +39,11 @@ public class TransferSubsystem extends SmartSubsystem {
 
             realLowerArmPos =idleArmPos;
         }
-        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER) || data.operatorGamepad.isDown(GamepadKeys.Button.B)) {
+
+        if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
+        {
+            leg.setPosition(hittingLegPos);
+        }else if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
             leg.setPosition(closedLegPos);
         }
         else leg.setPosition(openedLegPos);
@@ -47,7 +51,6 @@ public class TransferSubsystem extends SmartSubsystem {
         if(override&&(data.operatorGamepad.isDown(GamepadKeys.Button.A)||lifting))
         {
             arm.setPosition(upperArmPos);
-            firstDown=true;
         }
         else {
             arm.setPosition(realLowerArmPos);

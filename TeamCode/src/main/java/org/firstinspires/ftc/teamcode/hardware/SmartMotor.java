@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.hardware.customHardware;
+package org.firstinspires.ftc.teamcode.hardware;
 
 import androidx.annotation.NonNull;
 
