@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.fsm.NullState;
 import org.firstinspires.ftc.teamcode.fsm.SmartFSM;
 import org.firstinspires.ftc.teamcode.fsm.SmartState;
 import org.firstinspires.ftc.teamcode.junctionCalibration.JunctionAdjuster;
+import org.firstinspires.ftc.teamcode.junctionCalibration.LUT;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
@@ -48,7 +49,7 @@ public class MainTeleOP extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         telemetry= new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
-
+            LUT.loadLUT();
             List<SmartSubsystem> smartSubsystems = new ArrayList<SmartSubsystem>();
             // Use Java reflection to access all fields of this TeleOP which are SmartSubsystems
             // and run initSubsystem on them
