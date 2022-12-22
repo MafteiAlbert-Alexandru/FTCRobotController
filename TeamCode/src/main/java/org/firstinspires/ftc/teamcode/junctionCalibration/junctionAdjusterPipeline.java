@@ -7,6 +7,7 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.opencv.core.Core;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfInt4;
@@ -23,6 +24,8 @@ import org.openftc.easyopencv.OpenCvPipeline;
 import java.lang.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import java.io.*;
 
 @Config
 public class junctionAdjusterPipeline extends OpenCvPipeline {
@@ -41,12 +44,6 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     private Mat output = new Mat();
     private Mat ContourInput = new Mat();
 
-    public static double lowerYellowH = 12;
-    public static double lowerYellowS = 90;
-    public static double lowerYellowV = 40;
-    public static double upperYellowH = 35;
-    public static double upperYellowS = 255;
-    public static double upperYellowV = 255;
 
     public static int pixelTreshold = 250;
 
@@ -71,25 +68,31 @@ public class junctionAdjusterPipeline extends OpenCvPipeline {
     }
 
 
+    private Mat luttedImage = new Mat(800, 448, CvType.CV_8U);
     @Override
     public Mat processFrame(Mat input) {
         hsvInput.setTo(clearScalar);
         yellowMask.setTo(clearScalar);
         output.setTo(clearScalar);
 
-        Imgproc.cvtColor(input, hsvInput, Imgproc.COLOR_RGBA2RGB);
-        Imgproc.cvtColor(hsvInput, hsvInput, Imgproc.COLOR_RGB2HSV);
+        Imgproc.cvtColor(input, input, Imgproc.COLOR_RGBA2RGB);
 
-        Core.inRange(hsvInput, new Scalar(lowerYellowH, lowerYellowS, lowerYellowV), new Scalar(upperYellowH, upperYellowS, upperYellowV), yellowMask);
-        Core.copyTo(input, output, yellowMask);
+        //Imgproc.cvtColor(hsvInput, hsvInput, Imgproc.COLOR_RGB2HSV);
+
+        //Core.inRange(hsvInput, new Scalar(lowerYellowH, lowerYellowS, lowerYellowV), new Scalar(upperYellowH, upperYellowS, upperYellowV), yellowMask);
+        try {
+            LUT.lutOperation(input, luttedImage);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //Imgproc.morphologyEx(output, output, Imgproc.MORPH_OPEN, new Mat());
         //Imgproc.morphologyEx(output, output, Imgproc.MORPH_CLOSE, new Mat());
         //Imgproc.GaussianBlur(output, output, new Size(5.0, 15.0), 0.00);
 
-        Imgproc.cvtColor(output, ContourInput, Imgproc.COLOR_BGR2GRAY);
+
         List<MatOfPoint> contours = new ArrayList<>();
-        Imgproc.findContours(ContourInput, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(luttedImage, contours, new Mat(), Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
         RotatedRect junctionRect = new RotatedRect();
         double bestWeight = 0;
