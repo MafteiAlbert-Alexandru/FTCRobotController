@@ -58,9 +58,7 @@ public class SliderSubsystem extends SmartSubsystem {
 
 
             if(telemetryOn){
-                opMode.telemetry.addData("pos", slider.getCurrentPosition());
-                opMode.telemetry.addData("target", target);
-                opMode.telemetry.addData("pow", slider.get());
+
             }
 
     }

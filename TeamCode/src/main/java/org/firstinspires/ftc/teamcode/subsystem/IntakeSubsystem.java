@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.SmartMotor;
@@ -16,10 +15,11 @@ public class IntakeSubsystem extends SmartSubsystem {
 
     public static double power = 1;
 
-    public void intake()
+
+    public void intake(double pow)
     {
-        leftIntake.set(power);
-        rightIntake.set(power);
+        leftIntake.set(pow);
+        rightIntake.set(pow);
     }
     public void expulse()
     {
@@ -34,18 +34,6 @@ public class IntakeSubsystem extends SmartSubsystem {
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        if(data.operatorGamepad.getButton(GamepadKeys.Button.LEFT_BUMPER))
-        {
-            leftIntake.set(power);
-            rightIntake.set(power);
-        }else if(data.operatorGamepad.getButton(GamepadKeys.Button.RIGHT_BUMPER)){
-            leftIntake.set(-power);
-            rightIntake.set(-power);
-        }else {
-            leftIntake.set(0);
-            rightIntake.set(0);
-        }
-
     }
 
     @Override

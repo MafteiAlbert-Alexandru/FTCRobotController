@@ -28,32 +28,31 @@ public class TransferSubsystem extends SmartSubsystem {
     public void goDown() throws InterruptedException {
         lifting=false;
     }
-    public boolean override=true;
+    public void goTo(double position)
+    {
+        arm.setPosition(position);
+    }
+    public void blockWithLeg()
+    {
+        leg.setPosition(closedLegPos);
+    }
+    public void retreatLeg()
+    {
+        leg.setPosition(openedLegPos);
+    }
+
+    public boolean bControl =true;
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        double realLowerArmPos = idleArmPos;
-        if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER))
+        if(bControl)
         {
-            realLowerArmPos =lowerArmPos;
-        }else {
-
-            realLowerArmPos =idleArmPos;
-        }
-
-        if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
-        {
-            leg.setPosition(hittingLegPos);
-        }else if(data.operatorGamepad.isDown(GamepadKeys.Button.LEFT_BUMPER)) {
-            leg.setPosition(closedLegPos);
-        }
-        else leg.setPosition(openedLegPos);
-
-        if(override&&(data.operatorGamepad.isDown(GamepadKeys.Button.A)||lifting))
-        {
-            arm.setPosition(upperArmPos);
-        }
-        else {
-            arm.setPosition(realLowerArmPos);
+            if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
+            {
+                leg.setPosition(hittingLegPos);
+            }else
+            {
+                leg.setPosition(openedLegPos);
+            }
         }
     }
 
@@ -63,5 +62,6 @@ public class TransferSubsystem extends SmartSubsystem {
 
         arm = hardwareMap.get(Servo.class, "arm");
         leg = hardwareMap.get(Servo.class, "leg");
+        arm.setPosition(idleArmPos);
     }
 }

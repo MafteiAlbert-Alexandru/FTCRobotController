@@ -6,16 +6,13 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.Camera;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 @Config
 public class WebcamUtil {
     private Servo webcamServo;
@@ -23,7 +20,7 @@ public class WebcamUtil {
     private CameraConfig config;
     private ArrayList<WebcamUtilsListener> listeners= new ArrayList<>();
     private Telemetry telemetry;
-    public static int exposureTime_microseconds = 17500;
+
     public WebcamUtil(HardwareMap hardwareMap, Telemetry telemetry_)
     {
         config=CameraConfig.C920;
@@ -51,7 +48,6 @@ public class WebcamUtil {
      */
     public void setAngle(double angle)
     {
-        webcam.getExposureControl().setExposure((long)exposureTime_microseconds, TimeUnit.MICROSECONDS);
         for(WebcamUtilsListener listener:listeners)listener.onNewAngle(angle);
         webcamServo.setPosition(Math.toDegrees(angle)/300.0);
 
@@ -74,9 +70,6 @@ public class WebcamUtil {
             @Override
             public void onOpened() {
                 webcam.startStreaming(config.getResolutionX(), config.getResolutionY(), OpenCvCameraRotation.UPRIGHT);
-                telemetry.addData("initial camera exposure",webcam.getExposureControl().getExposure(TimeUnit.MICROSECONDS));
-                webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
-
             }
 
             @Override
