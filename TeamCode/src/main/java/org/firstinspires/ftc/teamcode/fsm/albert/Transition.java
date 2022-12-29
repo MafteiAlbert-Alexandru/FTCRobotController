@@ -48,9 +48,9 @@ public abstract class Transition{
      * Function called by the fsm(in parallel) on execution of this transition
      * Override for custom implentation
      */
-    public void run() throws InterruptedException
+    public boolean run() throws InterruptedException
     {
-
+        return true;
     }
 
     /**

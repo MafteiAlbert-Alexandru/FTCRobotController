@@ -20,7 +20,6 @@ public class LUT {
 
         if(alreadyLoaded)
             return;
-
         byte[] data = new byte[256*256*256];
         File lutFile = new File(String.format("%s/FIRST/%s", Environment.getExternalStorageDirectory(), "LUT.dat"));
         if(lutFile.exists())

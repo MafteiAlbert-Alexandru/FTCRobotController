@@ -78,8 +78,8 @@ public class FSM {
                     return transition.check();
                 }
                 @Override
-                public void run() throws InterruptedException{
-                    transition.run();
+                public boolean run() throws InterruptedException{
+                    return transition.run();
                 }
             });
         }
@@ -138,8 +138,10 @@ public class FSM {
                             try {
 
                                 Transition transition = executionDeque.peekFirst();
-                                transition.run();
-                                currentState=transition.to;
+                                if(transition.run())
+                                {
+                                    currentState=transition.to;
+                                }
                                 executionDeque.removeFirst();
                             } catch (InterruptedException e) {
                                 e.printStackTrace();

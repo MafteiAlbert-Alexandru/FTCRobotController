@@ -14,6 +14,7 @@ public class MainTeleOP extends LinearOpMode {
         try{
             Robot robot = new Robot(this, false);
             waitForStart();
+
             while(opModeIsActive()&&!isStopRequested())
             {
                 robot.update();

@@ -9,18 +9,31 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 public class ButtonTransition extends Transition {
 
     private final GamepadEx gamepad;
-    private final GamepadKeys.Button button;
+    private  GamepadKeys.Button button=null;
+    private GamepadKeys.Trigger trigger=null;
     public ButtonTransition(State from, State to, GamepadEx gamepad, GamepadKeys.Button button)
     {
         super(from, to);
         this.gamepad=gamepad;
         this.button=button;
     }
+    public ButtonTransition(State from, State to, GamepadEx gamepad, GamepadKeys.Trigger trigger)
+    {
+        super(from, to);
+        this.gamepad=gamepad;
+        this.trigger=trigger;
+    }
     public ButtonTransition(GamepadEx gamepad, GamepadKeys.Button button)
     {
         super();
         this.gamepad=gamepad;
         this.button=button;
+    }
+    public ButtonTransition(GamepadEx gamepad, GamepadKeys.Trigger trigger)
+    {
+        super();
+        this.gamepad=gamepad;
+        this.trigger=trigger;
     }
     @Override
     public void init() {
@@ -29,11 +42,13 @@ public class ButtonTransition extends Transition {
 
     @Override
     public boolean check() {
-        return gamepad.wasJustPressed(button);
+        if(button!=null) return gamepad.wasJustPressed(button);
+        else if(trigger!=null) return gamepad.getTrigger(trigger)>0.1;
+        return false;
     }
 
     @Override
-    public void run() throws InterruptedException {
-
+    public boolean run() throws InterruptedException {
+        return true;
     }
 }

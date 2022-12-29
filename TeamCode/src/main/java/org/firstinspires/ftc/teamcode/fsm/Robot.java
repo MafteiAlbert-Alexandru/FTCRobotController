@@ -106,12 +106,13 @@ private Executor executor = Executors.newSingleThreadExecutor();
             //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
 
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 sliderSubsystem.goTo(SliderSubsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
                 clampSubsystem.release();
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
+                return true;
             }
         });
 
@@ -120,11 +121,12 @@ private Executor executor = Executors.newSingleThreadExecutor();
             //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
 
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release();
                 sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
+                return true;
             }
         });
 
@@ -138,8 +140,10 @@ private Executor executor = Executors.newSingleThreadExecutor();
             }
 
             @Override
-            public void run() throws InterruptedException {
-                Thread.sleep(500);
+            public boolean run() throws InterruptedException {
+                Thread.sleep(600);
+                if(!sensorSubsystem.coneIsLoaded())
+                    return false;
                 //daca e sus mergi jos (vezi in codul sursa)
                 if(transferSubsystem.isUp()) transferSubsystem.bControl =false;
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -147,51 +151,56 @@ private Executor executor = Executors.newSingleThreadExecutor();
                 sliderSubsystem.goTo(SliderSubsystem.LoadPos); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
                 transferSubsystem.bControl =true;
+                return true;
             }
         });
 
         //restul se inteleg daca ai citit si codul sursa de la subsysteme
         SliderAndClampingFSM.add(new ButtonTransition(waitingState, frontWaitingState, operatorGamepad, GamepadKeys.Button.LEFT_STICK_BUTTON) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
             }
         });
 
         State[] sliderSafeStates = {loadedState, upperState, mediumState, lowerState, groundState};
         SliderAndClampingFSM.addTransitionsTo(upperState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_UP) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.HighPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
             }
         });
         SliderAndClampingFSM.addTransitionsTo(mediumState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
 
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.MediumPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
             }
         });
         SliderAndClampingFSM.addTransitionsTo(lowerState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderSubsystem.goTo(SliderSubsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-
+                return true;
             }
         });
         SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 if(sliderSubsystem.isSafe()) clampSubsystem.goToBackward();
                 if(sliderSubsystem.getPosition()>=SliderSubsystem.GroundPos+10)
                     clampSubsystem.goToForward();
                 sliderSubsystem.goTo(SliderSubsystem.GroundPos);
+                return true;
             }
         });
         State[] outsideStates = new State[]{groundState, frontWaitingState, lowerState, mediumState, upperState};
@@ -218,7 +227,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
             }
 
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 if (sliderSubsystem.isSafe()) {
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                     sliderSubsystem.goTo(SliderSubsystem.SafePos);
@@ -228,6 +237,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                     sliderSubsystem.goTo(SliderSubsystem.LowPos);
                 }
+                return true;
             }
         });
         SliderAndClampingFSM.build();
@@ -263,49 +273,55 @@ private Executor executor = Executors.newSingleThreadExecutor();
         IntakeFSM.setInitialState(inactiveState);
         IntakeFSM.add(new ButtonTransition(inactiveState, loweredState, operatorGamepad, GamepadKeys.Button.LEFT_BUMPER) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 transferSubsystem.bControl=false;
                 transferSubsystem.goTo(TransferSubsystem.lowerArmPos);
                 transferSubsystem.blockWithLeg();
                 Thread.sleep(100);
                 intakeSubsystem.intake(IntakeSubsystem.power);
+                return true;
             }
         });
         IntakeFSM.add(new ReleaseTransition(loweredState, inactiveState, operatorGamepad, GamepadKeys.Button.LEFT_BUMPER) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 transferSubsystem.bControl=true;
                 transferSubsystem.goTo(TransferSubsystem.idleArmPos);
-
+                intakeSubsystem.stop();
+                return true;
             }
         });
         IntakeFSM.add(new ButtonTransition(inactiveState, expulseState, operatorGamepad, GamepadKeys.Button.RIGHT_BUMPER) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 intakeSubsystem.expulse();
+                return true;
             }
         });
         IntakeFSM.add(new ReleaseTransition(expulseState, inactiveState, operatorGamepad, GamepadKeys.Button.RIGHT_BUMPER) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 transferSubsystem.goTo(TransferSubsystem.idleArmPos);
-
+                intakeSubsystem.stop();
+                return true;
             }
         });
         IntakeFSM.add(new ButtonTransition(inactiveState, liftingState, operatorGamepad, GamepadKeys.Button.A) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 transferSubsystem.bControl=false;
                 transferSubsystem.retreatLeg();
                 transferSubsystem.goTo(TransferSubsystem.upperArmPos);
-
+                return true;
             }
         });
         IntakeFSM.add(new ReleaseTransition(liftingState, inactiveState, operatorGamepad, GamepadKeys.Button.A) {
             @Override
-            public void run() throws InterruptedException {
+            public boolean run() throws InterruptedException {
                 transferSubsystem.bControl=true;
                 transferSubsystem.goTo(TransferSubsystem.idleArmPos);
+                intakeSubsystem.stop();
+                return true;
             }
         });
         IntakeFSM.build();

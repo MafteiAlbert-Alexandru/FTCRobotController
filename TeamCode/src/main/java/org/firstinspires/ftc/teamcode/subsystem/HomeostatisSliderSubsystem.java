@@ -1,34 +1,45 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
-import com.ThermalEquilibrium.homeostasis.Controllers.Feedforward.BasicFeedforward;
-import com.ThermalEquilibrium.homeostasis.Filters.Estimators.RawValue;
+
+import com.ThermalEquilibrium.homeostasis.Controllers.Feedback.PIDEx;
 import com.ThermalEquilibrium.homeostasis.Parameters.FeedforwardCoefficients;
 import com.ThermalEquilibrium.homeostasis.Parameters.PIDCoefficientsEx;
-import com.ThermalEquilibrium.homeostasis.Systems.PositionVelocitySystem;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.experiments.PIDExFixed;
 import org.firstinspires.ftc.teamcode.hardware.SmartMotor;
 import org.firstinspires.ftc.teamcode.hardware.SmartMotorEx;
-
-import java.util.function.DoubleSupplier;
 @Config
 public class HomeostatisSliderSubsystem extends  SmartSubsystem {
 
 
     public SmartMotorEx slider;
+    public static double tolerance = 10;
+    public static int GroundPos =150; //Ajutam putin PID-ul
+    public static int LowPos =660;
+    public static int MediumPos = 1050;
+    public static int HighPos = 1475;
+    public static int PreLoadPos = 250;
 
+    public static int SafePos = 600;
+    public static int LoadPos = 80;
+
+    public static int aimPos = 380;
+    public static int cone5Pos = 230;
+    public static int cone4Pos = 125;
+    public static int cone3Pos = 65;
+    public static int cone2Pos = 25;
+    public static int cone1Pos = 0;
     public static double target=0;
-    public static double speed=0;
-    public static double power=0;
-    public static PIDCoefficientsEx posCoefficients = new PIDCoefficientsEx(0.1,0.0,0.0,0,0,0);
-    public static PIDCoefficientsEx veloCoefficients = new PIDCoefficientsEx(0.1,0,0, 100, 20, 0);
+    public static double power=0.8;
+    public static PIDCoefficientsEx posCoefficients = new PIDCoefficientsEx(0.02,0.0005,0,100,25,0.5   );
     public static FeedforwardCoefficients coefficientsFF = new FeedforwardCoefficients(1,1,1);
+    public boolean isSafe()
+    {
+        return slider.getCurrentPosition() >= LowPos;
+    }
+    private PIDEx posControl = new PIDEx(posCoefficients);
 
-    private PIDExFixed posControl = new PIDExFixed(posCoefficients);
-    private PIDExFixed veloControl = new PIDExFixed(veloCoefficients);
-    private PositionVelocitySystem system;
     @Override
     public void run(SubsystemData data) throws InterruptedException {
 
@@ -63,15 +74,18 @@ public class HomeostatisSliderSubsystem extends  SmartSubsystem {
         slider.setRunMode(SmartMotor.RunMode.RawPower);
         slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);
         slider.setInverted(true);
-
-        DoubleSupplier motorPosition = () -> slider.getCurrentPosition();
-        DoubleSupplier motorVelocity = () -> slider.getVelocity();
-
-        RawValue positionFilter = new RawValue(motorPosition);
-        RawValue velocityFilter = new RawValue(motorVelocity);
-        BasicFeedforward feedforward = new BasicFeedforward(coefficientsFF);
-        system =new PositionVelocitySystem(positionFilter,
-                        velocityFilter,feedforward,posControl,veloControl);
         target=0;
+    }
+    public void goTo(int target) {
+        this.target=target;
+        while (Math.abs(slider.getCurrentPosition()-target)>tolerance);
+    }
+    public void setTarget(int target){
+        this.target = target;
+        slider.setTargetPosition(target);
+    }
+
+    public int getPosition(){
+        return slider.getCurrentPosition();
     }
 }

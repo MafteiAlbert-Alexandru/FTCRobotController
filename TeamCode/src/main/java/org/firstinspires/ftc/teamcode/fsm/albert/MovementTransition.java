@@ -25,7 +25,7 @@ public class MovementTransition extends Transition {
     }
 
     @Override
-    public void run() throws InterruptedException {
-
+    public boolean run() throws InterruptedException {
+        return true;
     }
 }
