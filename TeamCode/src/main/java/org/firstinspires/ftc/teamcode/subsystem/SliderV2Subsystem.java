@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.util.SmartMath;
 public class SliderV2Subsystem extends SmartSubsystem {
 
     public SmartMotorEx slider;
+    PIDController controller;
 
     // TODO CALIBRATE POSITIONS FURTHER
     public  int target = 0; //Smash target
@@ -37,8 +38,6 @@ public class SliderV2Subsystem extends SmartSubsystem {
     public static int cone2Pos = 25;
     public static int cone1Pos = 0;
 
-    PIDController controller;
-
     public static double p = 0.01, i = 0.01, d = 0.0002;
 
     public static double up_f = 0.05;
@@ -48,7 +47,6 @@ public class SliderV2Subsystem extends SmartSubsystem {
     int minPos = 0, maxPos = 1800;
 
     public static boolean telemetryOn = false; //Daca vreau telemetrie
-
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
@@ -67,7 +65,6 @@ public class SliderV2Subsystem extends SmartSubsystem {
             opMode.telemetry.addData("target", target);
             opMode.telemetry.addData("power", power);
         }
-
     }
 
     @Override

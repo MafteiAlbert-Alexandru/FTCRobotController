@@ -28,6 +28,7 @@ public class SmartMotorEx extends SmartMotor {
      * @param id          the device id from the RC config
      * @param gobildaType the type of gobilda 5202 series motor being used
      */
+
     public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull GoBILDA gobildaType, MotorDirection type) {
         super(hMap, id, gobildaType, type);
         motorEx = (DcMotorEx) super.motor;
