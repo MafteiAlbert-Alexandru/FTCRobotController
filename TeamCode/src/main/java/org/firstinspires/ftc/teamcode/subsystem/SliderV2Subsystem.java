@@ -43,7 +43,7 @@ public class SliderV2Subsystem extends SmartSubsystem {
 
     public static double up_f = 0.05;
 
-    public static double down_f = 0.02;
+    public static double down_f = 0.035;
 
     int minPos = 0, maxPos = 1800;
 
