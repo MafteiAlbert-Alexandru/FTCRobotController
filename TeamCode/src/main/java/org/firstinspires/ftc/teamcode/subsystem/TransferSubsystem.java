@@ -11,7 +11,7 @@ public class TransferSubsystem extends SmartSubsystem {
     private Servo arm;
     private Servo leg;
     public static double upperArmPos = 0.18;
-    public static double lowerArmPos = 0.65;
+    public static double lowerArmPos = 0.66;
     public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.27;
     public static double hittingLegPos =0.4;

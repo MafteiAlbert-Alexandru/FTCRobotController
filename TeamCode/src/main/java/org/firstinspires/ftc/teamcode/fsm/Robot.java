@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SensorSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
+import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
@@ -25,17 +25,15 @@ import java.util.concurrent.Executors;
 public class Robot {
 
     //region Subsystem
-
     public  IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public  TransferSubsystem transferSubsystem = new TransferSubsystem();
     public  MovementSubsystem movementSubsystem = new MovementSubsystem();
-    public  SliderSubsystem sliderSubsystem = new SliderSubsystem();
+    public  SliderV2Subsystem SliderV2Subsystem = new SliderV2Subsystem();
     public ClampSubsystem clampSubsystem = new ClampSubsystem();
     public   SensorSubsystem sensorSubsystem = new SensorSubsystem();
-private Executor executor = Executors.newSingleThreadExecutor();
+    private final Executor executor = Executors.newSingleThreadExecutor();
     //endregion
 
-    //region SliderAndClampingFSM states
     public State initialState;
     public State waitingState;
     public State loadedState;
@@ -44,23 +42,18 @@ private Executor executor = Executors.newSingleThreadExecutor();
     public State lowerState;
     public State groundState;
     public State frontWaitingState;
-    //endregion
-    //region MovementFSM states
+
     public State movingState;
     public State homingState;
-    //endregion
+
     public State inactiveState;
     public State liftingState;
     public State loweredState;
     public State expulseState;
-    //region IntakeFSM states
 
-    //endregion
-    //region FSM
     public final FSM SliderAndClampingFSM = new FSM();
     public final FSM MovementFSM = new FSM();
     public final FSM IntakeFSM = new FSM();
-    //endregion
 
     private final boolean autonomous;
     private final GamepadEx driverGamepad;
@@ -100,16 +93,15 @@ private Executor executor = Executors.newSingleThreadExecutor();
         //imi setez un state initial
         SliderAndClampingFSM.setInitialState(initialState);
 
-
         SliderAndClampingFSM.add(new ButtonTransition(initialState, waitingState, operatorGamepad, GamepadKeys.Button.Y) {
             //adaug un state intre cel initial si cel de waiting
             //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
 
             @Override
             public boolean run() throws InterruptedException {
-                sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.PreLoadPos);
                 clampSubsystem.release();
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
                 return true;
@@ -124,7 +116,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release();
-                sliderSubsystem.goTo(SliderSubsystem.PreLoadPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.PreLoadPos);
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
                 return true;
             }
@@ -148,7 +140,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
                 if(transferSubsystem.isUp()) transferSubsystem.bControl =false;
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release(); //dau drumul la hook (siguranta)
-                sliderSubsystem.goTo(SliderSubsystem.LoadPos); //duc slider-ul in con (o bag tare)
+                SliderV2Subsystem.goTo(SliderV2Subsystem.LoadPos); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
                 transferSubsystem.bControl =true;
                 return true;
@@ -169,7 +161,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                sliderSubsystem.goTo(SliderSubsystem.HighPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.HighPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
                 return true;
             }
@@ -179,7 +171,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                sliderSubsystem.goTo(SliderSubsystem.MediumPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.MediumPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
                 return true;
             }
@@ -188,7 +180,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.ForwardPos);
                 return true;
             }
@@ -196,10 +188,10 @@ private Executor executor = Executors.newSingleThreadExecutor();
         SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
             @Override
             public boolean run() throws InterruptedException {
-                if(sliderSubsystem.isSafe()) clampSubsystem.goToBackward();
-                if(sliderSubsystem.getPosition()>=SliderSubsystem.GroundPos+10)
+                if(SliderV2Subsystem.isSafe()) clampSubsystem.goToBackward();
+                if(SliderV2Subsystem.getPosition()>=SliderV2Subsystem.GroundPos+10)
                     clampSubsystem.goToForward();
-                sliderSubsystem.goTo(SliderSubsystem.GroundPos);
+                SliderV2Subsystem.goTo(SliderV2Subsystem.GroundPos);
                 return true;
             }
         });
@@ -228,14 +220,14 @@ private Executor executor = Executors.newSingleThreadExecutor();
 
             @Override
             public boolean run() throws InterruptedException {
-                if (sliderSubsystem.isSafe()) {
+                if (SliderV2Subsystem.isSafe()) {
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                    sliderSubsystem.goTo(SliderSubsystem.SafePos);
-                    sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                    SliderV2Subsystem.goTo(SliderV2Subsystem.SafePos);
+                    SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
                 } else {
-                    sliderSubsystem.goTo(SliderSubsystem.SafePos);
+                    SliderV2Subsystem.goTo(SliderV2Subsystem.SafePos);
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                    sliderSubsystem.goTo(SliderSubsystem.LowPos);
+                    SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
                 }
                 return true;
             }
@@ -328,7 +320,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
 
     }
     private boolean running = false;
-    private SubsystemData subsystemData = new SubsystemData();
+    private final SubsystemData subsystemData = new SubsystemData();
     public void update() throws InterruptedException {
         if(!this.autonomous)
         {
@@ -338,7 +330,7 @@ private Executor executor = Executors.newSingleThreadExecutor();
 
         SliderAndClampingFSM.update(!this.autonomous);
 
-        sliderSubsystem.run(subsystemData);
+        SliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);
 
         if(!this.autonomous)

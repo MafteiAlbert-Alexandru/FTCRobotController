@@ -7,12 +7,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
+
 @Config
 public class WebcamUtil {
     private Servo webcamServo;
@@ -70,6 +73,8 @@ public class WebcamUtil {
             @Override
             public void onOpened() {
                 webcam.startStreaming(config.getResolutionX(), config.getResolutionY(), OpenCvCameraRotation.UPRIGHT);
+                webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
+                webcam.getExposureControl().setExposure(5, TimeUnit.MILLISECONDS);
             }
 
             @Override

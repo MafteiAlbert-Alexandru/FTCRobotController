@@ -31,11 +31,7 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
     private Results latestResults=new Results();
 
     private Scalar clearScalar = new Scalar(0, 0, 0);
-    private Mat hsvInput = new Mat();
-    private Mat yellowMask = new Mat();
     private Mat output = new Mat();
-    private Mat ContourInput = new Mat();
-    private Mat outputLuttedImage = new Mat();
 
     public static int pixelTreshold = 250;
 
@@ -63,8 +59,6 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
     private Mat luttedImage = new Mat(448, 800, CvType.CV_8U);
     @Override
     public Mat processFrame(Mat input) {
-        hsvInput.setTo(clearScalar);
-        yellowMask.setTo(clearScalar);
         output.setTo(clearScalar);
 
         Imgproc.cvtColor(input, input, Imgproc.COLOR_RGBA2RGB);

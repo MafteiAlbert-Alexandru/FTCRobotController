@@ -16,7 +16,7 @@ public class ClampSubsystem extends SmartSubsystem {
     public static double clampOffset=0.17;
     public static double unclampedOffset=0.22;
     public static double initialPosition=0.35;
-    public static double ForwardPos = 0.1;
+    public static double ForwardPos = 0;
     public static double BackwardPos = 0.6;
     private boolean clamping = false;
     public boolean isClamping()
