@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SensorSubsystem;
-import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
+import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
@@ -28,7 +28,7 @@ public class Robot {
     public  IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public  TransferSubsystem transferSubsystem = new TransferSubsystem();
     public  MovementSubsystem movementSubsystem = new MovementSubsystem();
-    public  SliderV2Subsystem SliderV2Subsystem = new SliderV2Subsystem();
+    public SliderSubsystem sliderV2Subsystem = new SliderSubsystem();
     public ClampSubsystem clampSubsystem = new ClampSubsystem();
     public   SensorSubsystem sensorSubsystem = new SensorSubsystem();
     private final Executor executor = Executors.newSingleThreadExecutor();
@@ -99,9 +99,9 @@ public class Robot {
 
             @Override
             public boolean run() throws InterruptedException {
-                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                SliderV2Subsystem.goTo(SliderV2Subsystem.PreLoadPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.PreLoadPos,500, 20);
                 clampSubsystem.release();
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
                 return true;
@@ -116,7 +116,7 @@ public class Robot {
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release();
-                SliderV2Subsystem.goTo(SliderV2Subsystem.PreLoadPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.PreLoadPos,500, 20);
                 //hook-ul se duce in SafePos si pe spate (adica in robot)
                 return true;
             }
@@ -140,7 +140,7 @@ public class Robot {
                 if(transferSubsystem.isUp()) transferSubsystem.bControl =false;
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 clampSubsystem.release(); //dau drumul la hook (siguranta)
-                SliderV2Subsystem.goTo(SliderV2Subsystem.LoadPos); //duc slider-ul in con (o bag tare)
+                sliderV2Subsystem.goTo(SliderSubsystem.LoadPos, 750); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
                 transferSubsystem.bControl =true;
                 return true;
@@ -155,47 +155,185 @@ public class Robot {
                 return true;
             }
         });
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+            @Override
+            public boolean run() throws InterruptedException {
+                sliderV2Subsystem.goTo(SliderSubsystem.HighPos,750);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+            @Override
+            public boolean run() throws InterruptedException {
+                sliderV2Subsystem.goTo(SliderSubsystem.MediumPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+            @Override
+            public boolean run() throws InterruptedException {
+                sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+            @Override
+            public boolean run() throws InterruptedException {
+                sliderV2Subsystem.goTo(SliderSubsystem.SafePos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.GroundPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+            @Override
+            public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.MediumPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+            @Override
+            public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+            @Override
+            public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.SafePos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.GroundPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState, upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+            @Override
+            public boolean run() throws InterruptedException {
+                sliderV2Subsystem.goTo(SliderSubsystem.HighPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+            @Override
+            public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState,groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+            @Override
+            public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.SafePos);
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.GroundPos);
 
-        State[] sliderSafeStates = {loadedState, upperState, mediumState, lowerState, groundState};
-        SliderAndClampingFSM.addTransitionsTo(upperState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_UP) {
-            @Override
-            public boolean run() throws InterruptedException {
-                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                SliderV2Subsystem.goTo(SliderV2Subsystem.HighPos);
-                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
                 return true;
             }
         });
-        SliderAndClampingFSM.addTransitionsTo(mediumState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+            @Override
+            public boolean run() throws InterruptedException {
 
-            @Override
-            public boolean run() throws InterruptedException {
-                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                SliderV2Subsystem.goTo(SliderV2Subsystem.MediumPos);
-                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+                sliderV2Subsystem.goTo(SliderSubsystem.HighPos);
                 return true;
             }
         });
-        SliderAndClampingFSM.addTransitionsTo(lowerState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
             @Override
             public boolean run() throws InterruptedException {
-                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
-                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+
+                sliderV2Subsystem.goTo(SliderSubsystem.MediumPos);
                 return true;
             }
         });
-        SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
             @Override
             public boolean run() throws InterruptedException {
-                if(SliderV2Subsystem.isSafe()) clampSubsystem.goToBackward();
-                if(SliderV2Subsystem.getPosition()>=SliderV2Subsystem.GroundPos+10)
-                    clampSubsystem.goToForward();
-                SliderV2Subsystem.goTo(SliderV2Subsystem.GroundPos);
+
+                sliderV2Subsystem.goTo(SliderSubsystem.GroundPos);
                 return true;
             }
         });
-        State[] outsideStates = new State[]{groundState, frontWaitingState, lowerState, mediumState, upperState};
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+            @Override
+            public boolean run() throws InterruptedException {
+
+                sliderV2Subsystem.goTo(SliderSubsystem.HighPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+            @Override
+            public boolean run() throws InterruptedException {
+
+                sliderV2Subsystem.goTo(SliderSubsystem.MediumPos);
+                return true;
+            }
+        });
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+            @Override
+            public boolean run() throws InterruptedException {
+
+                sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
+                return true;
+            }
+        });
+
+
+
+//        State[] sliderSafeStates = {loadedState, upperState, mediumState, lowerState, groundState};
+//        SliderAndClampingFSM.addTransitionsTo(upperState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+//                SliderV2Subsystem.goTo(SliderV2Subsystem.HighPos);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
+//        SliderAndClampingFSM.addTransitionsTo(mediumState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+//
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+//                SliderV2Subsystem.goTo(SliderV2Subsystem.MediumPos);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
+//        SliderAndClampingFSM.addTransitionsTo(lowerState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
+//                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
+//        SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                if(SliderV2Subsystem.isSafe()) clampSubsystem.goToBackward();
+//                if(SliderV2Subsystem.getPosition()>=SliderV2Subsystem.GroundPos+10)
+//                    clampSubsystem.goToForward();
+//                SliderV2Subsystem.goTo(SliderV2Subsystem.GroundPos);
+//                return true;
+//            }
+//        });
+        State[] outsideStates = new State[]{lowerState, mediumState, upperState,groundState};
         SliderAndClampingFSM.addTransitionsTo(waitingState, outsideStates, new Transition() {
             Long lastTimeSinceClamped = null;
 
@@ -220,22 +358,21 @@ public class Robot {
 
             @Override
             public boolean run() throws InterruptedException {
-                if (SliderV2Subsystem.isSafe()) {
+                if (sliderV2Subsystem.isSafe()) {
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                    SliderV2Subsystem.goTo(SliderV2Subsystem.SafePos);
-                    SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
+                    sliderV2Subsystem.goTo(SliderSubsystem.PreLoadPos);
                 } else {
-                    SliderV2Subsystem.goTo(SliderV2Subsystem.SafePos);
+                    sliderV2Subsystem.goTo(SliderSubsystem.SafePos);
                     clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-                    SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
+                    sliderV2Subsystem.goTo(SliderSubsystem.PreLoadPos);
                 }
                 return true;
             }
         });
         SliderAndClampingFSM.build();
-//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap);
+//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
 //
-//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry);
+//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
 //        webcamUtil.registerListener(junctionAdjuster);
 //        webcamUtil.start(true);
         opMode.telemetry.update();
@@ -249,11 +386,11 @@ public class Robot {
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
-//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4));
+//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
 //                movementSubsystem.move(direction.getY(), direction.getX(), 0);
             }
         };
-        MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.A) {
+        MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
         });
         MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
         });
@@ -330,7 +467,7 @@ public class Robot {
 
         SliderAndClampingFSM.update(!this.autonomous);
 
-        SliderV2Subsystem.run(subsystemData);
+        sliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);
 
         if(!this.autonomous)

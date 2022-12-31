@@ -16,7 +16,7 @@ public class ClampSubsystem extends SmartSubsystem {
     public static double clampOffset=0.17;
     public static double unclampedOffset=0.22;
     public static double initialPosition=0.35;
-    public static double ForwardPos = 0;
+    public static double ForwardPos = 0.04;
     public static double BackwardPos = 0.6;
     private boolean clamping = false;
     public boolean isClamping()
@@ -36,7 +36,7 @@ public class ClampSubsystem extends SmartSubsystem {
     public void goTo(double position) throws InterruptedException {
         double initialPosition = baseServo.getPosition();
         double delta = Math.abs(position-initialPosition);
-        double time = delta * 300 / 220.0 *1000;
+        double time = delta * 300 / 200.0 *1000;
         setPosition(position);
         Thread.sleep((long) time);
     }

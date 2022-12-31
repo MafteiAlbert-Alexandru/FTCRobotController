@@ -15,8 +15,8 @@ public class SliderSubsystem extends SmartSubsystem {
     // TODO CALIBRATE POSITIONS FURTHER
     public  int target = 0; //Smash target
     public static double tolerance = 10; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
-    public static double upwardCoefficient = 0.15; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
-    public static double downwardCoefficient =0.18; //Dar cand cobor sunt mai chill
+    public static double upwardCoefficient = 0.09; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
+    public static double downwardCoefficient =0.06; //Dar cand cobor sunt mai chill
     public static double pow = 0.1; //POWer pentru cine nu si-a dat seama
     //Asta mi face glisiera sa faca pau pau (adica e kP-ul din PID)
 
@@ -25,7 +25,7 @@ public class SliderSubsystem extends SmartSubsystem {
     public static int GroundPos =150; //Ajutam putin PID-ul
     public static int LowPos =660;
     public static int MediumPos = 1050;
-    public static int HighPos = 1475;
+    public static int HighPos = 1500;
     public static int PreLoadPos = 250;
 
     public static int SafePos = 600;
@@ -74,12 +74,15 @@ public class SliderSubsystem extends SmartSubsystem {
         target=0;
     }
     public void goTo(int target) {
-        goTo(target, Long.MAX_VALUE);
+        goTo(target, Long.MAX_VALUE,tolerance);
     }
     public void goTo(int target, long timeout) {
+        goTo(target, timeout,tolerance);
+    }
+    public void goTo(int target, long timeout, double tolerance) {
         setTarget(target);
         long startTime=System.currentTimeMillis();
-        while(!slider.atTargetPosition() && System.currentTimeMillis()-startTime<timeout);
+        while(!(Math.abs(slider.getCurrentPosition()-target)<tolerance)& System.currentTimeMillis()-startTime<timeout);
     }
     public void setTarget(int target){
         this.target = target;

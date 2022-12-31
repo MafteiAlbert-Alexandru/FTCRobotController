@@ -9,6 +9,8 @@ public class SmartMath {
     }
 
     public static boolean ToleranceError(double x, double y,double tolerance){
+
+
         return (x>y-tolerance && x<y+tolerance);
     }
 

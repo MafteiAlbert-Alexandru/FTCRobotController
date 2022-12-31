@@ -32,7 +32,7 @@ public class PipelineTeleOp extends LinearOpMode {
                 @Override
                 public void onOpened() {
                     webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
-                    webcam.getExposureControl().setExposure(5, TimeUnit.MILLISECONDS);
+                    webcam.getExposureControl().setExposure(4, TimeUnit.MILLISECONDS);
                     webcam.startStreaming(800, 448, OpenCvCameraRotation.UPRIGHT);
                     telemetry.addData("initial camera exposure",webcam.getExposureControl().getExposure(TimeUnit.MICROSECONDS));
 

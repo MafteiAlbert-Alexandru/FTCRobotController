@@ -28,10 +28,10 @@ public class SliderV2Subsystem extends SmartSubsystem {
     public static int HighPos = 1525;
     public static int PreLoadPos = 250;
 
-    public static int SafePos = 600;
+    public static int SafePos = 725;
     public static int LoadPos = 45;
 
-    public static int aimPos = 380;
+    public static int AimPos = 380;
     public static int cone5Pos = 230;
     public static int cone4Pos = 125;
     public static int cone3Pos = 65;
@@ -79,13 +79,13 @@ public class SliderV2Subsystem extends SmartSubsystem {
     }
 
     public void goTo(int target) {
-        goTo(target, Long.MAX_VALUE);
+        goTo(target, Long.MAX_VALUE, tolerance);
     }
 
-    public void goTo(int target, long timeout) {
+    public void goTo(int target, long timeout, double tolerance) {
         setTarget(target);
         long startTime=System.currentTimeMillis();
-        while(SmartMath.ToleranceError(slider.getCurrentPosition(), target, tolerance) && System.currentTimeMillis()-startTime<timeout);
+        while(!SmartMath.ToleranceError(slider.getCurrentPosition(), target, tolerance) && System.currentTimeMillis()-startTime<timeout);
     }
 
     public void setTarget(int target){
@@ -105,6 +105,6 @@ public class SliderV2Subsystem extends SmartSubsystem {
     //Functie secsi ca sa se verifice daca glisiera este intr-o pozitie sigura
     public boolean isSafe()
     {
-        return slider.getCurrentPosition() >= LowPos;
+        return slider.getCurrentPosition() >= SafePos;
     }
 }
