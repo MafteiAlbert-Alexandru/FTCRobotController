@@ -15,7 +15,7 @@ public class SmartMath {
     }
 
     public static double TicksToDistance(int ticks, double revRatio, int angle){
-        return Math.round(ticks*revRatio*Math.abs(Math.cos(angle))*100)/100;
+        return Math.round(ticks*revRatio*Math.cos(angle)*100)/100;
     }
 
     public static double TicksToDistance(int ticks, double revRatio){
@@ -23,7 +23,7 @@ public class SmartMath {
     }
 
     public static double DistanceToTicks(int distance, double revRatio, int angle){
-        return Math.round(distance/revRatio/Math.abs(Math.cos(angle))*100)/100;
+        return Math.round(distance/revRatio/Math.cos(angle)*100)/100;
     }
 
     public static double DistanceToTicks(int distance, double revRatio){

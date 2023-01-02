@@ -24,6 +24,13 @@ import java.util.concurrent.Executors;
 
 public class Robot {
 
+    public enum OpModeType{
+        Auto,
+        TeleOp
+    }
+
+    public OpModeType opModeType;
+
     //region Subsystem
     public  IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public  TransferSubsystem transferSubsystem = new TransferSubsystem();
@@ -55,12 +62,11 @@ public class Robot {
     public final FSM MovementFSM = new FSM();
     public final FSM IntakeFSM = new FSM();
 
-    private final boolean autonomous;
     private final GamepadEx driverGamepad;
     private final GamepadEx operatorGamepad;
 
-    public Robot(OpMode opMode, boolean autonomous) throws IllegalAccessException {
-        this.autonomous = autonomous;
+    public Robot(OpMode opMode, OpModeType opModeType) throws IllegalAccessException {
+        this.opModeType = opModeType;
 
         SmartSubsystem.initAllSubsystems(this, opMode);
         //initializeaza toate subsystemele
@@ -171,7 +177,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(loadedState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
@@ -459,18 +465,18 @@ public class Robot {
     private boolean running = false;
     private final SubsystemData subsystemData = new SubsystemData();
     public void update() throws InterruptedException {
-        if(!this.autonomous)
+        if(!(opModeType == OpModeType.Auto))
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
         }
 
-        SliderAndClampingFSM.update(!this.autonomous);
+        SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));
 
         sliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);
 
-        if(!this.autonomous)
+        if(!(opModeType == OpModeType.Auto))
         {
             MovementFSM.update(true);
             IntakeFSM.update(true);

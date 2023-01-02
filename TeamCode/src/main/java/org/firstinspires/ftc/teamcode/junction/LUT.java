@@ -11,6 +11,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class LUT {
+
     private static long ptrToLut=0;
     private static boolean alreadyLoaded = false;
     public static ExecutorService threadPool = Executors.newFixedThreadPool(4);
