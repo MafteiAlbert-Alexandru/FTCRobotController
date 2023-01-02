@@ -29,7 +29,7 @@ public class Robot {
         TeleOp
     }
 
-    public OpModeType opModeType;
+    public OpModeType opModeType;//love you tudor<3
 
     //region Subsystem
     public  IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
@@ -43,7 +43,7 @@ public class Robot {
     GamepadKeys.Button highButton = GamepadKeys.Button.DPAD_UP;
     GamepadKeys.Button midButton = GamepadKeys.Button.DPAD_RIGHT;
     GamepadKeys.Button lowButton = GamepadKeys.Button.DPAD_DOWN;
-    GamepadKeys.Button groundButton = GamepadKeys.Button.DPAD_LEFT;
+    GamepadKeys.Button groundButton;
 
     //endregion
 
