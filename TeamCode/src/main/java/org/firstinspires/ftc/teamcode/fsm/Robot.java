@@ -105,7 +105,13 @@ public class Robot {
         //imi setez un state initial
         SliderAndClampingFSM.setInitialState(initialState);
 
-        SliderAndClampingFSM.add(new ButtonTransition(initialState, waitingState, operatorGamepad, GamepadKeys.Button.Y) {
+        SliderAndClampingFSM.add(new Transition(initialState, waitingState) {
+
+            @Override
+            public boolean check(){
+                return true;
+            }
+
             //adaug un state intre cel initial si cel de waiting
             //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
 
