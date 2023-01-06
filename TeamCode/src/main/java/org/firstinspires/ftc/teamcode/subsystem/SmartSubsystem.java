@@ -6,7 +6,6 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import java.lang.reflect.Field;
 import java.util.Objects;
 
-
 public abstract class SmartSubsystem {
 
 

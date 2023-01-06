@@ -17,10 +17,12 @@ public class SmartMotorEx extends SmartMotor {
      * @param hMap the hardware map from the OpMode
      * @param id   the device id from the RC config
      */
-    public SmartMotorEx(@NonNull HardwareMap hMap, String id) {
+
+    public SmartMotorEx(HardwareMap hMap, String id) {
         this(hMap, id, GoBILDA.NONE, MotorDirection.FORWARD);
         ACHIEVABLE_MAX_TICKS_PER_SECOND = motorEx.getMotorType().getAchieveableMaxTicksPerSecond();
     }
+
     /**
      * Constructs the instance motor for the wrapper
      *
@@ -29,34 +31,34 @@ public class SmartMotorEx extends SmartMotor {
      * @param gobildaType the type of gobilda 5202 series motor being used
      */
 
-    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull GoBILDA gobildaType, MotorDirection type) {
+    public SmartMotorEx(HardwareMap hMap, String id, @NonNull GoBILDA gobildaType, MotorDirection type) {
         super(hMap, id, gobildaType, type);
         motorEx = (DcMotorEx) super.motor;
     }
 
-    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull GoBILDA gobildaType) {
+    public SmartMotorEx(HardwareMap hMap, String id, @NonNull GoBILDA gobildaType) {
         super(hMap, id, gobildaType, MotorDirection.FORWARD);
         motorEx = (DcMotorEx) super.motor;
     }
 
-    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull NeveRest gobildaType, MotorDirection type) {
+    public SmartMotorEx(HardwareMap hMap, String id, @NonNull NeveRest gobildaType, MotorDirection type) {
         super(hMap, id, gobildaType, type);
         motorEx = (DcMotorEx) super.motor;
     }
 
-    public SmartMotorEx(@NonNull HardwareMap hMap, String id, @NonNull NeveRest gobildaType) {
+    public SmartMotorEx(HardwareMap hMap, String id, @NonNull NeveRest gobildaType) {
         super(hMap, id, gobildaType, MotorDirection.FORWARD);
         motorEx = (DcMotorEx) super.motor;
     }
 
     /**
      * Constructs an instance motor for the wrapper
-     *
      * @param hMap the hardware map from the OpMode
      * @param id   the device id from the RC config
      * @param cpr  the counts per revolution of the motor
      * @param rpm  the revolutions per minute of the motor
      */
+
     public SmartMotorEx(@NonNull HardwareMap hMap, String id, double cpr, double rpm, MotorDirection Type) {
         super(hMap, id, cpr, rpm, Type);
         motorEx = (DcMotorEx) super.motor;
@@ -79,6 +81,7 @@ public class SmartMotorEx extends SmartMotor {
     /**
      * @param velocity the velocity in ticks per second
      */
+
     public void setVelocity(double velocity) {
         set(velocity / ACHIEVABLE_MAX_TICKS_PER_SECOND);
     }
@@ -93,6 +96,7 @@ public class SmartMotorEx extends SmartMotor {
      * @param velocity  the angular rate
      * @param angleUnit radians or degrees
      */
+
     public void setVelocity(double velocity, AngleUnit angleUnit) {
         setVelocity(getCPR() * AngleUnit.RADIANS.fromUnit(angleUnit, velocity) / (2 * Math.PI));
     }
@@ -100,6 +104,7 @@ public class SmartMotorEx extends SmartMotor {
     /**
      * @return the velocity of the motor in ticks per second
      */
+
     @Override
     public double getVelocity() {
         return motorEx.getVelocity();
@@ -108,6 +113,7 @@ public class SmartMotorEx extends SmartMotor {
     /**
      * @return the acceleration of the motor in ticks per second squared
      */
+
     public double getAcceleration() {
         return encoder.getAcceleration();
     }

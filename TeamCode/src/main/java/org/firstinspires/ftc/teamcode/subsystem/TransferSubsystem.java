@@ -14,7 +14,7 @@ public class TransferSubsystem extends SmartSubsystem {
     public static double lowerArmPos = 0.66;
     public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.27;
-    public static double hittingLegPos =0.4;
+    public static double hittingLegPos =0.45;
     public static double openedLegPos =0;
     private boolean lifting=false;
     public void lift() throws InterruptedException {

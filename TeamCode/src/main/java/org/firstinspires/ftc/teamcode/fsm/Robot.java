@@ -24,6 +24,13 @@ import java.util.concurrent.Executors;
 
 public class Robot {
 
+    public enum OpModeType{
+        Auto,
+        TeleOp
+    }
+
+    public OpModeType opModeType;//love you tudor<3
+
     //region Subsystem
     public  IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     public  TransferSubsystem transferSubsystem = new TransferSubsystem();
@@ -32,6 +39,12 @@ public class Robot {
     public ClampSubsystem clampSubsystem = new ClampSubsystem();
     public   SensorSubsystem sensorSubsystem = new SensorSubsystem();
     private final Executor executor = Executors.newSingleThreadExecutor();
+
+    GamepadKeys.Button highButton = GamepadKeys.Button.DPAD_UP;
+    GamepadKeys.Button midButton = GamepadKeys.Button.DPAD_RIGHT;
+    GamepadKeys.Button lowButton = GamepadKeys.Button.DPAD_DOWN;
+    GamepadKeys.Button groundButton;
+
     //endregion
 
     public State initialState;
@@ -55,12 +68,11 @@ public class Robot {
     public final FSM MovementFSM = new FSM();
     public final FSM IntakeFSM = new FSM();
 
-    private final boolean autonomous;
     private final GamepadEx driverGamepad;
     private final GamepadEx operatorGamepad;
 
-    public Robot(OpMode opMode, boolean autonomous) throws IllegalAccessException {
-        this.autonomous = autonomous;
+    public Robot(OpMode opMode, OpModeType opModeType) throws IllegalAccessException {
+        this.opModeType = opModeType;
 
         SmartSubsystem.initAllSubsystems(this, opMode);
         //initializeaza toate subsystemele
@@ -93,7 +105,13 @@ public class Robot {
         //imi setez un state initial
         SliderAndClampingFSM.setInitialState(initialState);
 
-        SliderAndClampingFSM.add(new ButtonTransition(initialState, waitingState, operatorGamepad, GamepadKeys.Button.Y) {
+        SliderAndClampingFSM.add(new Transition(initialState, waitingState) {
+
+            @Override
+            public boolean check(){
+                return true;
+            }
+
             //adaug un state intre cel initial si cel de waiting
             //isi ia trigger de la butonul Y (ala de sus de pe partea dreapta pt cei care nu le stiu dupa litere/daca esti hater la alea logitech)
 
@@ -155,7 +173,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(loadedState, upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.HighPos,750);
@@ -163,7 +181,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(loadedState, mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, mediumState, operatorGamepad, midButton) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.MediumPos);
@@ -171,7 +189,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(loadedState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, lowerState, operatorGamepad, lowButton) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
@@ -179,7 +197,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(loadedState, groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+        SliderAndClampingFSM.add(new ButtonTransition(loadedState, groundState, operatorGamepad, groundButton) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.SafePos);
@@ -188,7 +206,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(upperState, mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, mediumState, operatorGamepad, midButton) {
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -197,7 +215,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(upperState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, lowerState, operatorGamepad, lowButton) {
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -206,7 +224,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(upperState, groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+        SliderAndClampingFSM.add(new ButtonTransition(upperState, groundState, operatorGamepad, groundButton) {
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -216,14 +234,14 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(mediumState, upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState, upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
                 sliderV2Subsystem.goTo(SliderSubsystem.HighPos);
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(mediumState, lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState, lowerState, operatorGamepad, lowButton) {
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -232,7 +250,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(mediumState,groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+        SliderAndClampingFSM.add(new ButtonTransition(mediumState,groundState, operatorGamepad, groundButton) {
             @Override
             public boolean run() throws InterruptedException {
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
@@ -243,7 +261,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(lowerState,upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -251,7 +269,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(lowerState,mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,mediumState, operatorGamepad, midButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -259,7 +277,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(lowerState,groundState, operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
+        SliderAndClampingFSM.add(new ButtonTransition(lowerState,groundState, operatorGamepad, groundButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -267,7 +285,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(groundState,upperState, operatorGamepad, GamepadKeys.Button.DPAD_UP) {
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -275,7 +293,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(groundState,mediumState, operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,mediumState, operatorGamepad, midButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -283,7 +301,7 @@ public class Robot {
                 return true;
             }
         });
-        SliderAndClampingFSM.add(new ButtonTransition(groundState,lowerState, operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
+        SliderAndClampingFSM.add(new ButtonTransition(groundState,lowerState, operatorGamepad, lowButton) {
             @Override
             public boolean run() throws InterruptedException {
 
@@ -459,18 +477,18 @@ public class Robot {
     private boolean running = false;
     private final SubsystemData subsystemData = new SubsystemData();
     public void update() throws InterruptedException {
-        if(!this.autonomous)
+        if(!(opModeType == OpModeType.Auto))
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
         }
 
-        SliderAndClampingFSM.update(!this.autonomous);
+        SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));
 
         sliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);
 
-        if(!this.autonomous)
+        if(!(opModeType == OpModeType.Auto))
         {
             MovementFSM.update(true);
             IntakeFSM.update(true);
