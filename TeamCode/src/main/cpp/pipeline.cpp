@@ -1,6 +1,3 @@
-//
-// Created by nightchips on 12/22/22.
-//
 
 #include <jni.h>
 #include <opencv2/core.hpp>
@@ -12,9 +9,10 @@ extern "C"
 
         JNIEXPORT JNICALL
             jlong
-            Java_org_firstinspires_ftc_teamcode_junction_LUT_createPtrToLut(JNIEnv *env, jclass lutObject, jbyteArray lut)
+            Java_org_firstinspires_ftc_teamcode_junction_LUT_createPtrToLut(JNIEnv *env,
+                                                                            __attribute__((unused)) jclass lutObject, jbyteArray lut)
         {
-                jbyte *rawLut = new jbyte[256 * 256 * 256];
+                auto *rawLut = new jbyte[256 * 256 * 256];
                 jboolean boolean = JNI_FALSE;
                 jbyte *lutElements = env->GetByteArrayElements(lut, &boolean);
                 memcpy(rawLut, lutElements, sizeof(jbyte) * 256 * 256 * 256);
@@ -23,9 +21,9 @@ extern "C"
         }
         JNIEXPORT JNICALL void Java_org_firstinspires_ftc_teamcode_junction_LUT_lutOperation(JNIEnv *env, jclass lutObject, jlong inputPtr, jlong outputPtr)
         {
-                static jbyte *lut = NULL;
-                cv::Mat *inputMat = (cv::Mat *)inputPtr;
-                cv::Mat *outputMat = (cv::Mat *)outputPtr;
+                static jbyte *lut = nullptr;
+                auto *inputMat = (cv::Mat *)inputPtr;
+                auto *outputMat = (cv::Mat *)outputPtr;
 
                 assert(inputMat->isContinuous() == true);
                 assert(inputMat->type() == CV_8UC3);
@@ -44,7 +42,7 @@ extern "C"
                         const auto g = *(offset + 1);
                         const auto r = *(offset + 2);
 
-                        outputMat->data[i] = (lut[r * 256 * 256 + g * 256 + b]>0) ? 255 : 0;
+                        outputMat->data[i] = lut[r * 256 * 256 + g * 256 + b];
                 }
         }
 }
