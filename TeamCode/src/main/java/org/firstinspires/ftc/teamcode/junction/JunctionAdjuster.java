@@ -98,6 +98,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         pipeline = new JunctionAdjusterPipeline();
         camera.setPipeline(pipeline);
         telemetry = telemetry_;
+        cameraVec= new Vec2(Math.sin(0), Math.cos(0));
     }
 
     @Override

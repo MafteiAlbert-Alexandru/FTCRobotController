@@ -7,14 +7,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.controls.ExposureControl;
+import org.firstinspires.ftc.teamcode.junction.LUT;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvWebcam;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 @Config
 public class WebcamUtil {
@@ -26,12 +26,20 @@ public class WebcamUtil {
 
     public WebcamUtil(HardwareMap hardwareMap, Telemetry telemetry_)
     {
+        try {
+            LUT.loadLUT();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+
         config=CameraConfig.C920;
         this.telemetry = telemetry_;
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"));
         webcamServo=hardwareMap.get(Servo.class, "webcamServo");
         webcamServo.setDirection(Servo.Direction.REVERSE);
         webcamServo.setPosition(0);
+
         config.setResolutionX(800);
         config.setResolutionY(448);
     }
@@ -73,8 +81,8 @@ public class WebcamUtil {
             @Override
             public void onOpened() {
                 webcam.startStreaming(config.getResolutionX(), config.getResolutionY(), OpenCvCameraRotation.UPRIGHT);
-                webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
-                webcam.getExposureControl().setExposure(5, TimeUnit.MILLISECONDS);
+//                webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
+//                webcam.getExposureControl().setExposure(20, TimeUnit.MILLISECONDS);
             }
 
             @Override

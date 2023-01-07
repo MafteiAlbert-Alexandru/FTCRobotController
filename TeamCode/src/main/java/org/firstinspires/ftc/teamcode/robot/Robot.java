@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.robot;
+package org.firstinspires.ftc.teamcode.fsm;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -151,7 +151,7 @@ public class Robot {
 
             @Override
             public boolean run() throws InterruptedException {
-                Thread.sleep(300);
+                Thread.sleep(600);
                 if(!sensorSubsystem.coneIsLoaded())
                     return false;
                 //daca e sus mergi jos (vezi in codul sursa)
@@ -388,11 +388,11 @@ public class Robot {
             }
         });
         SliderAndClampingFSM.build();
-//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
-//
-//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
-//        webcamUtil.registerListener(junctionAdjuster);
-//        webcamUtil.start(true);
+        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
+
+        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
+        webcamUtil.registerListener(junctionAdjuster);
+        webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
         movingState = new State(MovementFSM, "movementState") {
@@ -404,8 +404,8 @@ public class Robot {
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
-//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
-//                movementSubsystem.move(direction.getY(), direction.getX(), 0);
+                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
+                movementSubsystem.move(direction.getY(), direction.getX(), 0);
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
