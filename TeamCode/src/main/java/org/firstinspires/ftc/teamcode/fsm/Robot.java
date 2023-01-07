@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.fsm;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -10,6 +11,7 @@ import org.firstinspires.ftc.teamcode.fsm.albert.MovementTransition;
 import org.firstinspires.ftc.teamcode.fsm.albert.ReleaseTransition;
 import org.firstinspires.ftc.teamcode.fsm.albert.State;
 import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
+import org.firstinspires.ftc.teamcode.junction.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
@@ -18,6 +20,7 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -312,45 +315,6 @@ public class Robot {
 
 
 
-//        State[] sliderSafeStates = {loadedState, upperState, mediumState, lowerState, groundState};
-//        SliderAndClampingFSM.addTransitionsTo(upperState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_UP) {
-//            @Override
-//            public boolean run() throws InterruptedException {
-//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-//                SliderV2Subsystem.goTo(SliderV2Subsystem.HighPos);
-//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-//                return true;
-//            }
-//        });
-//        SliderAndClampingFSM.addTransitionsTo(mediumState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_RIGHT) {
-//
-//            @Override
-//            public boolean run() throws InterruptedException {
-//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-//                SliderV2Subsystem.goTo(SliderV2Subsystem.MediumPos);
-//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-//                return true;
-//            }
-//        });
-//        SliderAndClampingFSM.addTransitionsTo(lowerState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_LEFT) {
-//            @Override
-//            public boolean run() throws InterruptedException {
-//                clampSubsystem.goTo(ClampSubsystem.BackwardPos);
-//                SliderV2Subsystem.goTo(SliderV2Subsystem.LowPos);
-//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-//                return true;
-//            }
-//        });
-//        SliderAndClampingFSM.addTransitionsTo(groundState, sliderSafeStates, new ButtonTransition(operatorGamepad, GamepadKeys.Button.DPAD_DOWN) {
-//            @Override
-//            public boolean run() throws InterruptedException {
-//                if(SliderV2Subsystem.isSafe()) clampSubsystem.goToBackward();
-//                if(SliderV2Subsystem.getPosition()>=SliderV2Subsystem.GroundPos+10)
-//                    clampSubsystem.goToForward();
-//                SliderV2Subsystem.goTo(SliderV2Subsystem.GroundPos);
-//                return true;
-//            }
-//        });
         State[] outsideStates = new State[]{lowerState, mediumState, upperState,groundState};
         SliderAndClampingFSM.addTransitionsTo(waitingState, outsideStates, new Transition() {
             Long lastTimeSinceClamped = null;
@@ -388,11 +352,11 @@ public class Robot {
             }
         });
         SliderAndClampingFSM.build();
-//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
-//
-//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
-//        webcamUtil.registerListener(junctionAdjuster);
-//        webcamUtil.start(true);
+        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
+
+        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
+        webcamUtil.registerListener(junctionAdjuster);
+        webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
         movingState = new State(MovementFSM, "movementState") {
@@ -404,8 +368,8 @@ public class Robot {
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
-//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
-//                movementSubsystem.move(direction.getY(), direction.getX(), 0);
+                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
+                movementSubsystem.move(direction.getY(), direction.getX(), 0);
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {

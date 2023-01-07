@@ -109,22 +109,25 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
             NewMtx.release();
         }
 
-        Point[] points = new Point[4];
-        junctionRect.points(points);
+        if(latestResults.found){
+            Point[] points = new Point[4];
+            junctionRect.points(points);
 
-        double mid_x = (points[0].x + points[2].x)/2;
-        double width = rectSize.getX();
+            double mid_x = (points[0].x + points[2].x)/2;
+            double width = rectSize.getX();
 
-        latestResults.junction_x1 = (int)(mid_x - width/2);
-        latestResults.junction_x2 = (int)(mid_x + width/2);
+            latestResults.junction_x1 = (int)(mid_x - width/2);
+            latestResults.junction_x2 = (int)(mid_x + width/2);
 
-        Imgproc.line(input, points[0], points[1], new Scalar(255, 255, 0));
-        Imgproc.line(input, points[1], points[2], new Scalar(255, 255, 0));
-        Imgproc.line(input, points[2], points[3], new Scalar(255, 255, 0));
-        Imgproc.line(input, points[3], points[0], new Scalar(255, 255, 0));
+            Imgproc.line(input, points[0], points[1], new Scalar(255, 255, 0));
+            Imgproc.line(input, points[1], points[2], new Scalar(255, 255, 0));
+            Imgproc.line(input, points[2], points[3], new Scalar(255, 255, 0));
+            Imgproc.line(input, points[3], points[0], new Scalar(255, 255, 0));
+        }
+
 
         return input;
     }
 
-    public  Results getLatestResults() {return latestResults;}
+    public Results getLatestResults() {return latestResults;}
 }
