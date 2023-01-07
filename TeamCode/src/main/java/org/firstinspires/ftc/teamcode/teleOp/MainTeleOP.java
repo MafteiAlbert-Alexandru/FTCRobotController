@@ -2,13 +2,12 @@ package org.firstinspires.ftc.teamcode.teleOp;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
-import com.outoftheboxrobotics.photoncore.PhotonCore;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.fsm.Robot;
+import org.firstinspires.ftc.teamcode.robot.Robot;
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
@@ -21,15 +20,24 @@ public class MainTeleOP extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Gamepad.RumbleEffect rumbleEffect = new Gamepad.RumbleEffect.Builder()
-                .addStep(0.0, 1.0, 250)
-                .addStep(0.0, 0.0, 250)
-                .addStep(1.0, 1.0, 250)
-                .addStep(0.0, 0.0, 250)
-                .addStep(1.0, 1.0, 250)
+        Gamepad.RumbleEffect rumbleEffectDriver = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 1000)
                 .build();
 
-        PhotonCore.enable();
+        Gamepad.RumbleEffect rumbleEffectOperator = new Gamepad.RumbleEffect.Builder()
+                .addStep(1.0, 1.0, 50)
+                .addStep(0, 0, 50)
+                .addStep(1.0, 1.0, 50)
+                .addStep(0, 0, 50)
+                .addStep(1.0, 1.0, 50)
+                .addStep(0, 0, 50)
+                .addStep(1.0, 1.0, 50)
+                .addStep(0, 0, 50)
+                .addStep(1.0, 1.0, 50)
+                .addStep(0, 0, 50)
+                .addStep(1.0, 1.0, 50)
+                .build();
+
 
         telemetry=new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
@@ -47,11 +55,13 @@ public class MainTeleOP extends LinearOpMode {
                 if(gamepad1.touchpad) elapsedTime.reset();
 
                 if(elapsedTime.seconds()>=beforeEndgameTimer && !firstRumble) {
-                    gamepad1.runRumbleEffect(rumbleEffect);
+                    gamepad1.runRumbleEffect(rumbleEffectDriver);
+                    gamepad2.runRumbleEffect(rumbleEffectOperator);
                     firstRumble = true;
                 }
                 else if(elapsedTime.seconds()>=beforeStopGame && !secondRumble) {
-                    gamepad1.runRumbleEffect(rumbleEffect);
+                    gamepad1.runRumbleEffect(rumbleEffectDriver);
+                    gamepad2.runRumbleEffect(rumbleEffectOperator);
                     secondRumble = true;
                 }
             }

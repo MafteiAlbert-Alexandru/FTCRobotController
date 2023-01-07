@@ -6,8 +6,8 @@
 //import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 //import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 //
-//import org.firstinspires.ftc.teamcode.fsm.Robot;
-//import org.firstinspires.ftc.teamcode.fsm.albert.State;
+//import org.firstinspires.ftc.teamcode.robot.Robot;
+//import org.firstinspires.ftc.teamcode.robot.fsm.albert.State;
 //import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
 //import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 //

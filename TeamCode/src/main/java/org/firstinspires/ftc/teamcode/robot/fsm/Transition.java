@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.fsm.albert;
+package org.firstinspires.ftc.teamcode.robot.fsm;
 
 import java.util.Objects;
 
@@ -9,6 +9,7 @@ public abstract class Transition{
     public State from;
     public State to;
     public FSM fsm;
+    public boolean humanInput = false;
 
     /**
      * Creates a SmartTransition between two SmartStates

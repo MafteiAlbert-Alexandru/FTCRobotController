@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.fsm.albert;
+package org.firstinspires.ftc.teamcode.robot.fsm;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
@@ -9,8 +9,8 @@ import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 public class ButtonTransition extends Transition {
 
     private final GamepadEx gamepad;
-    private  GamepadKeys.Button button=null;
-    private GamepadKeys.Trigger trigger=null;
+    private  GamepadKeys.Button button;
+    private GamepadKeys.Trigger trigger;
     public ButtonTransition(State from, State to, GamepadEx gamepad, GamepadKeys.Button button)
     {
         super(from, to);

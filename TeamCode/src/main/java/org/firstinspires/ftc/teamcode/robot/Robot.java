@@ -1,15 +1,15 @@
-package org.firstinspires.ftc.teamcode.fsm;
+package org.firstinspires.ftc.teamcode.robot;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.FSM;
-import org.firstinspires.ftc.teamcode.fsm.albert.MovementTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.ReleaseTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.State;
-import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
+import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
+import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
+import org.firstinspires.ftc.teamcode.robot.fsm.MovementTransition;
+import org.firstinspires.ftc.teamcode.robot.fsm.ReleaseTransition;
+import org.firstinspires.ftc.teamcode.robot.fsm.State;
+import org.firstinspires.ftc.teamcode.robot.fsm.Transition;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.IntakeSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.MovementSubsystem;
@@ -151,7 +151,7 @@ public class Robot {
 
             @Override
             public boolean run() throws InterruptedException {
-                Thread.sleep(600);
+                Thread.sleep(300);
                 if(!sensorSubsystem.coneIsLoaded())
                     return false;
                 //daca e sus mergi jos (vezi in codul sursa)

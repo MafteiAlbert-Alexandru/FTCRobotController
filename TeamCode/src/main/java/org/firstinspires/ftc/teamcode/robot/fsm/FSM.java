@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.fsm.albert;
+package org.firstinspires.ftc.teamcode.robot.fsm;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
@@ -29,7 +29,6 @@ public class FSM {
 
     public FSM(Telemetry telemetry)
     {
-
         this.telemetry=telemetry;
         executor =Executors.newSingleThreadExecutor();
     }

@@ -6,10 +6,10 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.fsm.albert.ButtonTransition;
-import org.firstinspires.ftc.teamcode.fsm.albert.FSM;
-import org.firstinspires.ftc.teamcode.fsm.albert.State;
-import org.firstinspires.ftc.teamcode.fsm.albert.Transition;
+import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
+import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
+import org.firstinspires.ftc.teamcode.robot.fsm.State;
+import org.firstinspires.ftc.teamcode.robot.fsm.Transition;
 
 import java.util.Random;
 
