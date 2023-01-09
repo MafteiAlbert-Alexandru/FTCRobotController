@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode.fsm;
+package org.firstinspires.ftc.teamcode.robot;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.junction.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
 import org.firstinspires.ftc.teamcode.robot.fsm.MovementTransition;
@@ -18,6 +20,7 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -404,13 +407,23 @@ public class Robot {
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
-                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
+                Vector2d direction = junctionAdjuster.value().movementData;
                 movementSubsystem.move(direction.getY(), direction.getX(), 0);
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
+            @Override
+            public boolean run() throws InterruptedException {
+                junctionAdjuster.start();
+                return true;
+            }
         });
         MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+            @Override
+            public boolean run() throws InterruptedException {
+                webcamUtil.setAngle(0);
+                return true;
+            }
         });
         MovementFSM.setInitialState(movingState);
         MovementFSM.build();

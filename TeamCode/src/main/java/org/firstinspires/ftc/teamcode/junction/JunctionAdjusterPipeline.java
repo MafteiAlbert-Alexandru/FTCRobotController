@@ -96,7 +96,7 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
 
             double weight =
                     kWidthWeight * size.getX() +
-                    kRaportWeight * (size.getY()/size.getX()) +
+                    kRaportWeight * ((size.getX()*size.getY())/(Imgproc.contourArea(contours.get(i)))) +
                     kMidDistanceWeight * (input.width()/2 - Math.abs(rectangle.center.x - input.width()/2));
 
             if (weight > bestWeight) {

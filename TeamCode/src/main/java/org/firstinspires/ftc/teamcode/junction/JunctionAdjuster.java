@@ -1,6 +1,10 @@
 package org.firstinspires.ftc.teamcode.junction;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+
+import org.firstinspires.ftc.teamcode.experiments.PIDController;
+import org.firstinspires.ftc.teamcode.experiments.PIDCoefficients;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.vision.CameraConfig;
@@ -8,6 +12,7 @@ import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 import org.firstinspires.ftc.teamcode.vision.WebcamUtilsListener;
 import org.openftc.easyopencv.OpenCvCamera;
 
+@Config
 public class JunctionAdjuster implements WebcamUtilsListener {
     private OpenCvCamera camera;
 
@@ -16,7 +21,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         public double diameter;
     }
 
-    public static class visionResults{
+    public class visionResults{
         public Vector2d movementData;
         public boolean found;
 
@@ -26,26 +31,8 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         }
     }
 
-    public static class Vec2{
-        public double x;
-        public double y;
 
-        public Vec2(){
-            this.x=0;
-            this.y=0;
-        };
-        public Vec2(double x, double y){
-            this.x = x;
-            this.y = y;
-        }
-        Vec2 normalize(){
-            double length = Math.sqrt(x*x + y*y);
-            x/=length;
-            y/=length;
-            return this;
-        }
-    }
-    public static class Vec3{
+    public class Vec3{
         public double x;
         public double y;
         public double z;
@@ -73,7 +60,16 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     private double cameraTangent;
     private double cameraAngle;
     private double initialCameraAngle;
-    private Vec2 cameraVec;
+    public static Vec2 cameraVec=new Vec2();
+
+    public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0.2, 0.1, 0.1);
+    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.8, 0.1, 0.1);
+    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(0.08, 0.01, 0.01);
+
+    private PIDController MovementController_x;
+    private PIDController MovementController_y;
+    private PIDController CameraController;
+    public static Vec2 setPoint = new Vec2(-10.2, 4.4);;
 
 
     private JunctionAdjusterPipeline.Results results;
@@ -99,6 +95,10 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         camera.setPipeline(pipeline);
         telemetry = telemetry_;
         cameraVec= new Vec2(Math.sin(0), Math.cos(0));
+
+        this.MovementController_x = new PIDController(new PIDCoefficients(0,0,0));
+        this.MovementController_y = new PIDController(new PIDCoefficients(0,0,0));
+        this.CameraController = new PIDController(new PIDCoefficients(0,0,0));
     }
 
     @Override
@@ -166,11 +166,30 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         return position;
     }
 
-    //this returns the strafe and forward values the robot moves by in homing state
-    public visionResults value(double speed, Vec2 setPoint){
-        relativePosition = relativeJunctionPosition();
+    public void start(){
+        this.MovementController_x = new PIDController(MovementCoefficients_x);
+        this.MovementController_y = new PIDController(MovementCoefficients_y);
+        this.CameraController = new PIDController(CameraCoefficients);
+    }
 
+    //this returns the strafe and forward values the robot moves by in homing state
+    public visionResults value(){
+        relativePosition = relativeJunctionPosition();
+    telemetry.addData("junction x", relativePosition.x);
+    telemetry.addData("junction y", relativePosition.y);
         if(results.found == false){
+            return new visionResults(new Vector2d(0,0),false);
+        }
+
+        double camError = -Math.atan(relativePosition.x/relativePosition.y);
+        double newCamAngle = CameraController.update(camError);
+        boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
+
+        if(camInRange){
+            webcamUtil.setAngle(newCamAngle);
+        }
+
+        if((this.results.junction_x1 <= 1 || this.results.junction_x2 >= config.getResolutionX() - 1) && camInRange){
             return new visionResults(new Vector2d(0,0),false);
         }
 
@@ -183,19 +202,13 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
         double length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
 
-        double kp;
-        if(length > 10)kp = 1;
-        else kp = length/10;
 
         direction.x/=length;
         direction.y/=length;
 
-        double newCamAngle = cameraAngle - (Math.atan(relativePosition.x/relativePosition.y)/15);
+        direction.x = MovementController_x.update(direction.x);
+        direction.y = MovementController_y.update(direction.y);
 
-        if(-Math.toDegrees(newCamAngle) < 0 && -Math.toDegrees(newCamAngle) > -45){
-            webcamUtil.setAngle(newCamAngle);
-        }
-
-        return new visionResults(new Vector2d(direction.x*speed*kp, direction.y*speed*kp*0.4), true);
+        return new visionResults(new Vector2d(direction.x, direction.y), true);
     }
 }
