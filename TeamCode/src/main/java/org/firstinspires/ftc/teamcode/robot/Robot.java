@@ -403,12 +403,14 @@ public class Robot {
                 movementSubsystem.run(new SubsystemData() {{
                     this.driverGamepad = robot.driverGamepad;
                 }});
+                junctionAdjuster.moveCamera();
             }
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
                 Vector2d direction = junctionAdjuster.value().movementData;
                 movementSubsystem.move(direction.getY(), direction.getX(), 0);
+
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
@@ -419,6 +421,11 @@ public class Robot {
             }
         });
         MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+            @Override
+            public boolean check()
+            {
+                return super.check() || junctionAdjuster.inReach();
+            }
             @Override
             public boolean run() throws InterruptedException {
                 webcamUtil.setAngle(0);

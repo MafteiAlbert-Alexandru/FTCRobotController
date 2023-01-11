@@ -69,7 +69,9 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     private PIDController MovementController_x;
     private PIDController MovementController_y;
     private PIDController CameraController;
-    public static Vec2 setPoint = new Vec2(-10.2, 4.4);;
+    public static Vec2 setPoint = new Vec2(-10.2, 4.4);
+
+    public static double reach = 2;
 
 
     private JunctionAdjusterPipeline.Results results;
@@ -169,20 +171,50 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     public void start(){
         this.MovementController_x = new PIDController(MovementCoefficients_x);
         this.MovementController_y = new PIDController(MovementCoefficients_y);
-        this.CameraController = new PIDController(CameraCoefficients);
+    }
+
+    public boolean inReach(){
+
+        if(results.found == false){return false;}
+
+        Vec2 direction = new Vec2(
+                relativePosition.x * cameraVec.y - relativePosition.y * cameraVec.x,
+                relativePosition.y * cameraVec.y + relativePosition.x * cameraVec.x
+        );
+
+        direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
+        double length = Math.sqrt(direction.x * direction.x + direction.y * direction.y);
+
+        return length < reach;
+    }
+
+    public void moveCamera(){
+        relativePosition = relativeJunctionPosition();
+
+        if(results.found == false){
+            return;
+        }
+
+        double camError = -Math.atan(relativePosition.x/relativePosition.y);
+        double newCamAngle = cameraAngle+CameraController.update(camError);
+        boolean camInRange = 10<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 35;
+
+        if(camInRange){
+            webcamUtil.setAngle(newCamAngle);
+        }
+
     }
 
     //this returns the strafe and forward values the robot moves by in homing state
     public visionResults value(){
         relativePosition = relativeJunctionPosition();
-    telemetry.addData("junction x", relativePosition.x);
-    telemetry.addData("junction y", relativePosition.y);
+
         if(results.found == false){
             return new visionResults(new Vector2d(0,0),false);
         }
 
         double camError = -Math.atan(relativePosition.x/relativePosition.y);
-        double newCamAngle = CameraController.update(camError);
+        double newCamAngle = cameraAngle+CameraController.update(camError);
         boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
 
         if(camInRange){
@@ -200,11 +232,6 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         );
 
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
-        double length = Math.sqrt(direction.x* direction.x + direction.y* direction.y);
-
-
-        direction.x/=length;
-        direction.y/=length;
 
         direction.x = MovementController_x.update(direction.x);
         direction.y = MovementController_y.update(direction.y);
