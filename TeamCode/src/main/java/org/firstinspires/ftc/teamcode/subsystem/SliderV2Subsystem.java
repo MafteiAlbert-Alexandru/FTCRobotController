@@ -31,7 +31,7 @@ public class SliderV2Subsystem extends SmartSubsystem {
     public static int SafePos = 725;
     public static int LoadPos = 45;
 
-    public static int AimPos = 380;
+    public static int AimPos = 500;
     public static int cone5Pos = 230;
     public static int cone4Pos = 125;
     public static int cone3Pos = 65;

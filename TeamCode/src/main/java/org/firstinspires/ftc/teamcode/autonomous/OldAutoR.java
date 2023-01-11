@@ -29,7 +29,7 @@
 //        telemetry=new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 //        try{
 //            SampleMecanumDriveCancelable drive = new SampleMecanumDriveCancelable(hardwareMap);
-//            Robot robot = new Robot(this, true);
+//            Robot robot = new Robot(this, Robot.OpModeType.Auto);
 //
 //            drive.setPoseEstimate(startPoseRight);
 //

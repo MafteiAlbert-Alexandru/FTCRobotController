@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.robot.Robot;
+
 @TeleOp
 public class MainTeleOP extends LinearOpMode {
 
@@ -41,7 +42,7 @@ public class MainTeleOP extends LinearOpMode {
 
         telemetry=new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         try{
-            Robot robot = new Robot(this, Robot.OpModeType.TeleOp);
+            Robot robot = new Robot(this,  Robot.OpModeType.TeleOp);
             waitForStart();
             elapsedTime = new ElapsedTime();
             elapsedTime.startTime();
