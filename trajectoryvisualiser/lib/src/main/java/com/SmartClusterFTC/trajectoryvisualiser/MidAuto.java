@@ -37,7 +37,8 @@ public class MidAuto {
                                 //1)
                                 .lineToLinearHeading(leftBlueStack)
 //                                .lineToLinearHeading(leftBlueMidPos)
-                                .lineToSplineHeading(rightBlueJunction)
+                                .lineToLinearHeading(rightBlueJunction, SampleMecanumDriveCancelable.getVelocityConstraint(speedBack, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
+                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
                                 .strafeRight(12)
                                 .strafeLeft(12)
 

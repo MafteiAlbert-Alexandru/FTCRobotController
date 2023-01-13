@@ -162,7 +162,7 @@ public class RightAutoVision extends LinearOpMode
                     .lineToSplineHeading(rightBlueJunction)
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
                     .strafeLeft(12)
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.3)
                     .strafeRight(12)
                     //yas
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
@@ -178,7 +178,7 @@ public class RightAutoVision extends LinearOpMode
                     .lineToSplineHeading(rightBlueJunction)
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
                     .strafeLeft(12)
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.3)
                     .strafeRight(12)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
                     .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
@@ -193,7 +193,7 @@ public class RightAutoVision extends LinearOpMode
                     .lineToSplineHeading(rightBlueJunction)
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
                     .strafeLeft(12)
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.3)
                     .strafeRight(12)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
                     .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
@@ -208,7 +208,7 @@ public class RightAutoVision extends LinearOpMode
                     .lineToSplineHeading(rightBlueJunction)
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
                     .strafeLeft(12)
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.3)
                     .strafeRight(12)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
                     .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
@@ -223,7 +223,7 @@ public class RightAutoVision extends LinearOpMode
                     .lineToSplineHeading(rightBlueJunction)
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
                     .strafeLeft(12)
-                    .waitSeconds(0.5)
+                    .waitSeconds(0.3)
                     .strafeRight(12)
                     .lineToLinearHeading(parkPose)
                     .build();

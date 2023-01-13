@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -19,6 +20,13 @@ public class ClampSubsystem extends SmartSubsystem {
     public static double ForwardPos = 0.04;
     public static double BackwardPos = 0.59;
     private boolean clamping = false;
+
+    public ClampSubsystem(){}
+
+    public ClampSubsystem(LinearOpMode opMode){
+        initSubsystem(opMode);
+    }
+
     public boolean isClamping()
     {return  clamping;
     }

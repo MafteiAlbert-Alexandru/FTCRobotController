@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.subsystem;
 
 
 import com.acmerobotics.dashboard.config.Config;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import org.firstinspires.ftc.teamcode.hardware.SmartMotor;
@@ -47,6 +48,12 @@ public class SliderSubsystem extends SmartSubsystem {
     public boolean isSafe()
     {
         return slider.getCurrentPosition() >= LowPos;
+    }
+
+    public SliderSubsystem(){}
+
+    public SliderSubsystem(LinearOpMode opMode){
+        initSubsystem(opMode);
     }
 
 
