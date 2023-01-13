@@ -15,6 +15,7 @@ public class SliderSubsystem extends SmartSubsystem {
 
     // TODO CALIBRATE POSITIONS FURTHER
     public  int target = 0; //Smash target
+    public static double speed=5;
     public static double tolerance = 20; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
     public static double upwardCoefficient = 0.15; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
     public static double downwardCoefficient =0.05; //Dar cand cobor sunt mai chill

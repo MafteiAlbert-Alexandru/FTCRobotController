@@ -477,11 +477,27 @@ public class Robot {
     }
     private boolean running = false;
     private final SubsystemData subsystemData = new SubsystemData();
+    private Long time = null;
     public void update() throws InterruptedException {
         if(!(opModeType == OpModeType.Auto))
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
+            if(time==null)
+            {
+                time=System.currentTimeMillis();
+            }else if(subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0)
+            {
+
+                sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target+ (System.currentTimeMillis()-time)/1000.0*SliderSubsystem.speed));
+                time=System.currentTimeMillis();
+            }else if(subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0)
+            {
+                sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target- (System.currentTimeMillis()-time)/1000.0*SliderSubsystem.speed));
+                time=System.currentTimeMillis();
+            }else {
+                time=System.currentTimeMillis();
+            }
         }
 
         SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));
