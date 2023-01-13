@@ -166,13 +166,22 @@ public class Robot {
         });
 
         //restul se inteleg daca ai citit si codul sursa de la subsysteme
-        SliderAndClampingFSM.add(new ButtonTransition(waitingState, frontWaitingState, operatorGamepad, GamepadKeys.Button.LEFT_STICK_BUTTON) {
-            @Override
-            public boolean run() throws InterruptedException {
-                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                return true;
-            }
-        });
+//        SliderAndClampingFSM.add(new ButtonTransition(waitingState, frontWaitingState, operatorGamepad, GamepadKeys.Button.LEFT_STICK_BUTTON) {
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                sliderV2Subsystem.goTo(SliderSubsystem.LowPos, 750);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
+//        SliderAndClampingFSM.add(new ButtonTransition(frontWaitingState, upperState, operatorGamepad, highButton){
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                sliderV2Subsystem.goTo(SliderSubsystem.LowPos, 750);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
         SliderAndClampingFSM.add(new ButtonTransition(loadedState, upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
@@ -483,21 +492,25 @@ public class Robot {
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
-            if(time==null)
-            {
-                time=System.currentTimeMillis();
-            }else if(subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER)>0)
-            {
-
-                sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target+ (System.currentTimeMillis()-time)/1000.0*SliderSubsystem.speed));
-                time=System.currentTimeMillis();
-            }else if(subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER)>0)
-            {
-                sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target- (System.currentTimeMillis()-time)/1000.0*SliderSubsystem.speed));
-                time=System.currentTimeMillis();
-            }else {
-                time=System.currentTimeMillis();
-            }
+//            if(time==null)
+//            {
+//                time=System.currentTimeMillis();
+//            }else
+//            {
+//                if(SliderAndClampingFSM.getCurrentState().hashCode()  ==frontWaitingState.hashCode()) {
+//
+//                    if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0) {
+//
+//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target + (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
+//                        time = System.currentTimeMillis();
+//                    } else if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0) {
+//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target - (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
+//                        time = System.currentTimeMillis();
+//                    } else {
+//                        time = System.currentTimeMillis();
+//                    }
+//                }
+//            }
         }
 
         SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));
