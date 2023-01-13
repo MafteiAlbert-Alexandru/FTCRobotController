@@ -34,11 +34,12 @@ public class SliderSubsystem extends SmartSubsystem {
 
     public static int AimPos = 500;
     public static int StackLoad = 150;
-//    public static int cone5Pos = 230;
-//    public static int cone4Pos = 125;
-//    public static int cone3Pos = 65;
-//    public static int cone2Pos = 25;
-//    public static int cone1Pos = 0;
+
+    public static int cone5Pos = 220;
+    public static int cone4Pos = 170;
+    public static int cone3Pos = 120;
+    public static int cone2Pos = 50;
+    public static int cone1Pos = 5;
 
     public static boolean telemetryOn = false; //Daca vreau telemetrie
 
