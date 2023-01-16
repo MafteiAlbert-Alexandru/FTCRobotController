@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.robot;
 
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
@@ -408,8 +407,8 @@ public class Robot {
         };
         homingState = new State(MovementFSM, "homingState") {
             public void update() {
-                Vector2d direction = junctionAdjuster.value().movementData;
-                movementSubsystem.move(direction.getY(), direction.getX(), 0);
+                JunctionAdjuster.visionResults results = junctionAdjuster.value();
+                movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
 
             }
         };
@@ -428,7 +427,6 @@ public class Robot {
             }
             @Override
             public boolean run() throws InterruptedException {
-                webcamUtil.setAngle(0);
                 return true;
             }
         });

@@ -23,10 +23,12 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
     public class visionResults{
         public Vector2d movementData;
+        public double turn;
         public boolean found;
 
-        visionResults(Vector2d MovementData, boolean Found){
+        visionResults(Vector2d MovementData, double turn, boolean Found){
             this.movementData = MovementData;
+            this.turn = turn;
             this.found = Found;
         }
     }
@@ -62,12 +64,15 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     private double initialCameraAngle;
     public static Vec2 cameraVec=new Vec2();
 
-    public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0.2, 0.1, 0.1);
-    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.8, 0.1, 0.1);
-    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(0.08, 0.01, 0.01);
+    public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0.2, 0, -0.1);
+    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.3, 0, -0.1);
+    public static PIDCoefficients MovementCoefficients_turn = new PIDCoefficients(0.3, 0, -0.1);
+
+    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(2, 0.05, 0.3);
 
     private PIDController MovementController_x;
     private PIDController MovementController_y;
+    private PIDController MovementController_turn;
     private PIDController CameraController;
     public static Vec2 setPoint = new Vec2(-10.2, 4.4);
 
@@ -97,10 +102,6 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         camera.setPipeline(pipeline);
         telemetry = telemetry_;
         cameraVec= new Vec2(Math.sin(0), Math.cos(0));
-
-        this.MovementController_x = new PIDController(new PIDCoefficients(0,0,0));
-        this.MovementController_y = new PIDController(new PIDCoefficients(0,0,0));
-        this.CameraController = new PIDController(new PIDCoefficients(0,0,0));
     }
 
     @Override
@@ -171,6 +172,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     public void start(){
         this.MovementController_x = new PIDController(MovementCoefficients_x);
         this.MovementController_y = new PIDController(MovementCoefficients_y);
+        this.MovementController_turn = new PIDController(MovementCoefficients_turn);
     }
 
     public boolean inReach(){
@@ -197,7 +199,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
         double camError = -Math.atan(relativePosition.x/relativePosition.y);
         double newCamAngle = cameraAngle+CameraController.update(camError);
-        boolean camInRange = 10<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 35;
+        boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
 
         if(camInRange){
             webcamUtil.setAngle(newCamAngle);
@@ -210,7 +212,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         relativePosition = relativeJunctionPosition();
 
         if(results.found == false){
-            return new visionResults(new Vector2d(0,0),false);
+            return new visionResults(new Vector2d(0,0), 0, false);
         }
 
         double camError = -Math.atan(relativePosition.x/relativePosition.y);
@@ -222,7 +224,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         }
 
         if((this.results.junction_x1 <= 1 || this.results.junction_x2 >= config.getResolutionX() - 1) && camInRange){
-            return new visionResults(new Vector2d(0,0),false);
+            return new visionResults(new Vector2d(0,0), 0, false);
         }
 
 
@@ -233,9 +235,11 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
 
+        double turn = MovementController_turn.update(Math.atan(direction.x / direction.y));
+
         direction.x = MovementController_x.update(direction.x);
         direction.y = MovementController_y.update(direction.y);
 
-        return new visionResults(new Vector2d(direction.x, direction.y), true);
+        return new visionResults(new Vector2d(direction.x, direction.y), turn, true);
     }
 }
