@@ -9,8 +9,7 @@ extern "C"
 
         JNIEXPORT JNICALL
             jlong
-            Java_org_firstinspires_ftc_teamcode_junction_LUT_createPtrToLut(JNIEnv *env,
-                                                                            __attribute__((unused)) jclass lutObject, jbyteArray lut)
+            Java_org_firstinspires_ftc_teamcode_junction_LUT_createPtrToLut(JNIEnv *env, __attribute__((unused)) jclass lutObject, jbyteArray lut)
         {
                 auto *rawLut = new jbyte[256 * 256 * 256];
                 jboolean boolean = JNI_FALSE;

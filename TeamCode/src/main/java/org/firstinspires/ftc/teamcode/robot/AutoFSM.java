@@ -6,7 +6,7 @@
 //
 //import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 //import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
-//import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
+//import org.firstinspires.ftc.teamcode.experiments.SliderV2Subsystem;
 //
 //public class AutoFSM{
 //    int nrCone = 6;

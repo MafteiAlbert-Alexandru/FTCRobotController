@@ -36,8 +36,8 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
     public static int pixelTreshold = 250;
 
     public static double kWidthWeight = 1.5;
-    public static double kRaportWeight = 23;
-    public static double kMidDistanceWeight = 0;
+    public static double kRaportWeight = 100;
+    public static double kMidDistanceWeight = 0.1;
 
 
 

@@ -2,8 +2,10 @@ package org.firstinspires.ftc.teamcode.robot;
 
 import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
+import org.firstinspires.ftc.teamcode.junction.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
 import org.firstinspires.ftc.teamcode.robot.fsm.MovementTransition;
@@ -18,9 +20,9 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
+import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
+import java.util.List;
 
 public class Robot {
 
@@ -38,7 +40,6 @@ public class Robot {
     public SliderSubsystem sliderV2Subsystem = new SliderSubsystem();
     public ClampSubsystem clampSubsystem = new ClampSubsystem();
     public   SensorSubsystem sensorSubsystem = new SensorSubsystem();
-    private final Executor executor = Executors.newSingleThreadExecutor();
 
     GamepadKeys.Button highButton = GamepadKeys.Button.DPAD_UP;
     GamepadKeys.Button midButton = GamepadKeys.Button.DPAD_RIGHT;
@@ -73,7 +74,6 @@ public class Robot {
 
     public Robot(OpMode opMode, OpModeType opModeType) throws IllegalAccessException {
         this.opModeType = opModeType;
-
         SmartSubsystem.initAllSubsystems(this, opMode);
         //initializeaza toate subsystemele
 
@@ -397,29 +397,41 @@ public class Robot {
             }
         });
         SliderAndClampingFSM.build();
-//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
-//
-//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
-//        webcamUtil.registerListener(junctionAdjuster);
-//        webcamUtil.start(true);
+        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
+
+        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
+        webcamUtil.registerListener(junctionAdjuster);
+        webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
         movingState = new State(MovementFSM, "movementState") {
+            @Override
             public void update() {
                 movementSubsystem.run(new SubsystemData() {{
                     this.driverGamepad = robot.driverGamepad;
                 }});
+                junctionAdjuster.moveCamera();
             }
         };
         homingState = new State(MovementFSM, "homingState") {
+            @Override
             public void update() {
-//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
-//                movementSubsystem.move(direction.getY(), direction.getX(), 0);
+                JunctionAdjuster.visionResults results = junctionAdjuster.value();
+                movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
+            @Override
+            public boolean run(){
+                junctionAdjuster.start();
+                return true;
+            }
         });
         MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+            @Override
+            public boolean check(){
+                return super.check() || junctionAdjuster.inReach();
+            }
         });
         MovementFSM.setInitialState(movingState);
         MovementFSM.build();
@@ -482,62 +494,36 @@ public class Robot {
             }
         });
         IntakeFSM.build();
-
+        modules=opMode.hardwareMap.getAll(LynxModule.class);
     }
     private boolean running = false;
     private final SubsystemData subsystemData = new SubsystemData();
-    private Long time = null;
+
+    private List<LynxModule> modules;
     public void update() throws InterruptedException {
-        if(!(opModeType == OpModeType.Auto))
+        for(LynxModule module: modules)
+        {
+            module.clearBulkCache();
+        }
+        if(opModeType == OpModeType.TeleOp)
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
-//            if(time==null)
-//            {
-//                time=System.currentTimeMillis();
-//            }else
-//            {
-//                if(SliderAndClampingFSM.getCurrentState().hashCode()  ==frontWaitingState.hashCode()) {
-//
-//                    if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0) {
-//
-//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target + (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
-//                        time = System.currentTimeMillis();
-//                    } else if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0) {
-//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target - (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
-//                        time = System.currentTimeMillis();
-//                    } else {
-//                        time = System.currentTimeMillis();
-//                    }
-//                }
-//            }
+        }else {
+
         }
 
-        SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));
+        SliderAndClampingFSM.update(opModeType == OpModeType.TeleOp);
 
         sliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);
 
-        if(!(opModeType == OpModeType.Auto))
+        if(opModeType == OpModeType.TeleOp)
         {
             MovementFSM.update(true);
             IntakeFSM.update(true);
-            sensorSubsystem.run(subsystemData);
-            if(!running&&sensorSubsystem.toFlip())
-            {
-                executor.execute(()->{
-                    running=true;
-                    try {
-                        Thread.sleep(850);
-                        if(sensorSubsystem.toFlip())
-                            transferSubsystem.lift();
-                        Thread.sleep(300);
-                        transferSubsystem.goDown();
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-            }
+            sensorSubsystem.run(null);
+
             transferSubsystem.run(subsystemData);
         }
 

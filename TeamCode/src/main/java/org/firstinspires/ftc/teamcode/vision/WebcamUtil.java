@@ -26,7 +26,7 @@ public class WebcamUtil {
     private ArrayList<WebcamUtilsListener> listeners= new ArrayList<>();
     private Telemetry telemetry;
 
-    public static int exposure = 10000;
+    public static int exposure = 15600;
 
     public WebcamUtil(HardwareMap hardwareMap, Telemetry telemetry_)
     {

@@ -65,18 +65,19 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     public static Vec2 cameraVec=new Vec2();
 
     public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0, 0, 0);
-    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.45, 0, -0.1);
-    public static PIDCoefficients MovementCoefficients_turn = new PIDCoefficients(3, 0, 0);
+    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(1.1, 0, -0.1);
+    public static PIDCoefficients MovementCoefficients_turn = new PIDCoefficients(7, 0, 0);
 
-    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(2.3, 0.05, 0.3);
+    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(3, 0, 0);
 
     private PIDController MovementController_x;
     private PIDController MovementController_y;
     private PIDController MovementController_turn;
     private PIDController CameraController;
-    public static Vec2 setPoint = new Vec2(-8.2, 4.4);
+    public static Vec2 setPoint = new Vec2(-8.2, 5.4);
 
     public static double reach = 2;
+    public static int CamAngleOffset = 15;
 
 
     private JunctionAdjusterPipeline.Results results;
@@ -199,7 +200,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
             return;
         }
 
-        double camError = -relativeAngle;
+        double camError = -(relativeAngle - Math.toRadians(CamAngleOffset));
         double newCamAngle = cameraAngle+CameraController.update(camError);
         boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
 
@@ -209,7 +210,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
     }
 
-    //this returns the strafe and forward values the robot moves by in homing state
+    //this returns the strafe, forward and turn values the robot moves by in homing state
     public visionResults value(){
         relativePosition = relativeJunctionPosition();
 
@@ -217,7 +218,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
             return new visionResults(new Vector2d(0,0), 0, false);
         }
 
-        double camError = -Math.atan(relativePosition.x/relativePosition.y);
+        double camError = -(Math.atan(relativePosition.x/relativePosition.y) - Math.toRadians(CamAngleOffset));
         double newCamAngle = cameraAngle+CameraController.update(camError);
         boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
 
@@ -237,7 +238,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
 
         if((this.results.junction_x1 <= 1 || this.results.junction_x2 >= config.getResolutionX() - 1) && camInRange){
-            return new visionResults(new Vector2d(0,0), turn, false);
+            return new visionResults(new Vector2d(0,0), 0, false);
         }
 
         direction.x = MovementController_x.update(direction.x);

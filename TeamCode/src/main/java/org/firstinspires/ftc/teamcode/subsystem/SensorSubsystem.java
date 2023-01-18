@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
-import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class SensorSubsystem extends SmartSubsystem{
 
-    private DistanceSensor rightDistance, frontDistance, backDistance, coneDistance;
-    private ColorSensor frontColor, backColor, coneColor;
+    private DistanceSensor  frontDistance, backDistance, coneDistance;
 
     @Override
     public void initSubsystem(OpMode opMode) {
@@ -18,9 +15,6 @@ public class SensorSubsystem extends SmartSubsystem{
         frontDistance = hardwareMap.get(DistanceSensor.class, "frontColor");
         backDistance = hardwareMap.get(DistanceSensor.class, "backColor");
         coneDistance = hardwareMap.get(DistanceSensor.class, "coneColor");
-        frontColor = hardwareMap.get(ColorSensor.class, "frontColor");
-        backColor = hardwareMap.get(ColorSensor.class, "backColor");
-        coneColor = hardwareMap.get(ColorSensor.class, "coneColor");
 
     }
     public boolean coneIsLoaded()
