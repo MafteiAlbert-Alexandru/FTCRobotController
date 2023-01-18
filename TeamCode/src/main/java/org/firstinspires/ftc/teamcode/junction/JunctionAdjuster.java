@@ -64,17 +64,17 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     private double initialCameraAngle;
     public static Vec2 cameraVec=new Vec2();
 
-    public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0.2, 0, -0.1);
-    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.3, 0, -0.1);
-    public static PIDCoefficients MovementCoefficients_turn = new PIDCoefficients(0.3, 0, -0.1);
+    public static PIDCoefficients MovementCoefficients_x = new PIDCoefficients(0, 0, 0);
+    public static PIDCoefficients MovementCoefficients_y = new PIDCoefficients(0.45, 0, -0.1);
+    public static PIDCoefficients MovementCoefficients_turn = new PIDCoefficients(3, 0, 0);
 
-    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(2, 0.05, 0.3);
+    public static PIDCoefficients CameraCoefficients = new PIDCoefficients(2.3, 0.05, 0.3);
 
     private PIDController MovementController_x;
     private PIDController MovementController_y;
     private PIDController MovementController_turn;
     private PIDController CameraController;
-    public static Vec2 setPoint = new Vec2(-10.2, 4.4);
+    public static Vec2 setPoint = new Vec2(-8.2, 4.4);
 
     public static double reach = 2;
 
@@ -102,6 +102,8 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         camera.setPipeline(pipeline);
         telemetry = telemetry_;
         cameraVec= new Vec2(Math.sin(0), Math.cos(0));
+
+        CameraController = new PIDController(CameraCoefficients);
     }
 
     @Override
@@ -118,8 +120,8 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
         this.results = pipeline.getLatestResults();
 
-        tan1 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x1 - (double)(config.getResolutionX() / 2.0));
-        tan2 = (cameraTangent / (double)(config.getResolutionX() / 2.0)) * (results.junction_x2 - (double)(config.getResolutionX() / 2.0));
+        tan1 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x1 - (double)(config.getResolutionX() / 2.0));
+        tan2 = (cameraTangent / (config.getResolutionX() / 2.0)) * (results.junction_x2 - (double)(config.getResolutionX() / 2.0));
 
         distance = junction.diameter / (tan2 - tan1);
 
@@ -177,7 +179,7 @@ public class JunctionAdjuster implements WebcamUtilsListener {
 
     public boolean inReach(){
 
-        if(results.found == false){return false;}
+        if(results==null||!results.found){return false;}
 
         Vec2 direction = new Vec2(
                 relativePosition.x * cameraVec.y - relativePosition.y * cameraVec.x,
@@ -191,13 +193,13 @@ public class JunctionAdjuster implements WebcamUtilsListener {
     }
 
     public void moveCamera(){
-        relativePosition = relativeJunctionPosition();
+        double relativeAngle = relativeJunctionAngle();
 
         if(results.found == false){
             return;
         }
 
-        double camError = -Math.atan(relativePosition.x/relativePosition.y);
+        double camError = -relativeAngle;
         double newCamAngle = cameraAngle+CameraController.update(camError);
         boolean camInRange = 0<Math.toDegrees(newCamAngle) && Math.toDegrees(newCamAngle) < 45;
 
@@ -223,10 +225,6 @@ public class JunctionAdjuster implements WebcamUtilsListener {
             webcamUtil.setAngle(newCamAngle);
         }
 
-        if((this.results.junction_x1 <= 1 || this.results.junction_x2 >= config.getResolutionX() - 1) && camInRange){
-            return new visionResults(new Vector2d(0,0), 0, false);
-        }
-
 
         Vec2 direction = new Vec2(
                 relativePosition.x * cameraVec.y - relativePosition.y * cameraVec.x,
@@ -236,6 +234,11 @@ public class JunctionAdjuster implements WebcamUtilsListener {
         direction = new Vec2(direction.x - setPoint.x, direction.y - setPoint.y);
 
         double turn = MovementController_turn.update(Math.atan(direction.x / direction.y));
+
+
+        if((this.results.junction_x1 <= 1 || this.results.junction_x2 >= config.getResolutionX() - 1) && camInRange){
+            return new visionResults(new Vector2d(0,0), turn, false);
+        }
 
         direction.x = MovementController_x.update(direction.x);
         direction.y = MovementController_y.update(direction.y);

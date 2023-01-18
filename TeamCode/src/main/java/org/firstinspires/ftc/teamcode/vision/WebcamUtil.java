@@ -26,7 +26,7 @@ public class WebcamUtil {
     private ArrayList<WebcamUtilsListener> listeners= new ArrayList<>();
     private Telemetry telemetry;
 
-    public static int exposure = 10;
+    public static int exposure = 10000;
 
     public WebcamUtil(HardwareMap hardwareMap, Telemetry telemetry_)
     {
@@ -86,7 +86,7 @@ public class WebcamUtil {
             public void onOpened() {
                 webcam.startStreaming(config.getResolutionX(), config.getResolutionY(), OpenCvCameraRotation.UPRIGHT);
                 webcam.getExposureControl().setMode(ExposureControl.Mode.Manual);
-                webcam.getExposureControl().setExposure(exposure, TimeUnit.MILLISECONDS);
+                webcam.getExposureControl().setExposure(exposure, TimeUnit.MICROSECONDS);
             }
 
             @Override

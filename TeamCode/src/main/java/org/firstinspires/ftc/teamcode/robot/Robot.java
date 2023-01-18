@@ -7,7 +7,6 @@ import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import org.firstinspires.ftc.teamcode.junction.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
-import org.firstinspires.ftc.teamcode.robot.fsm.MovementTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.ReleaseTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.State;
 import org.firstinspires.ftc.teamcode.robot.fsm.Transition;
@@ -397,29 +396,21 @@ public class Robot {
         webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
-        movingState = new State(MovementFSM, "movementState") {
-            public void update() {
-                movementSubsystem.run(new SubsystemData() {{
-                    this.driverGamepad = robot.driverGamepad;
-                }});
-                junctionAdjuster.moveCamera();
-            }
-        };
-        homingState = new State(MovementFSM, "homingState") {
+
+        /*homingState = new State(MovementFSM, "homingState") {
             public void update() {
                 JunctionAdjuster.visionResults results = junctionAdjuster.value();
                 movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
-
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
-            @Override
+            /*@Override
             public boolean run() throws InterruptedException {
                 junctionAdjuster.start();
                 return true;
             }
-        });
-        MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+        });*/
+        /*MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
             @Override
             public boolean check()
             {
@@ -429,7 +420,13 @@ public class Robot {
             public boolean run() throws InterruptedException {
                 return true;
             }
-        });
+        });*/
+        movingState = new State(MovementFSM, "movementState") {
+            public void update() {
+                movementSubsystem.run(subsystemData);
+                //junctionAdjuster.moveCamera();
+            }
+        };
         MovementFSM.setInitialState(movingState);
         MovementFSM.build();
         subsystemData.driverGamepad=driverGamepad;
