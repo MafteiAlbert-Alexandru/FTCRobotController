@@ -1,16 +1,10 @@
 package com.SmartClusterFTC.trajectoryvisualiser;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.noahbres.meepmeep.MeepMeep;
-import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeBlueLight;
 import com.noahbres.meepmeep.core.colorscheme.scheme.ColorSchemeRedDark;
 import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
-import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequence;
-import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
-
-import javax.imageio.ImageTranscoder;
 
 public class LowAuto {
 
@@ -18,42 +12,31 @@ public class LowAuto {
 
         MeepMeep mm = new MeepMeep(950);
 
-        Pose2d startPoseLeft = new Pose2d(-36, -60, Math.toRadians(90));
         Pose2d startPoseRight = new Pose2d(36, -60, Math.toRadians(90));
+//        Pose2d startPoseRight = new Pose2d(36, -60, Math.toRadians(90));
 
-        Pose2d leftBlueJunction = new Pose2d(-24, -12, Math.toRadians(90));
-        Pose2d leftBlueStack = new Pose2d(-55, -13, Math.toRadians(175));
+        Pose2d rightBlueMid = new Pose2d(22, -13, Math.toRadians(0));
+
+        Pose2d rightBlueJunction = new Pose2d(16, 0, Math.toRadians(0));
+
+        Pose2d rightBlueStack = new Pose2d(55, -12, Math.toRadians(0));
 
         RoadRunnerBotEntity myBotLeft = new DefaultBotBuilder(mm)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
                 .setConstraints(55, 55, 3, 3, 13.5)
-                .setDimensions(15, 16)
+                .setDimensions(17, 17)
                 .setColorScheme(new ColorSchemeRedDark())
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(startPoseLeft)
+                        drive.trajectorySequenceBuilder(startPoseRight)
                                 .forward(48)
-                                //Pun pe stalp preload ul
-                                .lineToLinearHeading(leftBlueJunction)
-
-                                //Start cycle
-                                //1)
-                                .lineToLinearHeading(leftBlueStack)
-
-                                .lineToLinearHeading(leftBlueJunction)
-                                //2)
-                                .lineToLinearHeading(leftBlueStack)
-                                .lineToLinearHeading(leftBlueJunction)
-                                //3)
-                                .lineToLinearHeading(leftBlueStack)
-                                .lineToLinearHeading(leftBlueJunction)
-                                //4)
-                                .lineToLinearHeading(leftBlueStack)
-                                .lineToLinearHeading(leftBlueJunction)
-                                //5)
-                                .lineToLinearHeading(leftBlueStack)
-                                .lineToLinearHeading(leftBlueJunction)
-                                //Park
                                 .strafeLeft(12)
+                                .strafeRight(12)
+                                .turn(Math.toRadians(-90))
+                                .lineToLinearHeading(rightBlueStack)
+                                .lineToLinearHeading(rightBlueMid)
+                                .setReversed(true)
+                                .splineToLinearHeading(rightBlueJunction, Math.toRadians(-45))
+
                                 .build()
                 );
 
@@ -61,6 +44,7 @@ public class LowAuto {
                 .setDarkMode(true)
                 .setBackgroundAlpha(1)
                 .addEntity(myBotLeft)
+//                .addEntity(myBotLeft2)
                 .start();
     }
 }

@@ -8,10 +8,8 @@ public class SmartMath {
         return val;
     }
 
-    public static boolean ToleranceError(double x, double y,double tolerance){
-
-
-        return (x>y-tolerance && x<y+tolerance);
+    public static boolean ToleranceError(double x, double y, double tolerance){
+        return (Math.abs(x-y)<=tolerance);
     }
 
     public static double TicksToDistance(int ticks, double revRatio, int angle){

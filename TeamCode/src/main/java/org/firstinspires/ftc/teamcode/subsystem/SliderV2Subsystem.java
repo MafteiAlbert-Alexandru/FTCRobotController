@@ -31,12 +31,12 @@ public class SliderV2Subsystem extends SmartSubsystem {
     public static int SafePos = 725;
     public static int LoadPos = 45;
 
-    public static int AimPos = 380;
-    public static int cone5Pos = 230;
-    public static int cone4Pos = 125;
-    public static int cone3Pos = 65;
-    public static int cone2Pos = 25;
-    public static int cone1Pos = 0;
+    public static int AimPos = 500;
+    public static int cone5Pos = 500;
+    public static int cone4Pos = 400;
+    public static int cone3Pos = 300;
+    public static int cone2Pos = 200;
+    public static int cone1Pos = 100;
 
     public static double p = 0.01, i = 0.01, d = 0.0002;
 

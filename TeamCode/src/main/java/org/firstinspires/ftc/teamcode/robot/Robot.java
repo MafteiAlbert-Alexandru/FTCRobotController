@@ -4,9 +4,9 @@ import com.arcrobotics.ftclib.gamepad.GamepadEx;
 import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.teamcode.junction.JunctionAdjuster;
 import org.firstinspires.ftc.teamcode.robot.fsm.ButtonTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.FSM;
+import org.firstinspires.ftc.teamcode.robot.fsm.MovementTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.ReleaseTransition;
 import org.firstinspires.ftc.teamcode.robot.fsm.State;
 import org.firstinspires.ftc.teamcode.robot.fsm.Transition;
@@ -18,7 +18,6 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SmartSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SubsystemData;
 import org.firstinspires.ftc.teamcode.subsystem.TransferSubsystem;
-import org.firstinspires.ftc.teamcode.vision.WebcamUtil;
 
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -167,13 +166,22 @@ public class Robot {
         });
 
         //restul se inteleg daca ai citit si codul sursa de la subsysteme
-        SliderAndClampingFSM.add(new ButtonTransition(waitingState, frontWaitingState, operatorGamepad, GamepadKeys.Button.LEFT_STICK_BUTTON) {
-            @Override
-            public boolean run() throws InterruptedException {
-                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
-                return true;
-            }
-        });
+//        SliderAndClampingFSM.add(new ButtonTransition(waitingState, frontWaitingState, operatorGamepad, GamepadKeys.Button.LEFT_STICK_BUTTON) {
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                sliderV2Subsystem.goTo(SliderSubsystem.LowPos, 750);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
+//        SliderAndClampingFSM.add(new ButtonTransition(frontWaitingState, upperState, operatorGamepad, highButton){
+//            @Override
+//            public boolean run() throws InterruptedException {
+//                sliderV2Subsystem.goTo(SliderSubsystem.LowPos, 750);
+//                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
+//                return true;
+//            }
+//        });
         SliderAndClampingFSM.add(new ButtonTransition(loadedState, upperState, operatorGamepad, highButton) {
             @Override
             public boolean run() throws InterruptedException {
@@ -389,44 +397,30 @@ public class Robot {
             }
         });
         SliderAndClampingFSM.build();
-        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
-
-        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
-        webcamUtil.registerListener(junctionAdjuster);
-        webcamUtil.start(true);
+//        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
+//
+//        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
+//        webcamUtil.registerListener(junctionAdjuster);
+//        webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
-
-        /*homingState = new State(MovementFSM, "homingState") {
+        movingState = new State(MovementFSM, "movementState") {
             public void update() {
-                JunctionAdjuster.visionResults results = junctionAdjuster.value();
-                movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
+                movementSubsystem.run(new SubsystemData() {{
+                    this.driverGamepad = robot.driverGamepad;
+                }});
+            }
+        };
+        homingState = new State(MovementFSM, "homingState") {
+            public void update() {
+//                Vector2d direction = junctionAdjuster.value(0.7, new JunctionAdjuster.Vec2(-10.2, 4.4)).movementData;
+//                movementSubsystem.move(direction.getY(), direction.getX(), 0);
             }
         };
         MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
-            /*@Override
-            public boolean run() throws InterruptedException {
-                junctionAdjuster.start();
-                return true;
-            }
-        });*/
-        /*MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
-            @Override
-            public boolean check()
-            {
-                return super.check() || junctionAdjuster.inReach();
-            }
-            @Override
-            public boolean run() throws InterruptedException {
-                return true;
-            }
-        });*/
-        movingState = new State(MovementFSM, "movementState") {
-            public void update() {
-                movementSubsystem.run(subsystemData);
-                //junctionAdjuster.moveCamera();
-            }
-        };
+        });
+        MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+        });
         MovementFSM.setInitialState(movingState);
         MovementFSM.build();
         subsystemData.driverGamepad=driverGamepad;
@@ -446,6 +440,7 @@ public class Robot {
         });
         IntakeFSM.add(new ReleaseTransition(loweredState, inactiveState, operatorGamepad, GamepadKeys.Button.LEFT_BUMPER) {
             @Override
+            
             public boolean run() throws InterruptedException {
                 transferSubsystem.bControl=true;
                 transferSubsystem.goTo(TransferSubsystem.idleArmPos);
@@ -491,11 +486,31 @@ public class Robot {
     }
     private boolean running = false;
     private final SubsystemData subsystemData = new SubsystemData();
+    private Long time = null;
     public void update() throws InterruptedException {
         if(!(opModeType == OpModeType.Auto))
         {
             subsystemData.driverGamepad.readButtons();
             subsystemData.operatorGamepad.readButtons();
+//            if(time==null)
+//            {
+//                time=System.currentTimeMillis();
+//            }else
+//            {
+//                if(SliderAndClampingFSM.getCurrentState().hashCode()  ==frontWaitingState.hashCode()) {
+//
+//                    if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.RIGHT_TRIGGER) > 0) {
+//
+//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target + (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
+//                        time = System.currentTimeMillis();
+//                    } else if (subsystemData.operatorGamepad.getTrigger(GamepadKeys.Trigger.LEFT_TRIGGER) > 0) {
+//                        sliderV2Subsystem.setTarget((int) (sliderV2Subsystem.target - (System.currentTimeMillis() - time) / 1000.0 * SliderSubsystem.speed));
+//                        time = System.currentTimeMillis();
+//                    } else {
+//                        time = System.currentTimeMillis();
+//                    }
+//                }
+//            }
         }
 
         SliderAndClampingFSM.update(!(opModeType == OpModeType.Auto));

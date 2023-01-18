@@ -24,7 +24,7 @@ public class FSM {
     private ExecutorService executor =null;
 
     public Lock executionLock = new ReentrantLock();
-    Deque<Transition> executionDeque = new LinkedList<Transition>();
+    public Deque<Transition> executionDeque = new LinkedList<Transition>();
     private Telemetry telemetry=null;
 
     public FSM(Telemetry telemetry)

@@ -12,37 +12,37 @@
 //
 //        MeepMeep mm = new MeepMeep(950);
 //
-//        Pose2d startPoseLeft = new Pose2d(-36, -60, Math.toRadians(90));
+//        Pose2d startPoseright = new Pose2d(-36, -60, Math.toRadians(90));
 //        Pose2d startPoseRight = new Pose2d(36, -60, Math.toRadians(90));
 //
-//        Pose2d leftBlueJunction = new Pose2d(-24, -12, Math.toRadians(90));
-//        Pose2d leftBlueStack = new Pose2d(-55, -13, Math.toRadians(175));
+//        Pose2d rightBlueJunction = new Pose2d(-24, -12, Math.toRadians(90));
+//        Pose2d rightBlueStack = new Pose2d(-55, -13, Math.toRadians(175));
 //
-//        RoadRunnerBotEntity myBotLeft = new DefaultBotBuilder(mm)
+//        RoadRunnerBotEntity myBotright = new DefaultBotBuilder(mm)
 //                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
 //                .setConstraints(55, 55, 3, 3, 13.5)
 //                .setDimensions(15, 16)
 //                .setColorScheme(new ColorSchemeRedDark())
 //                .followTrajectorySequence(drive ->
-//                        drive.trajectorySequenceBuilder(startPoseLeft)
+//                        drive.trajectorySequenceBuilder(startPoseright)
 //                                .forward(48)
 //                                //Pun pe stalp preload ul
-//                                .lineToLinearHeading(leftBlueJunction)
+//                                .lineToLinearHeading(rightBlueJunction)
 //
 //                                //Start cycle
 //                                //1)
-//                                .lineToLinearHeading(leftBlueStack)
+//                                .lineToLinearHeading(rightBlueStack)
 //
-//                                .lineToLinearHeading(leftBlueJunction)
+//                                .lineToLinearHeading(rightBlueJunction)
 //                                //2)
-//                                .lineToLinearHeading(leftBlueStack)
-//                                .lineToLinearHeading(leftBlueJunction)
+//                                .lineToLinearHeading(rightBlueStack)
+//                                .lineToLinearHeading(rightBlueJunction)
 //                                //3)
-//                                .lineToLinearHeading(leftBlueStack)
-//                                .lineToLinearHeading(leftBlueJunction)
+//                                .lineToLinearHeading(rightBlueStack)
+//                                .lineToLinearHeading(rightBlueJunction)
 //                                //4)
-//                                .lineToLinearHeading(leftBlueStack)
-//                                .lineToLinearHeading(leftBlueJunction)
+//                                .lineToLinearHeading(rightBlueStack)
+//                                .lineToLinearHeading(rightBlueJunction)
 //                                //5)
 //                                .lineToLinearHeading(leftBlueStack)
 //                                .lineToLinearHeading(leftBlueJunction)
