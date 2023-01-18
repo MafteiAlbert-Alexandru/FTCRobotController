@@ -15,6 +15,22 @@ public class PIDController {
         lastError=0;
         lastTime=-1;
     }
+    public double update(double error){
+        if(lastTime==-1)
+        {
+            lastTime=System.currentTimeMillis();
+            lastError=error;
+            return 0;
+        }else {
+            long time = System.currentTimeMillis();
+            double deltaTime = (time-lastTime)/1000.0;
+            lastTime=time;
+            integral+=error*deltaTime;
+            double derivative = (error-lastError)*deltaTime;
+            lastError=error;
+            return coefficients.kP*error*deltaTime + coefficients.kI*integral + coefficients.kD*derivative;
+        }
+    }
     public double update(double target, double value)
     {
 
