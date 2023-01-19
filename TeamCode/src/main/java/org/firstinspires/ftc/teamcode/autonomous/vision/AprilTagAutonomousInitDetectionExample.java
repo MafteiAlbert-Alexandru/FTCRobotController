@@ -1,9 +1,14 @@
 package org.firstinspires.ftc.teamcode.autonomous.vision;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
+import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.openftc.apriltag.AprilTagDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -33,14 +38,17 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode
     double tagsize = 0.166;
 
 
-    AprilTagDetection tagOfInterest = null;
-
     @Override
     public void runOpMode()
     {
+        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        SampleMecanumDriveCancelable drive = new SampleMecanumDriveCancelable(hardwareMap);
+
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"), cameraMonitorViewId);
         aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
+
+        FtcDashboard.getInstance().startCameraStream(camera, 10);
 
         camera.setPipeline(aprilTagDetectionPipeline);
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
@@ -57,10 +65,11 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode
 
             }
         });
-        /*
-         * The INIT-loop:
-         * This REPLACES waitForStart!
-         */
+
+        Pose2d leftPark = new Pose2d(-12, 0);
+        Pose2d midPark = new Pose2d(0, 12);
+        Pose2d rightPark = new Pose2d(12, 0);
+
         while (!isStarted() && !isStopRequested())
         {
             ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
@@ -76,11 +85,45 @@ public class AprilTagAutonomousInitDetectionExample extends LinearOpMode
                 }
 
             }
+            telemetry.addData("case", autoCase);
             telemetry.update();
         }
 
-        while (opModeIsActive()){
+        TrajectorySequence trajectorySequence;
 
+        trajectorySequence = drive.trajectorySequenceBuilder(new Pose2d())
+                .forward(10)
+                .addDisplacementMarker(() -> {
+                    if(autoCase == 1) drive.followTrajectorySequenceAsync(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                            .lineToLinearHeading(leftPark)
+                            .build());
+                    else if(autoCase == 2) drive.followTrajectorySequenceAsync(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                            .lineToLinearHeading(midPark)
+                            .build());
+                    else if(autoCase == 3) drive.followTrajectorySequenceAsync(drive.trajectorySequenceBuilder(drive.getPoseEstimate())
+                            .lineToLinearHeading(rightPark)
+                            .build());
+                })
+                .build();
+
+//        leftParkTraj = drive.trajectorySequenceBuilder(trajectorySe+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++quence.end())
+//                .lineToLinearHeading(leftPark)
+//                        .build();
+//
+//        midParkTraj = drive.trajectorySequenceBuilder(trajectorySequence.end())
+//                .lineToLinearHeading(midPark)
+//                .build();
+//
+//        rightParkTraj = drive.trajectorySequenceBuilder(trajectorySequence.end())
+//                .lineToLinearHeading(rightPark)
+//                .build();
+
+
+        drive.followTrajectorySequenceAsync(trajectorySequence);
+
+        while (opModeIsActive()){
+            drive.update();
+            telemetry.update();
         }
     }
 

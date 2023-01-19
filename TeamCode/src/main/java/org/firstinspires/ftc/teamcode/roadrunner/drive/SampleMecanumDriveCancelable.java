@@ -102,6 +102,19 @@ public class SampleMecanumDriveCancelable extends MecanumDrive {
         frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
         setupDrive(hardwareMap, frontLeft, backLeft, backRight, frontRight);
     }
+
+    public SampleMecanumDriveCancelable(HardwareMap hardwareMap, Pose2d start)
+    {
+        super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
+
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+        setupDrive(hardwareMap, frontLeft, backLeft, backRight, frontRight);
+        setPoseEstimate(start);
+    }
+
     public SampleMecanumDriveCancelable(HardwareMap hardwareMap, DcMotorEx frontLeft, DcMotorEx backLeft, DcMotorEx backRight, DcMotorEx frontRight)
     {
         super(kV, kA, kStatic, TRACK_WIDTH, TRACK_WIDTH, LATERAL_MULTIPLIER);
