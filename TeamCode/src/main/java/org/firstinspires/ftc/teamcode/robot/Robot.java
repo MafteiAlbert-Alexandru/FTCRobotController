@@ -117,6 +117,7 @@ public class Robot {
 
             @Override
             public boolean run() throws InterruptedException {
+                clampSubsystem.goTo(ClampSubsystem.ForwardPos);
                 sliderV2Subsystem.goTo(SliderSubsystem.LowPos);
                 clampSubsystem.goTo(ClampSubsystem.BackwardPos);
                 sliderV2Subsystem.goTo(SliderSubsystem.PreLoadPos,500, 20);

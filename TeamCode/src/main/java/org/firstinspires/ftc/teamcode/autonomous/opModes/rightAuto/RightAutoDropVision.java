@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -23,6 +24,7 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
+import java.util.List;
 
 @Disabled
 @Autonomous(group = "right")
@@ -293,7 +295,9 @@ public class RightAutoDropVision extends LinearOpMode {
 
             autoCaseId(autoCase, drive);
 
+            List<LynxModule> modules = hardwareMap.getAll(LynxModule.class);
             while (opModeIsActive()){
+                for(LynxModule module:modules) module.clearBulkCache();
                 drive.update();
                 clampSubsystem.update();
                 sliderSubsystem.update();

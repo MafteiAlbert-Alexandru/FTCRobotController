@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
+import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -17,6 +18,8 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
 import org.firstinspires.ftc.teamcode.vision.AprilTagUtil;
 import org.openftc.easyopencv.OpenCvCamera;
+
+import java.util.List;
 
 @Autonomous(name = "RightPreloadPark", group = "right")
 public class RightAutoParkPreload extends LinearOpMode {
@@ -127,7 +130,9 @@ public class RightAutoParkPreload extends LinearOpMode {
             waitForStart();
             autoCaseId(aprilTagUtil);
 
+            List<LynxModule> modules = hardwareMap.getAll(LynxModule.class);
             while (opModeIsActive()){
+                for(LynxModule module:modules) module.clearBulkCache();
                 drive.update();
                 clampSubsystem.update();
                 sliderSubsystem.update();
