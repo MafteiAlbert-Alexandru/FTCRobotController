@@ -26,7 +26,7 @@ public class SliderSubsystem extends SmartSubsystem {
     //Aici niste pozitii ca suntem noi cam smec
 
     public static int GroundPos =150; //Ajutam putin PID-ul
-    public static int LowPos =660;
+    public static int LowPos =680;
     public static int MediumPos = 1170;
     public static int HighPos = 1600;
     public static int PreLoadPos = 330;

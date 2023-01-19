@@ -69,10 +69,16 @@ public class Robot {
     public final FSM MovementFSM = new FSM();
     public final FSM IntakeFSM = new FSM();
 
-    private final GamepadEx driverGamepad;
-    private final GamepadEx operatorGamepad;
+    private GamepadEx driverGamepad;
+    private GamepadEx operatorGamepad;
 
+    public Robot(OpMode opMode, OpModeType opModeType, boolean camera) throws IllegalAccessException {
+        setup(opMode, opModeType, camera);
+    }
     public Robot(OpMode opMode, OpModeType opModeType) throws IllegalAccessException {
+     setup(opMode, opModeType, false);
+    }
+    public void setup(OpMode opMode, OpModeType opModeType, boolean camera) throws IllegalAccessException {
         this.opModeType = opModeType;
         SmartSubsystem.initAllSubsystems(this, opMode);
         //initializeaza toate subsystemele
@@ -162,6 +168,7 @@ public class Robot {
                 sliderV2Subsystem.goTo(SliderSubsystem.LoadPos, 750); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
                 transferSubsystem.bControl =true;
+                Thread.sleep(100);//FIX to ensure the operator does not lift before it is clamped
                 return true;
             }
         });
@@ -398,42 +405,56 @@ public class Robot {
             }
         });
         SliderAndClampingFSM.build();
-        WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
 
-        JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
-        webcamUtil.registerListener(junctionAdjuster);
-        webcamUtil.start(true);
         opMode.telemetry.update();
         Robot robot = this;
-        movingState = new State(MovementFSM, "movementState") {
-            @Override
-            public void update() {
-                movementSubsystem.run(new SubsystemData() {{
-                    this.driverGamepad = robot.driverGamepad;
-                }});
-                junctionAdjuster.moveCamera();
-            }
-        };
-        homingState = new State(MovementFSM, "homingState") {
-            @Override
-            public void update() {
-                JunctionAdjuster.visionResults results = junctionAdjuster.value();
-                movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
-            }
-        };
-        MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
-            @Override
-            public boolean run(){
-                junctionAdjuster.start();
-                return true;
-            }
-        });
-        MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
-            @Override
-            public boolean check(){
-                return super.check() || junctionAdjuster.inReach();
-            }
-        });
+
+        if(camera) {
+
+            WebcamUtil webcamUtil = new WebcamUtil(opMode.hardwareMap, opMode.telemetry);
+
+            JunctionAdjuster junctionAdjuster = new JunctionAdjuster(webcamUtil, 2.54, opMode.telemetry, 45);
+            webcamUtil.registerListener(junctionAdjuster);
+            webcamUtil.start(true);
+            movingState = new State(MovementFSM, "movementState") {
+                @Override
+                public void update() {
+                    movementSubsystem.run(new SubsystemData() {{
+                        this.driverGamepad = robot.driverGamepad;
+                    }});
+                    junctionAdjuster.moveCamera();
+                }
+            };
+            homingState = new State(MovementFSM, "homingState") {
+                @Override
+                public void update() {
+                    JunctionAdjuster.visionResults results = junctionAdjuster.value();
+                    movementSubsystem.move(results.movementData.getY(), results.movementData.getX(), results.turn);
+                }
+            };
+            MovementFSM.add(new ButtonTransition(movingState, homingState, driverGamepad, GamepadKeys.Button.B) {
+                @Override
+                public boolean run() {
+                    junctionAdjuster.start();
+                    return true;
+                }
+            });
+            MovementFSM.add(new MovementTransition(homingState, movingState, driverGamepad) {
+                @Override
+                public boolean check() {
+                    return super.check() || junctionAdjuster.inReach();
+                }
+            });
+        }else {
+            movingState = new State(MovementFSM, "movementState") {
+                @Override
+                public void update() {
+                    movementSubsystem.run(new SubsystemData() {{
+                        this.driverGamepad = robot.driverGamepad;
+                    }});
+                }
+            };
+        }
         MovementFSM.setInitialState(movingState);
         MovementFSM.build();
         subsystemData.driverGamepad=driverGamepad;
