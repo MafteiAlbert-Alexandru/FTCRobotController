@@ -1,29 +1,34 @@
-package org.firstinspires.ftc.teamcode.autonomous.opModes;
+package org.firstinspires.ftc.teamcode.autonomous.opModes.rightAuto;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.profile.VelocityConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAccelerationConstraint;
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.autonomous.vision.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderSubsystem;
 import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
-import org.firstinspires.ftc.teamcode.vision.AprilTagUtil;
+import org.openftc.apriltag.AprilTagDetection;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Autonomous
-public class RightAuto extends LinearOpMode {
+import java.util.ArrayList;
 
-//    TrajectorySequence trajectorySequence;
+@Disabled
+@Autonomous(group = "right")
+public class RightAutoDropVision extends LinearOpMode {
 
     int speed = 40;
-    int speedBack = 40;
 
     double delayJunction = 0.5;
     double delayStack = 0.6;
@@ -34,21 +39,24 @@ public class RightAuto extends LinearOpMode {
     TrajectorySequence trajRight;
     TrajectorySequence trajMid;
 
-    int autoCase;
-
-//    Pose2d startPoseLeft = new Pose2d(36, -60, Math.toRadians(90));
     Pose2d startPose = new Pose2d(36, -60, Math.toRadians(90));
-
-//    Pose2d leftBlueMidPos = new Pose2d(36, -12, Math.toRadians(0));
     Pose2d stackPose = new Pose2d(59.25, -12.4, Math.toRadians(0));
-
     Pose2d stackPoseCycle = new Pose2d(59.25, -12.4, Math.toRadians(0));
-
     Pose2d rightBlueJunction = new Pose2d(13 ,-12.5, Math.toRadians(0));
 
     TrajectoryVelocityConstraint velocityConstraint = SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
-
     TrajectoryAccelerationConstraint accelerationConstraint = SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL);
+
+    OpenCvCamera camera;
+    AprilTagDetectionPipeline aprilTagDetectionPipeline;
+    int autoCase = 2;
+
+    double fx = 578.272;
+    double fy = 578.272;
+    double cx = 402.145;
+    double cy = 221.506;
+
+    double tagsize = 0.166;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -58,120 +66,63 @@ public class RightAuto extends LinearOpMode {
             SampleMecanumDriveCancelable drive = new SampleMecanumDriveCancelable(hardwareMap, startPose);
             SliderSubsystem sliderSubsystem = new SliderSubsystem(this);
             ClampSubsystem clampSubsystem = new ClampSubsystem(this);
-            AprilTagUtil aprilTagUtil = new AprilTagUtil(this);
+
+
+            int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+            camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "webcam"), cameraMonitorViewId);
+            aprilTagDetectionPipeline = new AprilTagDetectionPipeline(tagsize, fx, fy, cx, cy);
+
+            FtcDashboard.getInstance().startCameraStream(camera, 10);
+
+            camera.setPipeline(aprilTagDetectionPipeline);
+            camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+            {
+                @Override
+                public void onOpened()
+                {
+                    camera.startStreaming(800,448, OpenCvCameraRotation.UPRIGHT);
+                }
+
+                @Override
+                public void onError(int errorCode)
+                {
+
+                }
+            });
+
 
             //region RightTrajectorySequence
             trajRight = drive.trajectorySequenceBuilder(startPose)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))
-                    .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))
-                    .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))
-                    .addTemporalMarker(0.8, clampSubsystem::clamp)
-                    .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))
-                    .forward(49)
-                    .strafeLeft(12)
-                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)
-                    .waitSeconds(0.3)
-                    .back(3)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))
-//                    .back(1)
-//                    .strafeLeft(2)
-                    .strafeRight(13)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .turn(Math.toRadians(-90))
-                    //Pun pe stalp preload ul
-                    //Start cycle
-                    //1)
-                    .lineToLinearHeading(stackPose, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
+                    .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
+                    .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))//Incarc conul din piramida
+                    .addTemporalMarker(0.8, clampSubsystem::clamp)//Il agat
+                    .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
+                    .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
+                    .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
+                    .strafeLeft(12)//Ma duc cu fata la stalp
+                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)//Dau drumul la con
+                    .waitSeconds(0.3)//pauza intre actiuni
+                    .back(3)//Ma dau in spate ca sa nu lovesc stalpul
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Cobor la pozitia sigura
+                    .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))//Cobor glisiera ca sa fiu putin peste stack
+                    .turn(Math.toRadians(-90))//Ma rotesc ca sa fiu cu fata la stack
+                    .lineToLinearHeading(stackPose, velocityConstraint, accelerationConstraint)//merg la stack
+                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> { //iau conul 5
                         sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
                         clampSubsystem.clamp();
                     })
-                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
-                    .strafeLeft(11)
+                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//ridic glisiera
+                    .waitSeconds(delayStack)//ma chillez
+                    .back(1)//sa nu zbor conu
+                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)//ma duc la junction
+                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)//dau drumu la con dupa cateva milisec
+                    .strafeLeft(11)//ma centrez pe junction
                     .waitSeconds(0.3)
-                    .strafeRight(13)
-                    //yas
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
-                        sliderSubsystem.setTarget(SliderSubsystem.cone4Pos);    
-                        clampSubsystem.clamp();
-                    })
-                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
-                    .strafeLeft(11)
-                    .waitSeconds(0.3)
-                    .strafeRight(13)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
-                        sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
-//                        clampSubsystem.clamp();
-                    })
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
-//                    .lineToLinearHeading(rightBlueJunction, SampleMecanumDriveCancelable.getVelocityConstraint(speedBack, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-//                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-//                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
-//                    .strafeLeft(11)
-//                    .waitSeconds(0.5)
-//                    .strafeRight(13)
-                    .back(24)
-                    .strafeRight(24)
-                    .forward(24)
-                    //park
-                    .build();
+                    .strafeRight(13)//ma intorc inapoi
 
-            //endregion1
-            //region MidTrajectorySequence
-            trajMid = drive.trajectorySequenceBuilder(startPose)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))
-                    .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))
-                    .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))
-                    .addTemporalMarker(0.8, clampSubsystem::clamp)
-                    .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))
-                    .forward(49)
-                    .strafeLeft(12)
-                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)
-                    .waitSeconds(0.3)
-                    .back(3)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))
-//                    .back(1)
-//                    .strafeLeft(2)
-                    .strafeRight(13)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .turn(Math.toRadians(-90))
-                    //Pun pe stalp preload ul
-                    //Start cycle
-                    //1)
-                    .lineToLinearHeading(stackPose, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
-                        sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
-                        clampSubsystem.clamp();
-                    })
-                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
-                    .strafeLeft(11)
-                    .waitSeconds(0.3)
-                    .strafeRight(13)
-                    //yas
+                    //first cycle
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
                     .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
                     .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
@@ -186,37 +137,24 @@ public class RightAuto extends LinearOpMode {
                     .strafeLeft(11)
                     .waitSeconds(0.3)
                     .strafeRight(13)
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
-                        sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
-//                        clampSubsystem.clamp();
-                    })
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
                     .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
-//                    .lineToLinearHeading(rightBlueJunction, SampleMecanumDriveCancelable.getVelocityConstraint(speedBack, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-//                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-//                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, () -> clampSubsystem.release())
-//                    .strafeLeft(11)
-//                    .waitSeconds(0.5)
-//                    .strafeRight(13)
+                    //PARK
                     .back(24)
-                    .turn(90)
+                    .strafeRight(24)
+                    .forward(24)
                     //park
                     .build();
 
             //endregion1
-            //region LeftTrajectorySequence
-            trajLeft = drive.trajectorySequenceBuilder(startPose)
+            //region MidTrajectorySequence
+            trajMid = drive.trajectorySequenceBuilder(startPose)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
                     .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
                     .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))//Incarc conul din piramida
                     .addTemporalMarker(0.8, clampSubsystem::clamp)//Il agat
                     .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
                     .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
-                    .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul
+                    .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
                     .strafeLeft(12)//Ma duc cu fata la stalp
                     .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)//Dau drumul la con
                     .waitSeconds(0.3)//pauza intre actiuni
@@ -225,25 +163,23 @@ public class RightAuto extends LinearOpMode {
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))//Cobor glisiera ca sa fiu putin peste stack
                     .turn(Math.toRadians(-90))//Ma rotesc ca sa fiu cu fata la stack
-                    .lineToLinearHeading(stackPose, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
+                    .lineToLinearHeading(stackPose, velocityConstraint, accelerationConstraint)//merg la stack
+                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> { //iau conul 5
                         sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
                         clampSubsystem.clamp();
                     })
-                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
-                    .strafeLeft(11)
+                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//ridic glisiera
+                    .waitSeconds(delayStack)//ma chillez
+                    .back(1)//sa nu zbor conu
+                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)//ma duc la junction
+                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)//dau drumu la con dupa cateva milisec
+                    .strafeLeft(11)//ma centrez pe junction
                     .waitSeconds(0.3)
-                    .strafeRight(13)
+                    .strafeRight(13)//ma intorc inapoi
 
                     //first cycle
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
                     .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
                         sliderSubsystem.setTarget(SliderSubsystem.cone4Pos);
                         clampSubsystem.clamp();
@@ -259,27 +195,109 @@ public class RightAuto extends LinearOpMode {
 
                     //last cycle
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(leftBlueStackCycle, SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH),
-                            SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL))
+                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
                     .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> sliderSubsystem.setTarget(SliderSubsystem.cone5Pos))
                     .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
                     .waitSeconds(delayStack)
                     .back(1)
                     .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
-                    .back(48)
+
+                    //PARK
+                    .back(24)
                     .turn(90)
                     //park
                     .build();
 
             //endregion1
+            //region LeftTrajectorySequence
+            trajLeft = drive.trajectorySequenceBuilder(startPose)
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
+                    .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
+                    .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))//Incarc conul din piramida
+                    .addTemporalMarker(0.8, clampSubsystem::clamp)//Il agat
+                    .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
+                    .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
+                    .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
+                    .strafeLeft(12)//Ma duc cu fata la stalp
+                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)//Dau drumul la con
+                    .waitSeconds(0.3)//pauza intre actiuni
+                    .back(3)//Ma dau in spate ca sa nu lovesc stalpul
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Cobor la pozitia sigura
+                    .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))//Cobor glisiera ca sa fiu putin peste stack
+                    .turn(Math.toRadians(-90))//Ma rotesc ca sa fiu cu fata la stack
+                    .lineToLinearHeading(stackPose, velocityConstraint, accelerationConstraint)//merg la stack
+                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> { //iau conul 5
+                        sliderSubsystem.setTarget(SliderSubsystem.cone5Pos);
+                        clampSubsystem.clamp();
+                    })
+                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//ridic glisiera
+                    .waitSeconds(delayStack)//ma chillez
+                    .back(1)//sa nu zbor conu
+                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)//ma duc la junction
+                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)//dau drumu la con dupa cateva milisec
+                    .strafeLeft(11)//ma centrez pe junction
+                    .waitSeconds(0.3)
+                    .strafeRight(13)//ma intorc inapoi
 
-            waitForStart();
-            autoCaseId(aprilTagUtil);
+                    //first cycle
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
+                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
+                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> {
+                        sliderSubsystem.setTarget(SliderSubsystem.cone4Pos);
+                        clampSubsystem.clamp();
+                    })
+                    .UNSTABLE_addTemporalMarkerOffset(delayLift, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))
+                    .waitSeconds(delayStack)
+                    .back(1)
+                    .lineToLinearHeading(rightBlueJunction, velocityConstraint, accelerationConstraint)
+                    .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
+                    .strafeLeft(11)
+                    .waitSeconds(0.3)
+                    .strafeRight(13)
+
+                    //last cycle
+                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
+                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
+                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> sliderSubsystem.setTarget(SliderSubsystem.cone5Pos))
+                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
+                    .waitSeconds(delayStack)
+                    .back(1)
+                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
+
+                    //PARK
+                    .back(48)
+                    .turn(Math.toRadians(90))
+                    .build();
+
+            //endregion1
+
+            while (!isStarted() && !isStopRequested())
+            {
+                ArrayList<AprilTagDetection> currentDetections = aprilTagDetectionPipeline.getLatestDetections();
+
+                if(currentDetections.size() != 0)
+                {
+                    for(AprilTagDetection tag : currentDetections)
+                    {
+                        if(tag.id == 1 || tag.id == 2 || tag.id == 3){
+                            autoCase = tag.id;
+                            break;
+                        }
+                    }
+
+                }
+                telemetry.addData("case", autoCase);
+                telemetry.update();
+            }
+
+            autoCaseId(autoCase, drive);
 
             while (opModeIsActive()){
                 drive.update();
                 clampSubsystem.update();
                 sliderSubsystem.update();
+                telemetry.update();
             }
 
 
@@ -289,9 +307,7 @@ public class RightAuto extends LinearOpMode {
         }
     }
 
-    void autoCaseId(AprilTagUtil aprilTagUtil){
-        int id = aprilTagUtil.getId();
-        SampleMecanumDriveCancelable driveCancelable = aprilTagUtil.sampleMecanumDriveCancelable;
+    void autoCaseId(int id, SampleMecanumDriveCancelable driveCancelable){
              if(id == 3) driveCancelable.followTrajectorySequenceAsync(trajRight);
         else if(id == 2) driveCancelable.followTrajectorySequenceAsync(trajMid);
                     else driveCancelable.followTrajectorySequenceAsync(trajLeft);
