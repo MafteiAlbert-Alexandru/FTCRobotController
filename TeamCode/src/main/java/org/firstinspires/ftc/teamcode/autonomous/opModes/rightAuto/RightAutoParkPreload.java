@@ -21,7 +21,7 @@ import org.openftc.easyopencv.OpenCvCamera;
 
 import java.util.List;
 
-@Autonomous(name = "RightPreloadPark", group = "right")
+@Autonomous(name = "RightParkLoad", group = "right")
 public class RightAutoParkPreload extends LinearOpMode {
 
     int speed = 40;
@@ -85,8 +85,8 @@ public class RightAutoParkPreload extends LinearOpMode {
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(0))//Cobor la pozitia sigura
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
 //                    .addDisplacementMarker(() -> drive.followTrajectorySequenceAsync(trajPark))
-                    .back(24)
-                    .strafeLeft(26)
+                    .back(22.5)
+                    .strafeLeft(24)
                     .build();
 
             trajMid = drive.trajectorySequenceBuilder(startPose)
@@ -104,7 +104,7 @@ public class RightAutoParkPreload extends LinearOpMode {
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(0))//Cobor la pozitia sigura
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
 //                    .addDisplacementMarker(() -> drive.followTrajectorySequenceAsync(trajPark))
-                    .back(24)
+                    .back(22.5)
                     .build();
 
             trajRight = drive.trajectorySequenceBuilder(startPose)
@@ -122,8 +122,8 @@ public class RightAutoParkPreload extends LinearOpMode {
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(0))//Cobor la pozitia sigura
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
 //                    .addDisplacementMarker(() -> drive.followTrajectorySequenceAsync(trajPark))
-                    .back(24)
-                    .strafeRight(26)
+                    .back(22.5)
+                    .strafeRight(24)
                     .build();
 
             //endregion

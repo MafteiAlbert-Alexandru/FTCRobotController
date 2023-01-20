@@ -168,7 +168,7 @@ public class Robot {
                 sliderV2Subsystem.goTo(SliderSubsystem.LoadPos, 750); //duc slider-ul in con (o bag tare)
                 clampSubsystem.clamp();//imi deschid carligul/prind conul
                 transferSubsystem.bControl =true;
-                Thread.sleep(100);//FIX to ensure the operator does not lift before it is clamped
+                Thread.sleep(250);//FIX to ensure the operator does not lift before it is clamped
                 return true;
             }
         });

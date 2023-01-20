@@ -37,18 +37,17 @@ public class LowAuto {
                                 .splineToConstantHeading(new Vector2d(-13.76, -11.87), Math.toRadians(4.76))
                                 .splineToConstantHeading(new Vector2d(-11.28, -0.95), Math.toRadians(89.62))
                                 .build()
-                )
-//                .followTrajectorySequence(drive)
-                ;
+                );
 
         RoadRunnerBotEntity secondBot = new DefaultBotBuilder(mm)
                 // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(30, 30, 1, 1, 13.5)
+                .setConstraints(60, 60, 3, 3, 13.5)
                 .setDimensions(17, 17)
                 .setColorScheme(new ColorSchemeRedDark())
                 .followTrajectorySequence(drive ->
-                        drive.trajectorySequenceBuilder(new Pose2d(-12.74, -0.66, Math.toRadians(-75.74)))
-                                .splineToConstantHeading(new Vector2d(-55.11, -12.45), Math.toRadians(182.86))
+                        drive.trajectorySequenceBuilder(new Pose2d(-58.31, -12.30, Math.toRadians(0)))
+                                .splineToConstantHeading(new Vector2d(-15.65, -12.16), Math.toRadians(0.00))
+                                .splineToConstantHeading(new Vector2d(-12.16, -0.22), Math.toRadians(90))
                                 .build()
                 )
 //                .followTrajectorySequence(drive)

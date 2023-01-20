@@ -7,7 +7,6 @@ import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryAcceleration
 import com.acmerobotics.roadrunner.trajectory.constraints.TrajectoryVelocityConstraint;
 import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.roadrunner.drive.DriveConstants;
@@ -19,8 +18,9 @@ import org.firstinspires.ftc.teamcode.subsystem.SliderV2Subsystem;
 import org.firstinspires.ftc.teamcode.vision.AprilTagUtil;
 
 import java.util.List;
+//love you tudor<3
 
-@Disabled
+//@Disabled
 @Autonomous(group = "right")
 public class RightAutoDrop extends LinearOpMode {
 
@@ -37,7 +37,7 @@ public class RightAutoDrop extends LinearOpMode {
 
     Pose2d startPose = new Pose2d(36, -60, Math.toRadians(90));
     Pose2d stackPose = new Pose2d(59.25, -12.4, Math.toRadians(0));
-    Pose2d stackPoseCycle = new Pose2d(59.25, -12.4, Math.toRadians(0));
+    Pose2d stackPoseCycle = new Pose2d(58.5, -12, Math.toRadians(0));
     Pose2d rightBlueJunction = new Pose2d(13 ,-12.5, Math.toRadians(0));
 
     TrajectoryVelocityConstraint velocityConstraint = SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
@@ -63,8 +63,8 @@ public class RightAutoDrop extends LinearOpMode {
                     .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
                     .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
                     .strafeLeft(12)//Ma duc cu fata la stalp
-                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)//Dau drumul la con
-                    .waitSeconds(0.3)//pauza intre actiuni
+                    .UNSTABLE_addTemporalMarkerOffset(0.3, clampSubsystem::release)//Dau drumul la con
+                    .waitSeconds(0.4)//pauza intre actiuni
                     .back(3)//Ma dau in spate ca sa nu lovesc stalpul
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Cobor la pozitia sigura
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
@@ -98,16 +98,17 @@ public class RightAutoDrop extends LinearOpMode {
                     .UNSTABLE_addTemporalMarkerOffset(delayJunction, clampSubsystem::release)
                     .strafeLeft(11)
                     .waitSeconds(0.3)
-                    .strafeRight(13)
-
-                    //last cycle
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> sliderSubsystem.setTarget(SliderSubsystem.cone5Pos))
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
+                    .strafeRight(37)
+                    .forward(48)
+//
+//                    //last cycle
+//                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
+//                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
+//                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> sliderSubsystem.setTarget(SliderSubsystem.cone5Pos))
+//                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
+//                    .waitSeconds(delayStack)
+//                    .back(1)
+//                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
 
                     //PARK
                     .back(24)
@@ -125,10 +126,10 @@ public class RightAutoDrop extends LinearOpMode {
                     .addTemporalMarker(0.8, clampSubsystem::clamp)//Il agat
                     .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
                     .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
-                    .forward(49)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
+                    .forward(49.3)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
                     .strafeLeft(12)//Ma duc cu fata la stalp
-                    .UNSTABLE_addTemporalMarkerOffset(0.2, clampSubsystem::release)//Dau drumul la con
-                    .waitSeconds(0.3)//pauza intre actiuni
+                    .UNSTABLE_addTemporalMarkerOffset(0.3, clampSubsystem::release)//Dau drumul la con
+                    .waitSeconds(0.4)//pauza intre actiuni
                     .back(3)//Ma dau in spate ca sa nu lovesc stalpul
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Cobor la pozitia sigura
                     .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
@@ -164,18 +165,15 @@ public class RightAutoDrop extends LinearOpMode {
                     .waitSeconds(0.3)
                     .strafeRight(13)
 
+
                     //last cycle
-                    .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))
-                    .lineToLinearHeading(stackPoseCycle, velocityConstraint, accelerationConstraint)
-                    .UNSTABLE_addTemporalMarkerOffset(delayLoad, () -> sliderSubsystem.setTarget(SliderSubsystem.cone5Pos))
-                    .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(SliderSubsystem.LowPos))
-                    .waitSeconds(delayStack)
-                    .back(1)
                     .UNSTABLE_addTemporalMarkerOffset(2, () -> sliderSubsystem.setTarget(0))
 
                     //PARK
+//                    .back(24)
+                    .turn(Math.toRadians(90))
                     .back(24)
-                    .turn(90)
+                    .strafeRight(48)
                     //park
                     .build();
 
