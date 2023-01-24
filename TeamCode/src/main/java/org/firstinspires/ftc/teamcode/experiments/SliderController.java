@@ -12,18 +12,13 @@ import org.firstinspires.ftc.teamcode.hardware.SmartMotorEx;
 
 @Config
 @TeleOp
-public class ArmPIDF extends LinearOpMode {
+public class SliderController extends LinearOpMode {
 
     SmartMotorEx slider;
 
-    PIDController controller;
+    public static PIDController controller;
 
-    public static double p = 0.01, i = 0.01, d = 0.0002;
-
-    public static double up_f = 0.05;
-
-    public static double down_f = 0.02;
-
+    public static double p = 0.0, i = 0.0, d = 0.0, f = 0.0;
 
     public static double target = 0;
 
@@ -36,7 +31,7 @@ public class ArmPIDF extends LinearOpMode {
 
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        slider = new SmartMotorEx(hardwareMap, "slider", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
+        slider = new SmartMotorEx(hardwareMap, "slider", SmartMotor.MotorDirection.FORWARD);
         slider.setRunMode(SmartMotor.RunMode.RawPower);
 
         controller = new PIDController(p, i, d);
@@ -55,7 +50,7 @@ public class ArmPIDF extends LinearOpMode {
         int armPos = slider.getCurrentPosition();
         double pid = controller.calculate(armPos, target);
 
-        double power = pid + kf();
+        double power = pid + f;
 
         slider.setPower(power);
 
@@ -69,8 +64,8 @@ public class ArmPIDF extends LinearOpMode {
         target = Math.max(minPos, Math.min(maxPos, target));
     }
 
-    public double kf(){
-        if(target>slider.getCurrentPosition()) return up_f;
-        return down_f;
-    }
+//    public double kf(){
+//        if(target>slider.getCurrentPosition()) return up_f;
+//        return down_f;
+//    }
 }

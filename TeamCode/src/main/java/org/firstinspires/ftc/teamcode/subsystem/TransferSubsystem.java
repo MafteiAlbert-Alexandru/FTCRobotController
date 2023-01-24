@@ -10,7 +10,7 @@ public class TransferSubsystem extends SmartSubsystem {
 
     private Servo arm;
     private Servo leg;
-    public static double upperArmPos = 0.18;
+    public static double upperArmPos = 0.18 ;
     public static double lowerArmPos = 0.675;
     public static double idleArmPos = 0.62;
     public static double closedLegPos = 0.27;
@@ -46,12 +46,9 @@ public class TransferSubsystem extends SmartSubsystem {
         if(bControl)
         {
             if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
-            {
                 leg.setPosition(hittingLegPos);
-            }else
-            {
+            else
                 leg.setPosition(openedLegPos);
-            }
         }
     }
 

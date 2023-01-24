@@ -36,9 +36,9 @@ public class RightAutoDrop extends LinearOpMode {
     TrajectorySequence trajMid;
 
     Pose2d startPose = new Pose2d(36, -60, Math.toRadians(90));
-    Pose2d stackPose = new Pose2d(59.25, -12.4, Math.toRadians(0));
-    Pose2d stackPoseCycle = new Pose2d(58.5, -12, Math.toRadians(0));
-    Pose2d rightBlueJunction = new Pose2d(13 ,-12.5, Math.toRadians(0));
+    Pose2d stackPose = new Pose2d(59.25, -12.1, Math.toRadians(0));
+    Pose2d stackPoseCycle = new Pose2d(58.5, -11.75, Math.toRadians(0));
+    Pose2d rightBlueJunction = new Pose2d(12.5 ,-12.5, Math.toRadians(0));
 
     TrajectoryVelocityConstraint velocityConstraint = SampleMecanumDriveCancelable.getVelocityConstraint(speed, DriveConstants.MAX_ANG_VEL, DriveConstants.TRACK_WIDTH);
     TrajectoryAccelerationConstraint accelerationConstraint = SampleMecanumDriveCancelable.getAccelerationConstraint(DriveConstants.MAX_ACCEL);
@@ -124,15 +124,15 @@ public class RightAutoDrop extends LinearOpMode {
                     .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
                     .addTemporalMarker(0.6, () -> sliderSubsystem.setTarget(SliderV2Subsystem.LoadPos))//Incarc conul din piramida
                     .addTemporalMarker(0.8, clampSubsystem::clamp)//Il agat
-                    .addTemporalMarker(1.1, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
+                    .addTemporalMarker(1.25, () -> sliderSubsystem.setTarget(SliderSubsystem.HighPos))//Ridic la stalpul inalt
                     .addTemporalMarker(1.25, () ->clampSubsystem.setPosition(ClampSubsystem.ForwardPos))//Dau in fata hook-ul
-                    .forward(49.3)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
-                    .strafeLeft(12)//Ma duc cu fata la stalp
+                    .forward(48.8)//Merg 49 de inch (fix cat imi trebuie ca sa pun preload-ul)
+                    .strafeLeft(13)//Ma duc cu fata la stalp
                     .UNSTABLE_addTemporalMarkerOffset(0.3, clampSubsystem::release)//Dau drumul la con
                     .waitSeconds(0.4)//pauza intre actiuni
                     .back(3)//Ma dau in spate ca sa nu lovesc stalpul
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Cobor la pozitia sigura
-                    .strafeRight(13)//Ma duc pe tile ul sigur pentru turn
+                    .strafeRight(14)//Ma duc pe tile ul sigur pentru turn
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.AimPos))//Cobor glisiera ca sa fiu putin peste stack
                     .turn(Math.toRadians(-90))//Ma rotesc ca sa fiu cu fata la stack
                     .lineToLinearHeading(stackPose, velocityConstraint, accelerationConstraint)//merg la stack

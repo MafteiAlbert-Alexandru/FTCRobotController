@@ -19,7 +19,7 @@ public class SliderSubsystem extends SmartSubsystem {
     public static double speed=5;
     public static double tolerance = 20; //Cata eroare tolereaza (noi suntem mai smec si o avem la 0) retard nu o avem la 10 ca nu merge asa
     public static double upwardCoefficient = 0.15; //Cand ridic glisiera mi se opune gravitatia deci putere go brrrr
-    public static double downwardCoefficient =0.05; //Dar cand cobor sunt mai chill
+    public static double downwardCoefficient =0.06; //Dar cand cobor sunt mai chill
     public static double pow = 0.1; //POWer pentru cine nu si-a dat seama
     //Asta mi face glisiera sa faca pau pau (adica e kP-ul din PID)
 
@@ -32,7 +32,7 @@ public class SliderSubsystem extends SmartSubsystem {
     public static int PreLoadPos = 330;
 
     public static int SafePos = 600;
-    public static int LoadPos = 45;
+    public static int LoadPos = 40;
 
     public static int AimPos = 500;
     public static int StackLoad = 150;

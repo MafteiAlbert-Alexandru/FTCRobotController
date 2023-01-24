@@ -36,6 +36,11 @@ public class SmartMotorEx extends SmartMotor {
         motorEx = (DcMotorEx) super.motor;
     }
 
+    public SmartMotorEx(HardwareMap hardwareMap, String id, MotorDirection direction) {
+        super(hardwareMap, id, GoBILDA.NONE, direction);
+        motorEx = (DcMotorEx) super.motor;
+    }
+
     public SmartMotorEx(HardwareMap hMap, String id, @NonNull GoBILDA gobildaType) {
         super(hMap, id, gobildaType, MotorDirection.FORWARD);
         motorEx = (DcMotorEx) super.motor;
@@ -63,6 +68,8 @@ public class SmartMotorEx extends SmartMotor {
         super(hMap, id, cpr, rpm, Type);
         motorEx = (DcMotorEx) super.motor;
     }
+
+
 
     @Override
     public void set(double output) {
