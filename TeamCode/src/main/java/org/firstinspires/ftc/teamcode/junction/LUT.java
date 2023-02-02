@@ -30,7 +30,6 @@ public class LUT {
         ptrToLut=createPtrToLut(data);
     }
 
-
     public static native void lutOperation(long inputPtr, long outputPtr);
 
 }

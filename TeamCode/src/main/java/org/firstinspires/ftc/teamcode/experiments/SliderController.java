@@ -64,8 +64,4 @@ public class SliderController extends LinearOpMode {
         target = Math.max(minPos, Math.min(maxPos, target));
     }
 
-//    public double kf(){
-//        if(target>slider.getCurrentPosition()) return up_f;
-//        return down_f;
-//    }
 }

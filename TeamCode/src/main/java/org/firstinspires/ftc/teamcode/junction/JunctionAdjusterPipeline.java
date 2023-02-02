@@ -45,11 +45,12 @@ public class JunctionAdjusterPipeline extends OpenCvPipeline {
         double xy12 = Math.abs(points[2].x-points[1].x)/Math.abs(points[2].y-points[1].y);
         double xy23 = Math.abs(points[3].x-points[2].x)/Math.abs(points[3].y-points[2].y);
 
-        if(xy12 > xy23)return new Vector2d(
+        if(xy12 > xy23)
+            return new Vector2d(
                 Math.sqrt((points[2].x-points[1].x) * (points[2].x-points[1].x) + (points[2].y-points[1].y) * (points[2].y-points[1].y)),
                 Math.sqrt((points[3].x-points[2].x) * (points[3].x-points[2].x) + (points[3].y-points[2].y) * (points[3].y-points[2].y))
         );
-        return new Vector2d(
+            return new Vector2d(
                 Math.sqrt((points[3].x-points[2].x) * (points[3].x-points[2].x) + (points[3].y-points[2].y) * (points[3].y-points[2].y)),
                 Math.sqrt((points[2].x-points[1].x) * (points[2].x-points[1].x) + (points[2].y-points[1].y) * (points[2].y-points[1].y))
         );
