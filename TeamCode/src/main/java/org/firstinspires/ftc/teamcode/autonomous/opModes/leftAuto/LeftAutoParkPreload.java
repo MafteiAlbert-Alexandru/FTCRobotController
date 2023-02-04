@@ -7,7 +7,6 @@ import com.qualcomm.hardware.lynx.LynxModule;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.autonomous.vision.AprilTagDetectionPipeline;
 import org.firstinspires.ftc.teamcode.roadrunner.drive.SampleMecanumDriveCancelable;
 import org.firstinspires.ftc.teamcode.roadrunner.trajectorysequence.TrajectorySequence;
 import org.firstinspires.ftc.teamcode.subsystem.ClampSubsystem;
@@ -21,8 +20,6 @@ import java.util.List;
 @Autonomous(name = "LeftParkLoad", group = "left")
 public class LeftAutoParkPreload extends LinearOpMode {
 
-    int autoCase = 1;
-
     TrajectorySequence trajLeft;
     TrajectorySequence trajRight;
     TrajectorySequence trajMid;
@@ -30,14 +27,7 @@ public class LeftAutoParkPreload extends LinearOpMode {
     Pose2d startPose = new Pose2d(36, -60, Math.toRadians(90));
 
     OpenCvCamera camera;
-    AprilTagDetectionPipeline aprilTagDetectionPipeline;
 
-    double fx = 578.272;
-    double fy = 578.272;
-    double cx = 402.145;
-    double cy = 221.506;
-
-    double tagsize = 0.166;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,6 +42,7 @@ public class LeftAutoParkPreload extends LinearOpMode {
 
             FtcDashboard.getInstance().startCameraStream(camera, 10);
 
+            //region leftTraj
             trajLeft = drive.trajectorySequenceBuilder(startPose)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
                     .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
@@ -70,6 +61,8 @@ public class LeftAutoParkPreload extends LinearOpMode {
                     .back(22.5)
                     .strafeLeft(24)
                     .build();
+            //endregion
+            //region midTraj
 
             trajMid = drive.trajectorySequenceBuilder(startPose)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
@@ -88,7 +81,8 @@ public class LeftAutoParkPreload extends LinearOpMode {
 //                    .addDisplacementMarker(() -> drive.followTrajectorySequenceAsync(trajPark))
                     .back(22.5)
                     .build();
-
+            //endregion
+            //region rightTraj
             trajRight = drive.trajectorySequenceBuilder(startPose)
                     .addDisplacementMarker(() -> sliderSubsystem.setTarget(SliderV2Subsystem.LowPos))//Imi ridic glisiera
                     .addTemporalMarker(0.4, () -> clampSubsystem.setPosition(ClampSubsystem.BackwardPos))//Dau in spate hook-ul
@@ -107,11 +101,12 @@ public class LeftAutoParkPreload extends LinearOpMode {
                     .back(22.5)
                     .strafeRight(24)
                     .build();
+            //endregionS
 
-            //endregion
             waitForStart();
             autoCaseId(aprilTagUtil);
             List<LynxModule> modules = hardwareMap.getAll(LynxModule.class);
+
             while (opModeIsActive()){
                 for(LynxModule module:modules) module.clearBulkCache();
                 drive.update();
