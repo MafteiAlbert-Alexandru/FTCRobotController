@@ -535,7 +535,7 @@ public class Robot {
 
         }
 
-        SliderAndClampingFSM.update(opModeType == OpModeType.TeleOp);
+//        SliderAndClampingFSM.update(opModeType == OpModeType.TeleOp);
 
         sliderV2Subsystem.run(subsystemData);
         clampSubsystem.run(subsystemData);

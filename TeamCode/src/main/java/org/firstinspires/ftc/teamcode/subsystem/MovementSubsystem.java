@@ -53,7 +53,7 @@ public class MovementSubsystem extends SmartSubsystem{
             Turn /= 1.5;
         }
         double euler = Math.exp(1);
-        move(Math.pow(Math.abs(Forward),euler)*Math.signum(Forward), Math.pow(Math.abs(Strafe), euler)*Math.signum(Strafe),Math.pow(Math.abs(Turn),euler)*Math.signum(Turn));
+        move(Forward, Strafe,Turn);
 
     }
 
@@ -61,10 +61,10 @@ public class MovementSubsystem extends SmartSubsystem{
     public void initSubsystem(OpMode opMode) {
         super.initSubsystem(opMode);
 
-        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeft");
-        backLeft = hardwareMap.get(DcMotorEx.class, "backLeft");
-        backRight = hardwareMap.get(DcMotorEx.class, "backRight");
-        frontRight = hardwareMap.get(DcMotorEx.class, "frontRight");
+        frontLeft = hardwareMap.get(DcMotorEx.class, "frontLeftMotor");
+        backLeft = hardwareMap.get(DcMotorEx.class, "backLeftMotor");
+        backRight = hardwareMap.get(DcMotorEx.class, "backRightMotor");
+        frontRight = hardwareMap.get(DcMotorEx.class, "frontRightMotor");
 
         drive = new SampleMecanumDriveCancelable(hardwareMap, frontLeft, backLeft,
                 backRight, frontRight);

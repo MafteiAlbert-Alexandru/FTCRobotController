@@ -60,18 +60,18 @@ public class SliderSubsystem extends SmartSubsystem {
 
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-
-            if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
-            else slider.setPositionCoefficient(downwardCoefficient);
-            slider.setPositionTolerance(tolerance);
-            slider.setTargetPosition(target);
-            slider.set(pow);
-
-            if(telemetryOn){
-                opMode.telemetry.addData("pos", slider.getCurrentPosition());
-                opMode.telemetry.addData("target", target);
-                opMode.telemetry.addData("power", slider.get());
-            }
+//
+//            if(target>slider.getCurrentPosition()) slider.setPositionCoefficient(upwardCoefficient);
+//            else slider.setPositionCoefficient(downwardCoefficient);
+//            slider.setPositionTolerance(tolerance);
+//            slider.setTargetPosition(target);
+//            slider.set(pow);
+//
+//            if(telemetryOn){
+//                opMode.telemetry.addData("pos", slider.getCurrentPosition());
+//                opMode.telemetry.addData("target", target);
+//                opMode.telemetry.addData("power", slider.get());
+//            }
     }
 
     public void update() throws InterruptedException {
@@ -92,7 +92,7 @@ public class SliderSubsystem extends SmartSubsystem {
     @Override
     public void initSubsystem(OpMode opMode) {
         super.initSubsystem(opMode);
-        slider=new SmartMotorEx(hardwareMap, "slider", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
+        slider=new SmartMotorEx(hardwareMap, "sliderMotor", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
         slider.resetEncoder();
         slider.setRunMode(SmartMotor.RunMode.PositionControl);
         slider.setZeroPowerBehavior(SmartMotor.ZeroPowerBehavior.FLOAT);

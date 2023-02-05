@@ -58,7 +58,7 @@ public class SliderV2Subsystem extends SmartSubsystem {
         double power = pid + kf();
         target = SmartMath.Clamp(target, minPos, maxPos);
 
-        slider.set(power);
+        slider.set(0);
 
         if(telemetryOn){
             opMode.telemetry.addData("pos", slider.getCurrentPosition());
@@ -70,7 +70,7 @@ public class SliderV2Subsystem extends SmartSubsystem {
     @Override
     public void initSubsystem(OpMode opMode) {
         super.initSubsystem(opMode);
-        slider = new SmartMotorEx(hardwareMap, "slider", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
+        slider = new SmartMotorEx(hardwareMap, "sliderMotor", SmartMotor.NeveRest.RPM_1780, SmartMotor.MotorDirection.REVERSE);
         slider.setRunMode(SmartMotor.RunMode.RawPower);
         slider.resetEncoder();
         target=0;

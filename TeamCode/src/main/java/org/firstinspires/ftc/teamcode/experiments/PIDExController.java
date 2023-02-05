@@ -1,17 +1,13 @@
 package org.firstinspires.ftc.teamcode.experiments;
 
-import org.firstinspires.ftc.robotcore.external.Telemetry;
-
 import java.util.Random;
 
 public class PIDExController extends PIDController{
     private PIDExCoefficients coefficients;
-    private Telemetry telemetry;
     private Random delayRandom= new Random();
-    public PIDExController(Telemetry telemetry, PIDExCoefficients coefficients) {
+    public PIDExController(PIDExCoefficients coefficients) {
         super(coefficients);
         this.coefficients=coefficients;
-        this.telemetry=telemetry;
     }
     public double lastDT()
     {

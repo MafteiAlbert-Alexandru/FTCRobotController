@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -33,11 +32,12 @@ public class TransferSubsystem extends SmartSubsystem {
     }
     public void blockWithLeg()
     {
-        leg.setPosition(closedLegPos);
+        //leg.setPosition(closedLegPos);
     }
     public void retreatLeg()
     {
-        leg.setPosition(openedLegPos);
+
+        //leg.setPosition(openedLegPos);
     }
 
     public boolean bControl =true;
@@ -45,10 +45,10 @@ public class TransferSubsystem extends SmartSubsystem {
     public void run(SubsystemData data) throws InterruptedException {
         if(bControl)
         {
-            if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
-                leg.setPosition(hittingLegPos);
-            else
-                leg.setPosition(openedLegPos);
+//            if(data.operatorGamepad.isDown(GamepadKeys.Button.B))
+//                leg.setPosition(hittingLegPos);
+//            else
+//                leg.setPosition(openedLegPos);
         }
     }
 
@@ -56,8 +56,8 @@ public class TransferSubsystem extends SmartSubsystem {
     public void initSubsystem(OpMode opMode) {
         super.initSubsystem(opMode);
 
-        arm = hardwareMap.get(Servo.class, "arm");
-        leg = hardwareMap.get(Servo.class, "leg");
+        arm = hardwareMap.get(Servo.class, "flipServo");
+//        leg = hardwareMap.get(Servo.class, "legServo");
         arm.setPosition(idleArmPos);
     }
 }

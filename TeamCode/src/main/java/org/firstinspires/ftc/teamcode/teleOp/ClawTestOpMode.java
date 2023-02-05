@@ -9,30 +9,26 @@ import com.qualcomm.robotcore.hardware.Servo;
 @Config
 public class ClawTestOpMode extends LinearOpMode {
 
-    public static double clawOpen = 0.135;
-    public static double clawWaiting = 0.25;
-    public static double clawClose = 0;
-    public static double pivotFront = 1;
-    public static double pivotBack = 0;
+
+    public static double claw = 0.5;
+    // 0.43 - 0.54
+    public static double pivot = 0.46;
+    //    0.573 fata
+    // 0.46 spate
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        Servo claw, pivot;
+        Servo clawServo, pivotServo;
+        clawServo = hardwareMap.get(Servo.class, "clawServo");
+        pivotServo = hardwareMap.get(Servo.class, "pivotServo");
 
-        boolean isFront = false;
-
-        claw = hardwareMap.get(Servo.class, "claw");
-        pivot = hardwareMap.get(Servo.class, "pivot");
-
-        claw.setDirection(Servo.Direction.REVERSE);
+        clawServo.setDirection(Servo.Direction.REVERSE);
 
         waitForStart();
-//        claw.setPosition(0);
-        pivot.setPosition(0);
         while(opModeIsActive()){
-        claw.setPosition(clawClose);
-        pivot.setPosition(pivotBack);
+        clawServo.setPosition(claw);
+        pivotServo.setPosition(pivot);
         }
     }
 }

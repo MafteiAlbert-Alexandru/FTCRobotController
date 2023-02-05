@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.subsystem;
 
 import com.acmerobotics.dashboard.config.Config;
-import com.arcrobotics.ftclib.gamepad.GamepadKeys;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -77,25 +76,25 @@ public class ClampSubsystem extends SmartSubsystem {
     }
     @Override
     public void run(SubsystemData data) throws InterruptedException {
-        if(data.driverGamepad.wasJustPressed(GamepadKeys.Button.A)) clamping=!clamping;
-        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
-        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
+//        if(data.driverGamepad.wasJustPressed(GamepadKeys.Button.A)) clamping=!clamping;
+//        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
+//        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
 
     public void update() throws InterruptedException {
-        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
-        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
+//        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
+//        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
     }
 
     @Override
     public void initSubsystem(OpMode opMode) {
         super.initSubsystem(opMode);
-        baseServo=hardwareMap.get(Servo.class, "swingBase");
-        armPullServo=hardwareMap.get(Servo.class, "swingPullArm");
-        armPullServo.setDirection(Servo.Direction.REVERSE);
-        baseServo.setPosition(initialPosition);
-        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
-        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
-        clampButton=new ToggleButton(GamepadKeys.Button.X);
+//        baseServo=hardwareMap.get(Servo.class, "swingBase");
+//        armPullServo=hardwareMap.get(Servo.class, "swingPullArm");
+//        armPullServo.setDirection(Servo.Direction.REVERSE);
+//        baseServo.setPosition(initialPosition);
+//        if(clamping) armPullServo.setPosition(baseServo.getPosition()+clampOffset-unclampedOffset);
+//        else armPullServo.setPosition(baseServo.getPosition()+clampOffset);
+//        clampButton=new ToggleButton(GamepadKeys.Button.X);
     }
 }

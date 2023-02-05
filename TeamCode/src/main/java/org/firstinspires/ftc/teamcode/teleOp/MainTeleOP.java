@@ -45,6 +45,7 @@ public class MainTeleOP extends LinearOpMode {
             Robot robot = new Robot(this,  Robot.OpModeType.TeleOp);
             waitForStart();
             elapsedTime = new ElapsedTime();
+
             elapsedTime.startTime();
             if(isStopRequested()) return;
             while(opModeIsActive()&&!isStopRequested())
